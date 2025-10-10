@@ -1,0 +1,57 @@
+﻿using PCAN.Modles;
+using PCAN.ViewModle;
+using ReactiveUI;
+using Splat;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Windows;
+
+namespace PCAN
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window,IViewFor<MainWindowViewModle>
+    {
+        public MainWindow(AppViewModle appViewModle)
+        {
+           
+            InitializeComponent();
+            AppViewModle = appViewModle;
+            this.AppViewModle.CurrentPage.ObserveOn(RxApp.MainThreadScheduler).Subscribe(page =>
+            {
+                if (page != null)
+                {
+                    this.navWin.Navigate(page);
+                }
+            });
+            AppViewModle.NavigateTo(UrlDefines.URL_BasicFunctions);
+        }
+        #region ViewModel
+        public MainWindowViewModle ViewModel
+        {
+            get { return (MainWindowViewModle)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
+        }
+
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (MainWindowViewModle)value; }
+
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(MainWindowViewModle), typeof(MainWindow), new PropertyMetadata(null));
+        #endregion
+        public  AppViewModle AppViewModle{get;set;}
+
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
+
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+    }
+  
+}
