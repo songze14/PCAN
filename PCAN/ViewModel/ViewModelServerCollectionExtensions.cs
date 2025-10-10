@@ -2,6 +2,7 @@
 using PCAN.Modles;
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
+using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace PCAN.ViewModel
                 ;
                 return appvm;
             });
+            services.AddTransient<PCanClientUsercontrolViewModel>();
             return services;
         }
     }

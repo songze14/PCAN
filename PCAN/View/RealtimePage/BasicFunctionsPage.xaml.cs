@@ -30,19 +30,9 @@ namespace PCAN.View.UserPage
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.Title, v => v.Title).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.Ports, v => v.PortsList.ItemsSource).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.SelectedPort, v => v.PortsList.SelectedValue).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.LocalBaudRates, v => v.BaudRatesList.ItemsSource).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.SelectedBaudrate, v => v.BaudRatesList.SelectedValue).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.DeviceID, v => v.DeviceIDList.Text).DisposeWith(d);
-                this.BindCommand(ViewModel, vm => vm.ConnectCommand, v => v.Connect).DisposeWith(d);
-                this.BindCommand(ViewModel, vm => vm.RefreshPortCommand, v => v.RefreshPort).DisposeWith(d);
-                this.BindCommand(ViewModel, vm => vm.UnConnectCommand, v => v.UnConnect).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.TPCANMsgs, v => v.CanMessageDataGrid.ItemsSource).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.NoConnected, v => v.Connect.IsEnabled).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.IsConnected, v => v.UnConnect.IsEnabled).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.ConnectLab, v => v.ConnectLab.Content).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.FrameInterval, v => v.FrameInterval.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel.TPCANMsgs, v => v.CanMessageDataGrid.ItemsSource).DisposeWith(d);
+
 
             });
             InitializeComponent();

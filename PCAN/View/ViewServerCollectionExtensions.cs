@@ -1,14 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PCAN.UserControls;
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
-using PCAN.View.Windows;
 using PCAN.ViewModel;
+using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PCAN.View
 {
@@ -19,6 +15,7 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<BasicFunctionsPageViewModel>, BasicFunctionsPage>();
             services.AddSingleton<IViewFor<MainWindowViewModel>, MainWindow>();
             services.AddSingleton<IViewFor<ParmValueSettingPageViewModel>, ParmValueSettingPage>();
+            services.AddTransient<IViewFor<PCanClientUsercontrolViewModel>, PCanClientUsercontrol>();
             return services;
         }
     }
