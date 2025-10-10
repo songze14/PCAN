@@ -14,12 +14,12 @@ using System.Windows.Input;
 
 namespace PCAN.ViewModle
 {
-    public class RealtimePageViewModel : ReactiveObject
+    public class BasicFunctionsPageViewModel : ReactiveObject
     {
-        private readonly ILogger<RealtimePageViewModel> _logger;
+        private readonly ILogger<BasicFunctionsPageViewModel> _logger;
         private readonly IMediator _mediator;
 
-        public RealtimePageViewModel(ILogger<RealtimePageViewModel> logger,IMediator mediator)
+        public BasicFunctionsPageViewModel(ILogger<BasicFunctionsPageViewModel> logger,IMediator mediator)
         {
             _logger = logger;
             _mediator = mediator;
@@ -125,11 +125,11 @@ namespace PCAN.ViewModle
 
         public TPCANBaudrate SelectedBaudrate { get; set; }
         public string DeviceID { get; set; }
-        public ObservableCollection<LocalPorts> Ports { get; set; } = new ObservableCollection<LocalPorts>();
-        public ObservableCollection<WindowLog> WindowLogs { get; set; } = new ObservableCollection<WindowLog>();
-       public  ObservableCollection<ReadMessage> TPCANMsgs { get; set; } = new ObservableCollection<ReadMessage>();
-        public ObservableCollection<LocalBaudRate> LocalBaudRates { get; set; } = new ObservableCollection<LocalBaudRate>()
-        {
+        public ObservableCollection<LocalPorts> Ports { get; set; } = [];
+        public ObservableCollection<WindowLog> WindowLogs { get; set; } = [];
+        public  ObservableCollection<ReadMessage> TPCANMsgs { get; set; } = [];
+        public ObservableCollection<LocalBaudRate> LocalBaudRates { get; set; } =
+        [
             new LocalBaudRate()
             {
                 Baudrate= TPCANBaudrate.PCAN_BAUD_1M,
@@ -166,7 +166,7 @@ namespace PCAN.ViewModle
                 BaudRateName="50  kBit/sec"
             },
 
-        };
+        ];
         public ICommand RefreshPortCommand { get; }
         public ICommand AddLogCommand { get; }
         public ICommand ConnectCommand { get; }

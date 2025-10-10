@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
+using PCAN.View.Windows;
 using PCAN.ViewModle;
 using ReactiveUI;
 using System;
@@ -14,8 +16,9 @@ namespace PCAN.View
     {
         public static IServiceCollection AddViews(this IServiceCollection services)
         {
-            services.AddSingleton<IViewFor<RealtimePageViewModel>, RealtimePage>();
+            services.AddSingleton<IViewFor<BasicFunctionsPageViewModel>, BasicFunctionsPage>();
             services.AddSingleton<IViewFor<MainWindowViewModle>, MainWindow>();
+            services.AddSingleton<IViewFor<ParmValueSettingPageViewModel>, ParmValueSettingPage>();
             return services;
         }
     }

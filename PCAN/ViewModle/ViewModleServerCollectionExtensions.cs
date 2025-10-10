@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PCAN.Modles;
+using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
 using ReactiveUI;
 using System;
@@ -16,14 +17,15 @@ namespace PCAN.ViewModle
     {
         public static IServiceCollection AddViewModles(this IServiceCollection services)
         {
-            services.AddSingleton<RealtimePageViewModel>();
+            services.AddSingleton<BasicFunctionsPageViewModel>();
+            services.AddSingleton<ParmValueSettingPageViewModel>();
             services.AddSingleton<AppViewModle>(sp =>
             {
                 var appvm = new AppViewModle(sp);
                 appvm.MapSourceToPage=url => url switch 
                 {
-                    UrlDefines.URL_BasicFunctions => sp.GetRequiredService<IViewFor<RealtimePageViewModel>>() as Page,
-
+                    UrlDefines.URL_BasicFunctions => sp.GetRequiredService<IViewFor<BasicFunctionsPageViewModel>>() as Page,
+                    UrlDefines.URL_PCANDataParse => sp.GetRequiredService<IViewFor<ParmValueSettingPageViewModel>>() as Page,
                 }
                 ;
                 return appvm;

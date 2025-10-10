@@ -22,12 +22,11 @@ namespace PCAN.View.UserPage
     /// <summary>
     /// MainPage.xaml 的交互逻辑
     /// </summary>
-    public partial class RealtimePage : Page, IViewFor<RealtimePageViewModel>
+    public partial class BasicFunctionsPage : Page, IViewFor<BasicFunctionsPageViewModel>
     {
-        public RealtimePage()
+        public BasicFunctionsPage()
         {
-            InitializeComponent();
-            this.ViewModel = Locator.Current.GetService<RealtimePageViewModel>();
+            this.ViewModel = Locator.Current.GetService<BasicFunctionsPageViewModel>();
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.Title, v => v.Title).DisposeWith(d);
@@ -46,18 +45,20 @@ namespace PCAN.View.UserPage
                 this.Bind(ViewModel, vm => vm.FrameInterval, v => v.FrameInterval.Text).DisposeWith(d);
 
             });
+            InitializeComponent();
+
         }
         #region ViewModel
-        public RealtimePageViewModel ViewModel
+        public BasicFunctionsPageViewModel ViewModel
         {
-            get { return (RealtimePageViewModel)GetValue(ViewModelProperty); }
+            get { return (BasicFunctionsPageViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
-        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (RealtimePageViewModel)value; }
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (BasicFunctionsPageViewModel)value; }
 
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(RealtimePageViewModel), typeof(RealtimePage), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(ViewModel), typeof(BasicFunctionsPageViewModel), typeof(BasicFunctionsPage), new PropertyMetadata(null));
         #endregion
 
     }

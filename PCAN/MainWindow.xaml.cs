@@ -50,6 +50,13 @@ namespace PCAN
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            AppViewModle.NavigateTo(UrlDefines.URL_BasicFunctions);
+
+        }
+
+        private void PCANDataParse_Click(object sender, RoutedEventArgs e)
+        {
+            AppViewModle.NavigateTo(UrlDefines.URL_PCANDataParse);
 
         }
     }
