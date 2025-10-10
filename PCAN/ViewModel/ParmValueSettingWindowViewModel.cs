@@ -10,11 +10,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCAN.ViewModle
+namespace PCAN.ViewModel
 {
-    public class ParmValueSettingWindowViewModle:ReactiveObject
+    public class ParmValueSettingWindowViewModel:ReactiveObject
     {
-        public ParmValueSettingWindowViewModle(SourceList<PCanParmDataGrid> pCanParmDataGrids, PCanParmDataGrid? pCanParmData)
+        public ParmValueSettingWindowViewModel(SourceList<PCanParmDataGrid> pCanParmDataGrids, PCanParmDataGrid? pCanParmData)
         {
             PCanParmDataGrids = pCanParmDataGrids;
             if (pCanParmData==null)

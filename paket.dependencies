@@ -1,0 +1,22 @@
+source "C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\"
+source https://api.nuget.org/v3/index.json
+
+nuget DynamicData 9.4.1
+nuget MaterialDesignThemes 5.2.1
+nuget MaterialDesignThemes.MahApps 5.2.1
+nuget MediatR 13.0.0
+nuget Microsoft.Extensions.Hosting 9.0.9
+nuget Microsoft.Extensions.Hosting.Abstractions 9.0.9
+nuget Microsoft.Extensions.Logging 9.0.9
+nuget Microsoft.Extensions.Logging.Abstractions 9.0.9
+nuget Microsoft.Extensions.Logging.Configuration 9.0.9
+nuget ReactiveUI 21.0.1
+nuget ReactiveUI.Fody 19.5.41
+nuget ReactiveUI.WPF 21.0.1
+nuget Serilog 4.3.0
+nuget Serilog.Extensions.Hosting 9.0.0
+nuget Serilog.Extensions.Logging 9.0.2
+nuget Serilog.Settings.Configuration 9.0.0
+nuget Serilog.Sinks.File 7.0.0
+nuget Splat.Microsoft.Extensions.DependencyInjection 17.1.1
+nuget System.Reactive 6.1.0

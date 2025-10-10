@@ -1,5 +1,5 @@
 ﻿using PCAN.View.RealtimePage;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using Splat;
 using System;
@@ -23,9 +23,9 @@ namespace PCAN.View.Windows
     /// <summary>
     /// ParmValueSettingWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class ParmValueSettingWindow : Window,IViewFor<ParmValueSettingWindowViewModle>
+    public partial class ParmValueSettingWindow : Window,IViewFor<ParmValueSettingWindowViewModel>
     {
-        public ParmValueSettingWindow(ParmValueSettingWindowViewModle viewModle)
+        public ParmValueSettingWindow(ParmValueSettingWindowViewModel viewModle)
         {
             InitializeComponent();
             this.ViewModel = viewModle;
@@ -42,16 +42,16 @@ namespace PCAN.View.Windows
         }
 
         #region ViewModel
-        public ParmValueSettingWindowViewModle ViewModel
+        public ParmValueSettingWindowViewModel ViewModel
         {
-            get { return (ParmValueSettingWindowViewModle)GetValue(ViewModelProperty); }
+            get { return (ParmValueSettingWindowViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
-        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (ParmValueSettingWindowViewModle)value; }
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (ParmValueSettingWindowViewModel)value; }
 
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(ParmValueSettingWindowViewModle), typeof(ParmValueSettingWindow), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(ViewModel), typeof(ParmValueSettingWindowViewModel), typeof(ParmValueSettingWindow), new PropertyMetadata(null));
         #endregion
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)

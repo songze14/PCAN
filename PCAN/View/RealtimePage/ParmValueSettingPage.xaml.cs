@@ -1,4 +1,4 @@
-﻿using PCAN.ViewModle;
+﻿using PCAN.ViewModel;
 using ReactiveUI;
 using Splat;
 using System;

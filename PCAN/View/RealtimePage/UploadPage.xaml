@@ -7,8 +7,11 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="UploadPage" d:Background="AliceBlue">
-
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         
     </Grid>
 </Page>

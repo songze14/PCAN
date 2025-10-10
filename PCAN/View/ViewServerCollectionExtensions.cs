@@ -2,7 +2,7 @@
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
 using PCAN.View.Windows;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace PCAN.View
         public static IServiceCollection AddViews(this IServiceCollection services)
         {
             services.AddSingleton<IViewFor<BasicFunctionsPageViewModel>, BasicFunctionsPage>();
-            services.AddSingleton<IViewFor<MainWindowViewModle>, MainWindow>();
+            services.AddSingleton<IViewFor<MainWindowViewModel>, MainWindow>();
             services.AddSingleton<IViewFor<ParmValueSettingPageViewModel>, ParmValueSettingPage>();
             return services;
         }

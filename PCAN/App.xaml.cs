@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using Serilog;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -51,7 +51,7 @@ namespace PCAN
             RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             try
             {
-                var mainWin = this.RootServiceProvider.GetRequiredService<IViewFor<MainWindowViewModle>>() as Window;
+                var mainWin = this.RootServiceProvider.GetRequiredService<IViewFor<MainWindowViewModel>>() as Window;
                 mainWin.Show();
                 var thread = new Thread(async () =>
                 {

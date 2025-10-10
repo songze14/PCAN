@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace PCAN.ViewModle
+namespace PCAN.ViewModel
 {
     public class ParmValueSettingPageViewModel:ReactiveObject
     {
@@ -28,7 +28,7 @@ namespace PCAN.ViewModle
                 .Subscribe();
             this.ParmSetCommand = ReactiveCommand.Create(() =>
             {
-                var windowviewmodle = new ParmValueSettingWindowViewModle(ParmDataGridSource, null);
+                var windowviewmodle = new ParmValueSettingWindowViewModel(ParmDataGridSource, null);
                 var window = new ParmValueSettingWindow(windowviewmodle);
                 window.ShowDialog();
             });
@@ -43,7 +43,7 @@ namespace PCAN.ViewModle
             {
                 if (SelectData!=null)
                 {
-                    var windowviewmodle = new ParmValueSettingWindowViewModle(ParmDataGridSource, SelectData);
+                    var windowviewmodle = new ParmValueSettingWindowViewModel(ParmDataGridSource, SelectData);
                     var window = new ParmValueSettingWindow(windowviewmodle);
                     window.ShowDialog();
                 }

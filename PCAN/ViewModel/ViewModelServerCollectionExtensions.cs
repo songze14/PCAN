@@ -11,17 +11,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace PCAN.ViewModle
+namespace PCAN.ViewModel
 {
-    public static class ViewModleServerCollectionExtensions
+    public static class ViewModelServerCollectionExtensions
     {
-        public static IServiceCollection AddViewModles(this IServiceCollection services)
+        public static IServiceCollection AddViewModels(this IServiceCollection services)
         {
             services.AddSingleton<BasicFunctionsPageViewModel>();
             services.AddSingleton<ParmValueSettingPageViewModel>();
-            services.AddSingleton<AppViewModle>(sp =>
+            services.AddSingleton<AppViewModel>(sp =>
             {
-                var appvm = new AppViewModle(sp);
+                var appvm = new AppViewModel(sp);
                 appvm.MapSourceToPage=url => url switch 
                 {
                     UrlDefines.URL_BasicFunctions => sp.GetRequiredService<IViewFor<BasicFunctionsPageViewModel>>() as Page,

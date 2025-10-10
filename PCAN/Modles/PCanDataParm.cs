@@ -1,5 +1,5 @@
 ﻿using PCAN.View.Windows;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;

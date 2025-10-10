@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:PCAN"
-        xmlns:vm="clr-namespace:PCAN.ViewModle"
+        xmlns:vm="clr-namespace:PCAN.ViewModel"
         WindowState="Maximized"
         mc:Ignorable="d"
          d:Height="450" d:Width="1200" Closed="Window_Closed" d:DataContext="{d:DesignData Type=vm:BasicFunctionsPageViewModel}">

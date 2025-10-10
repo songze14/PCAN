@@ -12,7 +12,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-namespace PCAN.ViewModle
+namespace PCAN.ViewModel
 {
     public class BasicFunctionsPageViewModel : ReactiveObject
     {

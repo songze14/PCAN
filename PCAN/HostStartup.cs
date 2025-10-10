@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using PCAN.Notification.Log;
 using PCAN.View;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,7 @@ namespace PCAN
             resolver.InitializeSplat();
             resolver.InitializeReactiveUI();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LogNotification).Assembly) );
-            services.AddViewModles();
+            services.AddViewModels();
             services.AddViews();
 
 

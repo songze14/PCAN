@@ -1,0 +1,17 @@
+DynamicData
+MaterialDesignThemes
+MaterialDesignThemes.MahApps
+Microsoft.Extensions.Hosting
+Microsoft.Extensions.Hosting.Abstractions
+Microsoft.Extensions.Logging
+Microsoft.Extensions.Logging.Abstractions
+Microsoft.Extensions.Logging.Configuration
+ReactiveUI
+ReactiveUI.Fody
+ReactiveUI.WPF
+Serilog
+Serilog.Extensions.Hosting
+Serilog.Extensions.Logging
+Serilog.Settings.Configuration
+Serilog.Sinks.File
+Splat.Microsoft.Extensions.DependencyInjection

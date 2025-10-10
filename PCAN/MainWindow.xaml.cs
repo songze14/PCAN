@@ -1,5 +1,5 @@
 ﻿using PCAN.Modles;
-using PCAN.ViewModle;
+using PCAN.ViewModel;
 using ReactiveUI;
 using Splat;
 using System.Reactive.Disposables;
@@ -11,9 +11,9 @@ namespace PCAN
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window,IViewFor<MainWindowViewModle>
+    public partial class MainWindow : Window,IViewFor<MainWindowViewModel>
     {
-        public MainWindow(AppViewModle appViewModle)
+        public MainWindow(AppViewModel appViewModle)
         {
            
             InitializeComponent();
@@ -28,18 +28,18 @@ namespace PCAN
             AppViewModle.NavigateTo(UrlDefines.URL_BasicFunctions);
         }
         #region ViewModel
-        public MainWindowViewModle ViewModel
+        public MainWindowViewModel ViewModel
         {
-            get { return (MainWindowViewModle)GetValue(ViewModelProperty); }
+            get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
-        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (MainWindowViewModle)value; }
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (MainWindowViewModel)value; }
 
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(MainWindowViewModle), typeof(MainWindow), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(ViewModel), typeof(MainWindowViewModel), typeof(MainWindow), new PropertyMetadata(null));
         #endregion
-        public  AppViewModle AppViewModle{get;set;}
+        public  AppViewModel AppViewModle{get;set;}
 
 
         private void Window_Closed(object sender, EventArgs e)

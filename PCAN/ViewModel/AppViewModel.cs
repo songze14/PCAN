@@ -7,15 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace PCAN.ViewModle
+namespace PCAN.ViewModel
 {
-    public class AppViewModle:ReactiveObject
+    public class AppViewModel:ReactiveObject
     {
         private readonly IServiceProvider _serviceprovider;
         public ReactiveProperty<Page> CurrentPage;
         public Func<string, Page> MapSourceToPage { get; set; }
 
-        public AppViewModle(IServiceProvider serviceProvider)
+        public AppViewModel(IServiceProvider serviceProvider)
         {
             _serviceprovider = serviceProvider;
             CurrentPage=new ReactiveProperty<Page>();
