@@ -43,15 +43,15 @@
                 </Grid.ColumnDefinitions>
                 <Label Content="DeviceID" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"/>
                 <ComboBox x:Name="DeviceIDList" Grid.Column="1"  Margin="5" IsEditable="True" >
-                    <ComboBoxItem>0x102</ComboBoxItem>
-                    <ComboBoxItem>0x103</ComboBoxItem>
-                    <ComboBoxItem>0x104</ComboBoxItem>
-                    <ComboBoxItem>0x106</ComboBoxItem>
-                    <ComboBoxItem>0x1A6</ComboBoxItem>
-                    <ComboBoxItem>0x1A7</ComboBoxItem>
-                    <ComboBoxItem>0x1A8</ComboBoxItem>
-                    <ComboBoxItem>0x1A9</ComboBoxItem>
-                    <ComboBoxItem>0x1AA</ComboBoxItem>
+                    <ComboBoxItem>102</ComboBoxItem>
+                    <ComboBoxItem>103</ComboBoxItem>
+                    <ComboBoxItem>104</ComboBoxItem>
+                    <ComboBoxItem>106</ComboBoxItem>
+                    <ComboBoxItem>1A6</ComboBoxItem>
+                    <ComboBoxItem>1A7</ComboBoxItem>
+                    <ComboBoxItem>1A8</ComboBoxItem>
+                    <ComboBoxItem>1A9</ComboBoxItem>
+                    <ComboBoxItem>1AA</ComboBoxItem>
                 </ComboBox>
             </Grid>
             <Grid Grid.Column="1" Grid.Row="2">

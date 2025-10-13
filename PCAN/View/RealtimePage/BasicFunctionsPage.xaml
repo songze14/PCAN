@@ -21,7 +21,7 @@
         <DataGrid x:Name="CanMessageDataGrid" Grid.Row="2"  Margin="5" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.Columns>
                 <!--<DataGridTextColumn Header="时间戳" Binding="{Binding Timestamp}" Width="*"/>-->
-                <DataGridTextColumn Header="ID" Binding="{Binding ID}" Width="*"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding ID,StringFormat={}{0:X2}}" Width="*"/>
                 <DataGridTextColumn Header="类型" Binding="{Binding MSGTYPE}" Width="*"/>
                 <DataGridTextColumn Header="长度" Binding="{Binding LEN}" Width="*"/>
                 <DataGridTextColumn Header="数据" Binding="{Binding DATA}" Width="*"/>

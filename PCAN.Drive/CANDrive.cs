@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using Peak.Can.Basic;
@@ -20,7 +21,7 @@ namespace PCAN.Drive
         private TPCANType m_HwType;
         private int m_SleepTime;
         private CancellationTokenSource _tokensource=new CancellationTokenSource();
-        private List<PCanWriteMessage> CanMessages { get; set; } = new List<PCanWriteMessage>();
+        private Subject<PCanWriteMessage> CanMessages { get; set; } = new Subject<PCanWriteMessage>();
         /// <summary>
         /// 读取的信息
         /// </summary>
@@ -54,17 +55,48 @@ namespace PCAN.Drive
                         await Task.Delay(m_SleepTime);
                     }
                 }, token);
-                Task.Run(async () =>
-                {
-                    while (!token.IsCancellationRequested)
-                    {
-                        WriteMessages();
-                        await Task.Delay(m_SleepTime);
+                //Task.Run(async () =>
+                //{
+                //    while (!token.IsCancellationRequested)
+                //    {
+                //        WriteMessages();
+                //        await Task.Delay(m_SleepTime);
 
-                    }
-                }, token);
+                //    }
+                //}, token);
             } ;
-            
+            this.CanMessages.AsObservable().Subscribe(writemsg =>
+            {
+                try
+                {
+                    
+                    TPCANMsg msg = new TPCANMsg();
+                    msg.ID = (uint)writemsg.Id;
+                    msg.LEN = (byte)writemsg.Data.Length;
+                    msg.DATA = writemsg.Data;
+                    msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
+                    var result = Write(msg);
+                    if (result != TPCANStatus.PCAN_ERROR_OK)
+                    {
+                        _mediator.Publish(new LogNotification
+                        {
+                            LogSource = LogSource.CanDevice,
+                            Message = $"写入时出现错误：重试ID{writemsg.Id}"
+                        });
+                        CanMessages.OnNext(writemsg);
+                    }
+                   
+                }
+                catch (Exception ex)
+                {
+                    _mediator.Publish(new LogNotification
+                    {
+                        LogSource = LogSource.CanDevice,
+                        Message = $"写入时出现系统错误：{ex.Message}"
+                    });
+                }
+            });
+
         }
         #region Read
         private TPCANStatus ReadMessage()
@@ -80,7 +112,7 @@ namespace PCAN.Drive
                     ID = (int)_CANMsg.ID,
                     LEN = _CANMsg.LEN,
                     MSGTYPE = _CANMsg.MSGTYPE,
-                    DATA =BitConverter.ToString( _CANMsg.DATA),
+                    DATA =_CANMsg.DATA,
                     TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
                 };
                 CANMsgSubject.OnNext(message);
@@ -97,46 +129,35 @@ namespace PCAN.Drive
         #region Write
         private TPCANStatus Write(TPCANMsg msg)
         {
-           return PCANBasic.Write(PcanHandle, ref msg);
-        }
-
-        private void WriteMessages()
-        {
-            while (CanMessages.Count > 0)
+            try
             {
-                try
+                return PCANBasic.Write(PcanHandle, ref msg);
+
+            }
+            catch (Exception ex)
+            {
+
+                _mediator.Publish(new LogNotification
                 {
-                    var item = CanMessages[0];
-                    TPCANMsg msg = new TPCANMsg();
-                    msg.ID = (uint)item.Id;
-                    msg.LEN = (byte)item.Data.Length;
-                    msg.DATA = item.Data;
-                    msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
-                    var result = Write(msg);
-                    if (result != TPCANStatus.PCAN_ERROR_OK)
-                    {
-                        _mediator.Publish(new LogNotification
-                        {
-                            LogSource = LogSource.CanDevice,
-                            Message = $"写入时出现错误：重试ID{item.Id}"
-                        });
-                        CanMessages.Add(item);
-                    }
-                    CanMessages.RemoveAt(0);
-                }
-                catch (Exception ex)
-                {
-                    _mediator.Publish (new LogNotification
-                    {
-                        LogSource = LogSource.CanDevice,
-                        Message =$"写入时出现系统错误：{ex.Message}" 
-                    });
-                }
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"写入时出现系统错误：{ex.Message}"
+                });
+                return TPCANStatus.PCAN_ERROR_UNKNOWN;
             }
         }
+
+       
         public void AddMessage(PCanWriteMessage message)
         {
-            CanMessages.Add(message);
+            if (message.Data.Length < 8)
+            {
+                //var data = message.Data;
+                //var newdata = new byte[8];
+                //Array.Copy(data, newdata, data.Length);
+                //message.Data = newdata;
+            }
+            CanMessages.OnNext(message);
         }
         #endregion
 

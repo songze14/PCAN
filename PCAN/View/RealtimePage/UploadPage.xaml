@@ -24,6 +24,7 @@
                 <TextBox x:Name="FilePathTextBox" Width="400" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
                 <Button x:Name="BrowseFileButton" Content="浏览" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 <Button x:Name="UploadFileButton" Content="上传" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <Button x:Name="ReloadButton" Content="初始化" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </DockPanel>
             
         </Grid>

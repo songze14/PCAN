@@ -12,7 +12,7 @@ namespace PCAN.Drive.Modle
         public byte LEN { get; set; }
         [Reactive]
 
-        public string DATA { get; set; }
+        public byte[] DATA { get; set; }
         [Reactive]
 
         public double TimeStamp { get; set; }

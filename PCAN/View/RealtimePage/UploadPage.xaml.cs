@@ -35,6 +35,7 @@ namespace PCAN.View.UserPage
                 this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.FilePathTextBox.Text).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UploadCommand, v => v.UploadFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.ReloadCommand, v => v.ReloadButton).DisposeWith(d);
             });
         }
         #region ViewModel

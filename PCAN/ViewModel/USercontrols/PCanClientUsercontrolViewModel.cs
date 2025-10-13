@@ -110,7 +110,7 @@ namespace PCAN.ViewModel.USercontrols
             _logger = logger;
             _mediator = mediator;
         }
-        public void WriteMsg(uint id, byte[] data)
+        public void WriteMsg(uint id, byte[] data,Action? action=null)
         {
             if (CanDrive == null)
             {
@@ -118,6 +118,11 @@ namespace PCAN.ViewModel.USercontrols
                 return;
             }
             CanDrive.AddMessage(new PCanWriteMessage() { Data=data,Id=id});
+            if (action!=null)
+            {
+                action();
+
+            }
         }
         private CANDrive CanDrive;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;
