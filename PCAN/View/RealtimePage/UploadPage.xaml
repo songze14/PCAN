@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PCAN.View.UserPage"
+      xmlns:usercontrols="clr-namespace:PCAN.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="UploadPage" d:Background="AliceBlue">
@@ -12,6 +13,19 @@
             <RowDefinition Height="200"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        
+        <usercontrols:PCanClientUsercontrol x:Name="PcanClientUsercontrol" Grid.Row="0"/>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <DockPanel Background="AliceBlue">
+                <Label Content="文件路径:" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"/>
+                <TextBox x:Name="FilePathTextBox" Width="400" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
+                <Button x:Name="BrowseFileButton" Content="浏览" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <Button x:Name="UploadFileButton" Content="上传" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </DockPanel>
+            
+        </Grid>
     </Grid>
 </Page>

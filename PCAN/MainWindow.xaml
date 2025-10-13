@@ -5,15 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:PCAN"
+        xmlns:usercontrols="clr-namespace:PCAN.UserControls"
         xmlns:vm="clr-namespace:PCAN.ViewModel"
         WindowState="Maximized"
         mc:Ignorable="d"
-         d:Height="450" d:Width="1200" Closed="Window_Closed" d:DataContext="{d:DesignData Type=vm:BasicFunctionsPageViewModel}">
+         d:Height="450" d:Width="1200" Closed="Window_Closed" >
 
-    <DockPanel LastChildFill="True">
-        
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
         <!--#region菜单-->
-        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  DockPanel.Dock="Left" Width="260" Visibility="Visible" >
+        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="260" Visibility="Visible" >
             <Menu>
                 <Menu.Resources>
                     <Style TargetType="MenuItem">
@@ -31,11 +36,12 @@
                 </Menu.ItemsPanel>
                 <MenuItem x:Name="BasicFunctions" Header="基本功能" Click="MenuItem_Click"/>
                 <MenuItem x:Name="PCANDataParse" Header="PCANDATA信息解析" Click="PCANDataParse_Click"/>
+                <MenuItem x:Name="Upload" Header="升级" Click="Upload_Click"/>
 
             </Menu>
         </Border>
         <Frame Name="navWin" 
-       Margin="0,0,0,0" DockPanel.Dock="Left"
+       Margin="0,0,0,0" Grid.Column="1"
        NavigationUIVisibility="Hidden" 
        HorizontalAlignment="Stretch" 
        VerticalAlignment="Stretch"
@@ -47,6 +53,6 @@
         </Frame>
         <!--#endregion-->
         <!--#region连接设置-->
-       
-    </DockPanel>
+        <usercontrols:UILogsView x:Name="uilogView" Grid.Column="2"/>
+    </Grid>
 </Window>

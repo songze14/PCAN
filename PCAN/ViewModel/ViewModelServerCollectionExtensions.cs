@@ -1,15 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PCAN.Modles;
-using PCAN.View.RealtimePage;
-using PCAN.View.UserPage;
+using PCAN.ViewModel.RunPage;
 using PCAN.ViewModel.USercontrols;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace PCAN.ViewModel
@@ -27,11 +21,16 @@ namespace PCAN.ViewModel
                 {
                     UrlDefines.URL_BasicFunctions => sp.GetRequiredService<IViewFor<BasicFunctionsPageViewModel>>() as Page,
                     UrlDefines.URL_PCANDataParse => sp.GetRequiredService<IViewFor<ParmValueSettingPageViewModel>>() as Page,
+                    UrlDefines.URL_Upload => sp.GetRequiredService<IViewFor<UploadPageViewModel>>() as Page,
+
                 }
                 ;
                 return appvm;
             });
             services.AddTransient<PCanClientUsercontrolViewModel>();
+            services.AddSingleton<UploadPageViewModel>();
+            services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<UILogsViewModel>();
             return services;
         }
     }

@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCAN.ViewModel
+namespace PCAN.ViewModel.Window
 {
     public class ParmValueSettingWindowViewModel:ReactiveObject
     {
@@ -25,7 +25,7 @@ namespace PCAN.ViewModel
             {
                 ShowPCanParmData = PCanParmData = pCanParmData;
             }
-            this.SaveCommand = ReactiveCommand.Create(() =>
+            SaveCommand = ReactiveCommand.Create(() =>
             {
                 if (PCanParmData==null)
                 {

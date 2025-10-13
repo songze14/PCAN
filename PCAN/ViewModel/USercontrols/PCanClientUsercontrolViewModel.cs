@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PCAN.Drive;
 using PCAN.Drive.Modle;
 using PCAN.Modles;
+using PCAN.Notification.Log;
 using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -35,13 +36,21 @@ namespace PCAN.ViewModel.USercontrols
 
                     stsResult = PCANBasic.GetValue(PCANBasic.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS, info);
                     if (stsResult == TPCANStatus.PCAN_ERROR_OK)
-
+                    {
                         foreach (var channel in info)
                             if ((channel.channel_condition & PCANBasic.PCAN_CHANNEL_AVAILABLE) == PCANBasic.PCAN_CHANNEL_AVAILABLE)
                             {
                                 var bIsFD = (channel.device_features & PCANBasic.FEATURE_FD_CAPABLE) == PCANBasic.FEATURE_FD_CAPABLE;
                                 Ports.Add(new LocalPorts() { PortName = channel.device_name, PortsNum = channel.channel_handle });
                             }
+                        mediator.Publish(new LogNotification()
+                        {
+                            LogSource =LogSource.CanDevice,
+                            Message = $"刷新端口成功,共{Ports.Count}个端口"
+                        });
+                    }
+                       
+
                 }
             });
 
@@ -61,6 +70,7 @@ namespace PCAN.ViewModel.USercontrols
                 CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
                 this.CanDrive.CANMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                 {
+                    NewMessage.Value = msg;
                     var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
                     if (oldmsg != null)
                     {
@@ -100,14 +110,25 @@ namespace PCAN.ViewModel.USercontrols
             _logger = logger;
             _mediator = mediator;
         }
+        public void WriteMsg(uint id, byte[] data)
+        {
+            if (CanDrive == null)
+            {
+                MessageBox.Show("请先连接设备");
+                return;
+            }
+            CanDrive.AddMessage(new PCanWriteMessage() { Data=data,Id=id});
+        }
         private CANDrive CanDrive;
-        private bool _isConnected;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;
         private readonly IMediator _mediator;
 
         [Reactive]
         public bool IsConnected { get; set; }
         public ushort SelectedPort { get; set; }
+        /// <summary>
+        /// 每帧间隔时间，单位ms
+        /// </summary>
         public int FrameInterval { get; set; } = 10;
         [Reactive]
         public string ConnectLab { get; set; } = "未连接";
@@ -116,6 +137,7 @@ namespace PCAN.ViewModel.USercontrols
 
         public TPCANBaudrate SelectedBaudrate { get; set; }
         public string DeviceID { get; set; }
+        public ReactiveProperty<ReadMessage> NewMessage { get; set; } = new ReactiveProperty<ReadMessage>();
         public ObservableCollection<LocalPorts> Ports { get; set; } = [];
         public ObservableCollection<ReadMessage> TPCANMsgs { get; set; } = [];
         public ObservableCollection<LocalBaudRate> LocalBaudRates { get; set; } =

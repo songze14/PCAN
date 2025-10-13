@@ -17,7 +17,7 @@ namespace PCAN
             var resolver = Locator.CurrentMutable;
             resolver.InitializeSplat();
             resolver.InitializeReactiveUI();
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LogNotification).Assembly) );
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LogNotificationHandle).Assembly) );
             services.AddViewModels();
             services.AddViews();
 

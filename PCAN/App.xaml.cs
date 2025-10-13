@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PCAN.ViewModel;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 using Serilog;
 using Splat.Microsoft.Extensions.DependencyInjection;

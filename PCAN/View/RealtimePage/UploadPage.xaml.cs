@@ -1,6 +1,11 @@
-﻿using System;
+﻿using PCAN.View.RealtimePage;
+using PCAN.ViewModel.RunPage;
+using ReactiveUI;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,11 +23,31 @@ namespace PCAN.View.UserPage
     /// <summary>
     /// UploadPage.xaml 的交互逻辑
     /// </summary>
-    public partial class UploadPage : Page
+    public partial class UploadPage : Page,IViewFor<UploadPageViewModel>
     {
         public UploadPage()
         {
             InitializeComponent();
+            ViewModel=Locator.Current.GetService<UploadPageViewModel>();
+            this.WhenActivated(d =>
+            {
+                this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.FilePathTextBox.Text).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.UploadCommand, v => v.UploadFileButton).DisposeWith(d);
+            });
         }
+        #region ViewModel
+        public UploadPageViewModel ViewModel
+        {
+            get { return (UploadPageViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
+        }
+
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (UploadPageViewModel)value; }
+
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(UploadPageViewModel), typeof(UploadPage), new PropertyMetadata(null));
+        #endregion
     }
 }

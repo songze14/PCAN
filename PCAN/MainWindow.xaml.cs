@@ -1,5 +1,6 @@
 ﻿using PCAN.Modles;
 using PCAN.ViewModel;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 using Splat;
 using System.Reactive.Disposables;
@@ -17,7 +18,12 @@ namespace PCAN
         {
            
             InitializeComponent();
+            this.ViewModel=Locator.Current.GetService<MainWindowViewModel>();
             AppViewModle = appViewModle;
+            this.WhenActivated(d =>
+            {
+                this.OneWayBind(ViewModel, vm => vm.UILogsViewModel, v => v.uilogView.ViewModel).DisposeWith(d);
+            });
             this.AppViewModle.CurrentPage.ObserveOn(RxApp.MainThreadScheduler).Subscribe(page =>
             {
                 if (page != null)
@@ -57,6 +63,12 @@ namespace PCAN
         private void PCANDataParse_Click(object sender, RoutedEventArgs e)
         {
             AppViewModle.NavigateTo(UrlDefines.URL_PCANDataParse);
+
+        }
+
+        private void Upload_Click(object sender, RoutedEventArgs e)
+        {
+            AppViewModle.NavigateTo(UrlDefines.URL_Upload);
 
         }
     }

@@ -2,8 +2,9 @@
 using PCAN.UserControls;
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
-using PCAN.ViewModel;
+using PCAN.ViewModel.RunPage;
 using PCAN.ViewModel.USercontrols;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 
 namespace PCAN.View
@@ -16,6 +17,9 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<MainWindowViewModel>, MainWindow>();
             services.AddSingleton<IViewFor<ParmValueSettingPageViewModel>, ParmValueSettingPage>();
             services.AddTransient<IViewFor<PCanClientUsercontrolViewModel>, PCanClientUsercontrol>();
+            services.AddSingleton<IViewFor<UploadPageViewModel>, UploadPage>();
+            services.AddSingleton<IViewFor<UILogsViewModel>, UILogsView>();
+            
             return services;
         }
     }

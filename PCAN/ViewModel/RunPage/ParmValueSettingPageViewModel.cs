@@ -2,6 +2,7 @@
 using DynamicData.Binding;
 using PCAN.Modles;
 using PCAN.View.Windows;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
@@ -14,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace PCAN.ViewModel
+namespace PCAN.ViewModel.RunPage
 {
     public class ParmValueSettingPageViewModel:ReactiveObject
     {
@@ -26,20 +27,20 @@ namespace PCAN.ViewModel
                 .Sort(SortExpressionComparer<PCanParmDataGrid>.Ascending(x => x.Index)) // 排序
                 .Bind(out _parmDataGridItems) 
                 .Subscribe();
-            this.ParmSetCommand = ReactiveCommand.Create(() =>
+            ParmSetCommand = ReactiveCommand.Create(() =>
             {
                 var windowviewmodle = new ParmValueSettingWindowViewModel(ParmDataGridSource, null);
                 var window = new ParmValueSettingWindow(windowviewmodle);
                 window.ShowDialog();
             });
-            this.ParmDeleteCommand = ReactiveCommand.Create(() =>
+            ParmDeleteCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectData!=null)
                 {
                     ParmDataGridSource.Remove(SelectData);
                 }
             });
-            this.ParmEditCommand = ReactiveCommand.Create(() =>
+            ParmEditCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectData!=null)
                 {

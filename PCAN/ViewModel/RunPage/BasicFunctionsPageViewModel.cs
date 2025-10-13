@@ -13,7 +13,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-namespace PCAN.ViewModel
+namespace PCAN.ViewModel.RunPage
 {
     public class BasicFunctionsPageViewModel : ReactiveObject
     {
@@ -25,28 +25,13 @@ namespace PCAN.ViewModel
             _logger = logger;
             _mediator = mediator;
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
-            this.AddLogCommand = ReactiveCommand.Create<LogNotification>(log =>
-            {
-                if (WindowLogs.Count >= 100)
-                {
-                    WindowLogs.RemoveAt(0);
-                }
-                WindowLogs.Add(new WindowLog()
-                {
-                    DateTime = DateTime.Now,
-                    LogMessage = log.Message,
-                    LogSource = log.LogSource
-                });
-            });
            
         }
       
        
         public string Title { get; set; } = "PCAN";
       
-        public ObservableCollection<WindowLog> WindowLogs { get; set; } = [];
      
-        public ICommand AddLogCommand { get; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
     }
 }

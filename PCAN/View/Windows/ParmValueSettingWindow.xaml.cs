@@ -1,5 +1,5 @@
 ﻿using PCAN.View.RealtimePage;
-using PCAN.ViewModel;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 using Splat;
 using System;
