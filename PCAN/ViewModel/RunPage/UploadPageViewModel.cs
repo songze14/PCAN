@@ -74,6 +74,12 @@ namespace PCAN.ViewModel.RunPage
                         MessageBox.Show("空文件");
                         return;
                     }
+                    //判断文件大小是否可以%8无余数
+                    //var length8 = filebytes.Length % 8;
+                    //if (length8 != 0)
+                    //{
+                    //    Array.Resize(ref filebytes, filebytes.Length +  length8);
+                    //}
                     //先按照512分组
                     var packet512s = new List<byte[]>();
                     for (int i = 0; i < filebytes.Length; i += 512)
@@ -82,7 +88,7 @@ namespace PCAN.ViewModel.RunPage
                         packet512s.Add(chunk);
                     }
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已分包：包数量{packet512s.Count}" });
-
+                    
                     //h获取CRC
                     var crcHash = CRC.CalculateCRC8(filebytes);
                     //2.发送升级命令
@@ -104,7 +110,7 @@ namespace PCAN.ViewModel.RunPage
                             Reset();
                         });
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"等待回复！" });
-                        await _semaphoreslim.WaitAsync();
+                        _semaphoreslim.Wait();
                         if (UploadStep != UploadStep.Next)
                         {
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复异常退出升级" });
@@ -217,7 +223,6 @@ namespace PCAN.ViewModel.RunPage
                             switch (data)
                             {
                                 case 0x00:
-                                    //收到开始帧回复
                                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"下位回复0，升级继续" });
                                     UploadStep = UploadStep.Next;
                                     break;
@@ -243,9 +248,7 @@ namespace PCAN.ViewModel.RunPage
                                 _semaphoreslim.Release();
 
                             }
-
                             _timecancellationtokensource.Cancel();
-                            Reset();
                             break;
                         default:
                             break;
@@ -266,11 +269,12 @@ namespace PCAN.ViewModel.RunPage
                 _timecancellationtokensource.Cancel();
                 _cancellationtokensource.Cancel();
                 UploadStep = UploadStep.NON;
-                if (_semaphoreslim.CurrentCount == 0)
-                {
-                    _semaphoreslim.Release();
+                _semaphoreslim=new SemaphoreSlim(0,1);
+                //if (_semaphoreslim.CurrentCount == 0)
+                //{
+                //    _semaphoreslim.Release();
 
-                }
+                //}
                 MessageBox.Show("信号初始化完成");
             });
         }

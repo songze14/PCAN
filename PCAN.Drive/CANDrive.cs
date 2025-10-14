@@ -75,22 +75,40 @@ namespace PCAN.Drive
                     msg.LEN = (byte)writemsg.Data.Length;
                     msg.DATA = writemsg.Data;
                     msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
+                    if (msg.DATA.Length<8)
+                    {
+                        Array.Resize(ref msg.DATA, 8);
+                    }
                     var result = Write(msg);
                     if (result != TPCANStatus.PCAN_ERROR_OK)
                     {
                         _mediator.Publish(new LogNotification
                         {
+                            LogLevel = LogLevel.Error,
                             LogSource = LogSource.CanDevice,
-                            Message = $"写入时出现错误：重试ID{writemsg.Id}"
+                            Message = $"写入时出现错误：信息状态{result},重试ID{writemsg.Id}"
                         });
+                        ResendCount++;
+                        if (ResendCount >= 10)
+                        {
+                            _mediator.Publish(new LogNotification
+                            {
+                                LogLevel = LogLevel.Error,
+                                LogSource = LogSource.CanDevice,
+                                Message = $"写入时出现错误：已重试10次，取消发送！"
+                            });
+                            return;
+                        }
                         CanMessages.OnNext(writemsg);
                     }
-                   
+                    ResendCount = 0;
+
                 }
                 catch (Exception ex)
                 {
                     _mediator.Publish(new LogNotification
                     {
+                        LogLevel = LogLevel.Error,
                         LogSource = LogSource.CanDevice,
                         Message = $"写入时出现系统错误：{ex.Message}"
                     });
@@ -115,6 +133,7 @@ namespace PCAN.Drive
                     DATA =_CANMsg.DATA,
                     TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
                 };
+                
                 CANMsgSubject.OnNext(message);
             }
             return stsResult;
@@ -161,7 +180,7 @@ namespace PCAN.Drive
         }
         #endregion
 
-
+        public int ResendCount;
         private TPCANStatus CANInit()
         {
            return PCANBasic.Initialize(PcanHandle, m_Baudrate, 0, 0, 0);
