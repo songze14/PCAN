@@ -9,15 +9,22 @@ using PCAN.Tools;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Hashing;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using Aes = System.Security.Cryptography.Aes;
 using Unit = System.Reactive.Unit;
 
 
@@ -78,7 +85,20 @@ namespace PCAN.ViewModel.RunPage
                             return;
                         }
                         //1.拆分文件
-                        var filebytes = System.IO.File.ReadAllBytes(SelectedFilePath);
+                        var filebyteaess = System.IO.File.ReadAllBytes(SelectedFilePath);
+                        var key = filebyteaess[0..16];
+                        if (key[4] != AESKey[4])
+                        {
+                            MessageBox.Show("升级文件异常！");
+                            IsUploading = false;
+                            return;
+                        }
+                        var filebytes = filebyteaess[16..];
+                        var aesAlg = Aes.Create();
+                        var decryptor = aesAlg.CreateDecryptor(AESKey, AESIV);
+                        filebytes = decryptor.TransformFinalBlock(filebytes, 0, filebytes.Length);
+                        //释放解密器
+                        decryptor.Dispose();
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已读取文件：文件大小{filebytes.Length}Byte" });
                         if (filebytes == null)
                         {
@@ -214,6 +234,7 @@ namespace PCAN.ViewModel.RunPage
                                 case UploadStep.Completed:
                                 case UploadStep.TimeOut:
                                 case UploadStep.NON:
+                                    IsUploading = false;
                                     return;
                                 default:
                                     break;
@@ -231,7 +252,7 @@ namespace PCAN.ViewModel.RunPage
                     {
 
                         MessageBox.Show($"升级出现错误:{ex.Message}");
-
+                        IsUploading = false;
                         return;
                     }
                 }, _cancellationtokensource.Token
@@ -302,7 +323,42 @@ namespace PCAN.ViewModel.RunPage
                 IsUploading = false;
                 MessageBox.Show("信号初始化完成");
             });
-          
+            this.EncryptionFileCommand = ReactiveCommand.Create(() =>
+            {
+                if (string.IsNullOrEmpty(SelectedFilePath))
+                {
+                    MessageBox.Show("升级文件未选择");
+                    return;
+                }
+                var filebytes = System.IO.File.ReadAllBytes(SelectedFilePath);
+                if (filebytes == null)
+                {
+                    MessageBox.Show("空文件！");
+                    return;
+                }
+                
+                using (var aesAlg =new AesCng())
+                {
+                    
+                    // 创建加密器执行流转换
+                    ICryptoTransform encryptor = aesAlg.CreateEncryptor(AESKey, AESIV);
+                    var crysteam = encryptor.TransformFinalBlock(filebytes, 0, filebytes.Length);
+                    //加入标志位
+                    var newbytes= new byte[crysteam.Length + 16];
+                    AESKey.CopyTo(newbytes, 0);
+                    crysteam.CopyTo(newbytes, 16);
+                    var newfilepath = SelectedFilePath.Replace(".bin", "_en.bin");
+                    // 将所有数据写入流
+                    using (var fs = new FileStream(newfilepath, FileMode.Create, FileAccess.Write))
+                    {
+                         fs.Write(newbytes, 0, newbytes.Length);
+                    }
+                    MessageBox.Show($"加密完成，已生成新文件{newfilepath}，请使用新文件进行升级！");
+                }
+
+
+
+            });
             this.ChangeObs = this._sourceUploadDataGridModels.Connect();
 
             var d = this.ChangeObs
@@ -311,6 +367,8 @@ namespace PCAN.ViewModel.RunPage
                 .DisposeMany()
                 .Subscribe();
         }
+        private byte[] AESKey = System.Text.Encoding.UTF8.GetBytes("greenworksEGG123");
+        private byte[] AESIV = System.Text.Encoding.UTF8.GetBytes("greenworskEGG123");
         private async Task Reset()
         {
             try
@@ -354,6 +412,10 @@ namespace PCAN.ViewModel.RunPage
         public string SelectedFilePath { get; set; }
         [Reactive]
         public int UploadProgress { get; set; }
+        /// <summary>
+        /// 加密文件
+        /// </summary>
+        public ReactiveCommand<Unit,Unit> EncryptionFileCommand { get; set; }
         public ReactiveCommand<Unit,Unit> BrowseFileCommand { get; set; }
         public ReactiveCommand<Unit, Unit> UploadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
