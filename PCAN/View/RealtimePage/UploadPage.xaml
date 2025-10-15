@@ -48,7 +48,7 @@
                     <Label Content="包大小/byte" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <TextBox x:Name="PackSizeTextBox" Width="50" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" Text="5"/>
                     <Button x:Name="ReloadButton" Content="初始化" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                    <Button x:Name="EncryptionButton" Content="加密文件" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Button x:Name="EncryptionButton" Content="加密文件" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 </DockPanel>
             </GroupBox>
           
