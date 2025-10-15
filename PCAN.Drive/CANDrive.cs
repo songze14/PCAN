@@ -119,24 +119,38 @@ namespace PCAN.Drive
         #region Read
         private TPCANStatus ReadMessage()
         {
-            TPCANMsg _CANMsg;
-            TPCANTimestamp CANTimeStamp;
-            ushort length;
-            var stsResult = PCANBasic.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
-            if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+            try
             {
-                var message = new ReadMessage()
+                TPCANMsg _CANMsg;
+                TPCANTimestamp CANTimeStamp;
+                ushort length;
+                var stsResult = PCANBasic.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
+                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
                 {
-                    ID = (int)_CANMsg.ID,
-                    LEN = _CANMsg.LEN,
-                    MSGTYPE = _CANMsg.MSGTYPE,
-                    DATA =_CANMsg.DATA,
-                    TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
-                };
-                
-                CANMsgSubject.OnNext(message);
+                    var message = new ReadMessage()
+                    {
+                        ID = (int)_CANMsg.ID,
+                        LEN = _CANMsg.LEN,
+                        MSGTYPE = _CANMsg.MSGTYPE,
+                        DATA = _CANMsg.DATA,
+                        TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
+                    };
+
+                    CANMsgSubject.OnNext(message);
+                }
+                return stsResult;
             }
-            return stsResult;
+            catch (Exception ex)
+            {
+               _mediator.Publish(new LogNotification
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"读取时出现系统错误：{ex.Message}"
+                });
+                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+            }
+           
         }
         private void ReadMessages()
         {

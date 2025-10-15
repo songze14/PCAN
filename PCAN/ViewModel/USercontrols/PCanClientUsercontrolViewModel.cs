@@ -112,17 +112,20 @@ namespace PCAN.ViewModel.USercontrols
         }
         public void WriteMsg(uint id, byte[] data,Action? action=null)
         {
+            
             if (CanDrive == null)
             {
                 MessageBox.Show("请先连接设备");
                 return;
             }
-            CanDrive.AddMessage(new PCanWriteMessage() { Data=data,Id=id});
-            if (action!=null)
+            CanDrive.AddMessage(new PCanWriteMessage() { Data = data, Id = id });
+            if (action != null)
             {
                 action();
 
             }
+           
+           
         }
         private CANDrive CanDrive;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;

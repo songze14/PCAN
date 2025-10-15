@@ -2,14 +2,18 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using PCAN.Modles;
 using PCAN.Notification.Log;
 using PCAN.Shard.Tools;
+using PCAN.Tools;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Hashing;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,24 +35,26 @@ namespace PCAN.ViewModel.RunPage
             _timecancellationtokensource=new CancellationTokenSource();
             BrowseFileCommand = ReactiveCommand.Create(() =>
             {
-                // Implementation for browsing a file
                 var openFileDialog = new OpenFileDialog
                 {
-                    Filter = "All Files|*.*|Text Files|*.txt|CSV Files|*.csv",
+                    Filter = "升级文件/bin|*.bin",
                 };
                 if (openFileDialog.ShowDialog() == true)
                 {
                     SelectedFilePath = openFileDialog.FileName;
+                    var safepath = openFileDialog.SafeFileName;
+                    MCU = safepath.Split('_')[3][0..2];
                 }
             }
-                
             );
             UploadCommand = ReactiveCommand.Create(() =>
             {
-                //_cancellationtokensource.Cancel();
+                if (IsUploading)
+                {
+                    MessageBox.Show("正在升级中，请勿重复点击");
+                    return;
+                }
                 _cancellationtokensource = new CancellationTokenSource();
-                //_timecancellationtokensource = new CancellationTokenSource();
-                // Implementation for uploading the file
                 if (string.IsNullOrEmpty(SelectedFilePath) )
                 {
                     MessageBox.Show("升级文件未选择" );
@@ -61,153 +67,174 @@ namespace PCAN.ViewModel.RunPage
                 }
                 _ = Task.Run(async () =>
                 {
-                    if (_cancellationtokensource.Token.IsCancellationRequested)
-                    {
-                        MessageBox.Show("线程异常");
-                        return;
-                    }
-                    //1.拆分文件
-                    var filebytes = System.IO.File.ReadAllBytes(SelectedFilePath);
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已读取文件：文件大小{filebytes.Length}Byte" });
-                    if (filebytes == null)
-                    {
-                        MessageBox.Show("空文件");
-                        return;
-                    }
-                    //判断文件大小是否可以%8无余数
-                    //var length8 = filebytes.Length % 8;
-                    //if (length8 != 0)
-                    //{
-                    //    Array.Resize(ref filebytes, filebytes.Length +  length8);
-                    //}
-                    //先按照512分组
-                    var packet512s = new List<byte[]>();
-                    for (int i = 0; i < filebytes.Length; i += 512)
-                    {
-                        var chunk = filebytes.Skip(i).Take(512).ToArray();
-                        packet512s.Add(chunk);
-                    }
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已分包：包数量{packet512s.Count}" });
-                    
-                    //h获取CRC
-                    var crcHash = CRC.CalculateCRC8(filebytes);
-                    //2.发送升级命令
-                    var commandFrame = new byte[8];
                     try
                     {
-                        int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID,16);
-                        if (driveid==0)
+                        IsUploading = true;
+                        if (_cancellationtokensource.Token.IsCancellationRequested)
                         {
-                            MessageBox.Show("设备ID错误");
-                            return;
-                        }
-                        var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
-                        dirveridBytes.CopyTo(commandFrame, 0);
-                        commandFrame[4] = 0x01;
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
-                        PCanClientUsercontrolViewModel.WriteMsg(0x730, commandFrame, () =>
-                        {
-                            Reset();
-                        });
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"等待回复！" });
-                        _semaphoreslim.Wait();
-                        if (UploadStep != UploadStep.Next)
-                        {
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复异常退出升级" });
-                            UploadStep = UploadStep.NON;
+                            MessageBox.Show("线程异常，重启软件重试！");
+                            IsUploading = false;
 
                             return;
                         }
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复正常,升级继续" });
+                        //1.拆分文件
+                        var filebytes = System.IO.File.ReadAllBytes(SelectedFilePath);
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已读取文件：文件大小{filebytes.Length}Byte" });
+                        if (filebytes == null)
+                        {
+                            MessageBox.Show("空文件！");
+                            IsUploading = false;
+                            return;
+                        }
+                        //先按照PackSize分组（默认512）
+                        for (int i = 0; i < filebytes.Length; i += PackSize)
+                        {
+                            var chunk = filebytes.Skip(i).Take(PackSize).ToArray();
+                            _sourceUploadDataGridModels.Add(new UploadDataGridModel()
+                            {
+                                Data = chunk,
+                                Index = _sourceUploadDataGridModels.Count + 1,
+                                Size = $"{chunk.Length}Byte",
+                                CRC = CRC.CalculateCRC8(chunk)
+
+                            });
+                           
+                        }
+                        await Task.Delay(1000);
+
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已分包：包数量{_sourceUploadDataGridModels.Count}" });
+
+                    
+                        //h获取CRC
+                        var crcHash = CRC.CalculateCRC8(filebytes);
+                        //2.发送升级命令
+                        var commandFrame = new byte[8];
+                   
+                            int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID,16);
+                            if (driveid==0)
+                            {
+                                MessageBox.Show("设备ID错误");
+                                IsUploading = false;
+                                return;
+                            }
+                            var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
+                            dirveridBytes.CopyTo(commandFrame, 0);
+                            switch (MCU)
+                            {
+                                case "U0":
+                                    commandFrame[4] = 0x00;
+                                    break;
+                                case "U1":
+                                    commandFrame[4] = 0x01;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
+                            PCanClientUsercontrolViewModel.WriteMsg(0x730, commandFrame, () =>
+                            {
+                                Reset();
+                            });
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"等待回复！" });
+                            _semaphoreslim.Wait();
+                       
+                            if (UploadStep != UploadStep.Next)
+                            {
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复异常退出升级" });
+                                UploadStep = UploadStep.NON;
+                                IsUploading = false;
+
+                                return;
+                            }
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复正常,升级继续" });
+                   
+                        int ResendCount = 0;
+                        for (int i = 0; i < _sourceUploadDataGridModels.Count; i++)
+                        {
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包" });
+
+                            var packet = _sourceUploadDataGridModels.Items[i];
+                            var packet8s = new List<byte[]>();
+                            //3.继续拆分成8字节的包
+                            for (int j = 0; j < packet.Data.Length; j += 8)
+                            {
+                                var chunk = packet.Data.Skip(j).Take(8).ToArray();
+                                packet8s.Add(chunk);
+                            }
+                            //4.发送开始帧
+                            var startFrame = new byte[8];
+                            //4.1 总长度
+                            var totalLengthBytes = BitConverter.GetBytes((ushort)packet.Data.Length);
+                            Array.Reverse(totalLengthBytes);
+                            totalLengthBytes.CopyTo(startFrame, 0);
+                            //4.2 总包数
+                            var totalPacketCountBytes = BitConverter.GetBytes((ushort)_sourceUploadDataGridModels.Count);
+                            Array.Reverse(totalPacketCountBytes);
+                            totalPacketCountBytes.CopyTo(startFrame, 2);
+                            //4.3 当前包序号
+                            var packetindex = BitConverter.GetBytes((ushort)(i + 1));
+                            Array.Reverse(packetindex);
+                            packetindex.CopyTo(startFrame, 4);
+                            startFrame[6] = crcHash;
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的开始帧" });
+                            PCanClientUsercontrolViewModel.WriteMsg(0x731, startFrame);
+                            await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的数据帧" });
+                            foreach (var packet8 in packet8s)
+                            {
+                                PCanClientUsercontrolViewModel.WriteMsg(0x732, packet8);
+                                await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
+                            }
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的结束帧" });
+                            var endFrame = new byte[8];
+                            endFrame[0] = packet.CRC;
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的CRC{packet.CRC}" });
+                            PCanClientUsercontrolViewModel.WriteMsg(0x733, endFrame, () =>
+                            {
+                                Reset();
+                            });
+                            await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
+                            await _semaphoreslim.WaitAsync();
+                       
+                            switch (UploadStep)
+                            {
+                                case UploadStep.Next:
+                                    packet.IsOver= true;
+                                    break;
+                                case UploadStep.BackPacket:
+                                    packet.SendCount++;
+                                    if (packet.SendCount >= MaxResendCount)
+                                    {
+                                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"已重发{ResendCount},超出5退出升级！" });
+                                        IsUploading = false;
+                                        return;
+                                    }
+                                    i--;
+                                    break;
+                                case UploadStep.Completed:
+                                case UploadStep.TimeOut:
+                                case UploadStep.NON:
+                                    return;
+                                default:
+                                    break;
+                            }
+                            UIHelper.RunInUIThread(_ =>
+                            {
+                                UploadProgress = (int)(((i + 1) / (float)_sourceUploadDataGridModels.Count) * 100);
+
+                            });
+                        }
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"升级结束" });
+                        IsUploading = false;
                     }
                     catch (Exception ex)
                     {
 
                         MessageBox.Show($"升级出现错误:{ex.Message}");
-                        UploadStep = UploadStep.NON;
+
                         return;
                     }
-                    int ResendCount = 0;
-                    for (int i = 0; i < packet512s.Count; i++)
-                    {
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包" });
-
-                        var packet = packet512s[i];
-                        var packet8s = new List<byte[]>();
-                        //3.继续拆分成8字节的包
-                        for (int j = 0; j < packet.Length; j += 8)
-                        {
-                            var chunk = packet.Skip(j).Take(8).ToArray();
-                            packet8s.Add(chunk);
-                        }
-                        //4.发送开始帧
-                        var startFrame = new byte[8];
-                        //4.1 总长度
-                        var totalLengthBytes = BitConverter.GetBytes((ushort)packet.Length);
-                        Array.Reverse(totalLengthBytes);
-                        totalLengthBytes.CopyTo(startFrame, 0);
-                        //4.2 总包数
-                        var totalPacketCountBytes = BitConverter.GetBytes((ushort)packet512s.Count);
-                        Array.Reverse(totalPacketCountBytes);
-                        totalPacketCountBytes.CopyTo(startFrame, 2);
-                        //4.3 当前包序号
-                        var packetindex = BitConverter.GetBytes((ushort)(i + 1));
-                        Array.Reverse(packetindex);
-                        packetindex.CopyTo(startFrame, 4);
-                        startFrame[6] = crcHash;
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的开始帧" });
-
-                        PCanClientUsercontrolViewModel.WriteMsg(0x731, startFrame);
-                        await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的数据帧" });
-                        foreach (var packet8 in packet8s)
-                        {
-                            //4.发送8字节的包
-                            //if (packet8.Count()<8)
-                            //{
-                            //    var data = packet8;
-                            //    packet8 =new byte[8];
-                            //}
-                            PCanClientUsercontrolViewModel.WriteMsg(0x732, packet8);
-                            await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
-                        }
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的结束帧" });
-
-                        var crcpacket = CRC.CalculateCRC8(packet);
-                        var endFrame = new byte[8];
-                        endFrame[0] = crcpacket;
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的CRC{Convert.ToString(crcpacket,16)}" });
-                        PCanClientUsercontrolViewModel.WriteMsg(0x733, endFrame, () =>
-                        {
-                           Reset();
-                        });
-                        await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
-
-                        await _semaphoreslim.WaitAsync();
-                        switch (UploadStep)
-                        {
-                            case UploadStep.Next:
-                                break;
-                            case UploadStep.BackPacket:
-                                ResendCount++;
-                                if (ResendCount>=5)
-                                {
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已重发{ResendCount},超出5退出升级！" });
-                                    return;
-                                }
-                                i--;
-                                break;
-                            case UploadStep.Completed:
-                            case UploadStep.TimeOut:
-                            case UploadStep.NON:
-                                return;
-                            default:
-                                break;
-                        }
-                    }
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"升级结束" });
-
-                },_cancellationtokensource.Token
+                }, _cancellationtokensource.Token
                 );
             });
             this.PCanClientUsercontrolViewModel.NewMessage.Subscribe(async msg =>
@@ -227,17 +254,17 @@ namespace PCAN.ViewModel.RunPage
                                     UploadStep = UploadStep.Next;
                                     break;
                                 case 0x01:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"下位回复1，升级出现错误，重发" });
+                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复1，升级出现错误，重发" });
 
                                     UploadStep = UploadStep.BackPacket;
                                     break;
                                 case 0x02:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"下位回复2，升级结束后APP区CRC校验不过" });
+                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复2，升级结束后APP区CRC校验不过" });
 
                                     UploadStep = UploadStep.Completed;
                                     break;
                                 case 0x03:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"下位回复3，芯片型号不匹配,退出升级" });
+                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复3，芯片型号不匹配,退出升级" });
                                     UploadStep = UploadStep.Completed;
                                     break;
                                 default:
@@ -259,7 +286,7 @@ namespace PCAN.ViewModel.RunPage
                 catch (Exception ex)
                 {
 
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"处理回复异常{ex.Message}" });
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"处理回复异常{ex.Message}" });
 
                 }
 
@@ -270,20 +297,26 @@ namespace PCAN.ViewModel.RunPage
                 _cancellationtokensource.Cancel();
                 UploadStep = UploadStep.NON;
                 _semaphoreslim=new SemaphoreSlim(0,1);
-                //if (_semaphoreslim.CurrentCount == 0)
-                //{
-                //    _semaphoreslim.Release();
-
-                //}
+                UploadProgress = 0;
+                _sourceUploadDataGridModels.Clear();
+                IsUploading = false;
                 MessageBox.Show("信号初始化完成");
             });
+          
+            this.ChangeObs = this._sourceUploadDataGridModels.Connect();
+
+            var d = this.ChangeObs
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Bind(out _uploadDataGridModels)
+                .DisposeMany()
+                .Subscribe();
         }
         private async Task Reset()
         {
             try
             {
                 _timecancellationtokensource = new CancellationTokenSource();
-                var periodictimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+                var periodictimer = new PeriodicTimer(TimeSpan.FromSeconds(TimeOutSeconds));
                 while (await periodictimer.WaitForNextTickAsync(_timecancellationtokensource.Token))
                 {
                     _cancellationtokensource.Cancel();
@@ -293,27 +326,34 @@ namespace PCAN.ViewModel.RunPage
                         _semaphoreslim.Release();
 
                     }
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"信息回复超时" });
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"信息回复超时" });
+                    IsUploading = false;
                     return;
                 }
-               
-                //if (timedisponse.Result)
-                //{
-                //   
-                //}
             }
             catch (Exception ex)
             {
             }
-
-
-
-
         }
+        [Reactive]
+        
+        public bool IsUploading { get; set; }
+        [Reactive]
+        public string MCU { get; set; }
+        [Reactive]
+        public int PackSize { get; set; } = 512;
 
-        private PeriodicTimer _periodictimer;
+        [Reactive]
+
+        public int MaxResendCount { get; set; } = 5;
+
+        [Reactive]
+        public int TimeOutSeconds { get; set; } = 5;
+
         [Reactive]
         public string SelectedFilePath { get; set; }
+        [Reactive]
+        public int UploadProgress { get; set; }
         public ReactiveCommand<Unit,Unit> BrowseFileCommand { get; set; }
         public ReactiveCommand<Unit, Unit> UploadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
@@ -322,7 +362,11 @@ namespace PCAN.ViewModel.RunPage
         private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
         private  CancellationTokenSource _cancellationtokensource;
         private CancellationTokenSource _timecancellationtokensource;
+        public IObservable<IChangeSet<UploadDataGridModel>> ChangeObs { get; }
 
+        public SourceList<UploadDataGridModel> _sourceUploadDataGridModels = new SourceList<UploadDataGridModel>();
+        private readonly ReadOnlyObservableCollection<UploadDataGridModel> _uploadDataGridModels;
+        public ReadOnlyObservableCollection<UploadDataGridModel> UploadDataGridModels => _uploadDataGridModels;
     }
     internal enum UploadStep
     {

@@ -29,13 +29,20 @@ namespace PCAN.View.UserPage
         {
             InitializeComponent();
             ViewModel=Locator.Current.GetService<UploadPageViewModel>();
+            this.DataContext = ViewModel;
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.FilePathTextBox.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.MCU, v => v.MCUTextBox.Text).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UploadCommand, v => v.UploadFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ReloadCommand, v => v.ReloadButton).DisposeWith(d);
+                this.Bind(ViewModel,vm=>vm.MaxResendCount,v=>v.RetryCountTextBox.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.TimeOutSeconds, v => v.TimeoutTextBox.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.UploadDataGridModels, v => v.UploadDataGrid.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel,vm=>vm.UploadProgress,v=>v.UploadProgressBar.Value).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.UploadProgress, v => v.UploadProgressLable.Content).DisposeWith(d);
             });
         }
         #region ViewModel

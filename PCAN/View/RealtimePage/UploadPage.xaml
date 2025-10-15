@@ -5,8 +5,9 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PCAN.View.UserPage"
       xmlns:usercontrols="clr-namespace:PCAN.UserControls"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="500" d:DesignWidth="1200"
       Title="UploadPage" d:Background="AliceBlue">
     <Grid>
         <Grid.RowDefinitions>
@@ -18,15 +19,73 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="100"/>
                 <RowDefinition/>
+                
             </Grid.RowDefinitions>
-            <DockPanel Background="AliceBlue">
-                <Label Content="文件路径:" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"/>
-                <TextBox x:Name="FilePathTextBox" Width="400" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
-                <Button x:Name="BrowseFileButton" Content="浏览" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                <Button x:Name="UploadFileButton" Content="上传" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                <Button x:Name="ReloadButton" Content="初始化" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
-            </DockPanel>
-            
+            <GroupBox>
+                <DockPanel Background="AliceBlue">
+                    <DockPanel.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsUploading}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsUploading}" Value="False">
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DockPanel.Resources>
+                    <Label Content="文件路径:" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"/>
+                    <TextBox x:Name="FilePathTextBox" Width="400" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
+                    <Button x:Name="BrowseFileButton" Content="浏览" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Label Content="MCU" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox x:Name="MCUTextBox" Width="50" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
+                    <Button x:Name="UploadFileButton" Content="上传" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Label Content="重发次数" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox x:Name="RetryCountTextBox" Width="50" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" Text="3"/>
+                    <Label Content="超时/s" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox x:Name="TimeoutTextBox" Width="50" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" Text="5"/>
+                    <Label Content="包大小/byte" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox x:Name="PackSizeTextBox" Width="50" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" Text="5"/>
+                    <Button x:Name="ReloadButton" Content="初始化" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                </DockPanel>
+            </GroupBox>
+          
+            <GroupBox Grid.Row="1" >
+                <GroupBox.Header>
+                    <TextBlock Text="上传进度" FontWeight="Bold" FontSize="14"/>
+                </GroupBox.Header>
+                
+                <DockPanel  Background="AliceBlue" Margin="0,5,0,5" SnapsToDevicePixels="False" >
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label Content="上传进度:"  Margin="5" />
+                        <Label x:Name="UploadProgressLable" VerticalAlignment="Center"  Margin="5" />
+                        <Label Content="%"  Margin="5" />
+                        <!-- should disable on 2nd transition... -->
+                        <ProgressBar x:Name="UploadProgressBar" Height="20" Background="AliceBlue"  Margin="5" materialDesign:TransitionAssist.DisableTransitions="True" />
+                    </DockPanel>
+                    <DataGrid DockPanel.Dock="Bottom" x:Name="UploadDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" >
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOver}" Value="True">
+                                        <Setter Property="Background" Value="Green"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <!--<DataGridTextColumn Header="时间戳" Binding="{Binding Timestamp}" Width="*"/>-->
+                            <DataGridTextColumn Header="序号" Binding="{Binding Index}" Width="*"/>
+                            <DataGridTextColumn Header="大小" Binding="{Binding Size}" Width="*"/>
+                            <DataGridTextColumn Header="CRC" Binding="{Binding CRC,StringFormat={}{0:X2}}" Width="*"/>
+                            <DataGridTextColumn Header="重发次数" Binding="{Binding SendCount}" Width="*"/>
+                            <DataGridTextColumn Header="是否完成" Binding="{Binding IsOver}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </GroupBox>
+           
         </Grid>
     </Grid>
 </Page>
