@@ -33,14 +33,17 @@ namespace PCAN.ViewModel.Window
             {
                 if (PCanParmData==null)
                 {
+                   
+                    ShowPCanParmData.Size = (ushort)(ShowPCanParmData.DataEndIndex - ShowPCanParmData.DataStatrtIndex);
+
                     ShowPCanParmData.Index = PCanParmDataGrids.Count+1;
                     ShowPCanParmData.TargetType = SelectTypeInfo?.FullName ?? string.Empty;
-                    ShowPCanParmData.TargetFullName = SelectTypeInfo.Name ?? string.Empty;
+                    ShowPCanParmData.TargetFullName = SelectTypeInfo?.Name ?? string.Empty;
                     PCanParmDataGrids.Add(ShowPCanParmData);
                 }
                 else
                 {
-                    //PCanParmDataGrids.Remove(PCanParmData);
+                    PCanParmDataGrids.Remove(PCanParmData);
                     PCanParmData.Name = ShowPCanParmData.Name;
                     PCanParmData.DataEndIndex = ShowPCanParmData.DataEndIndex;
                     PCanParmData.DataStatrtIndex = ShowPCanParmData.DataStatrtIndex;
@@ -50,7 +53,7 @@ namespace PCAN.ViewModel.Window
                    
                     PCanParmData.TargetType = SelectTypeInfo?.FullName??string.Empty;
                     PCanParmData.TargetFullName=SelectTypeInfo.Name??string.Empty;
-                    //PCanParmDataGrids.Add(PCanParmData);
+                    PCanParmDataGrids.Add(PCanParmData);
 
                 }
             });

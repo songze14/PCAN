@@ -30,9 +30,15 @@ namespace PCAN.View.RealtimePage
             ViewModel = Locator.Current.GetService<DeviceParmTuningPageViewModel>();
             this.WhenActivated(d =>
             {
+                this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.ParmFilePathTextBlock.Text).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.ParmDataGridCollection, v => v.ParmDataGrid.ItemsSource).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.SelectData, v => v.ParmDataGrid.SelectedItem).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ParmAddCommand, v => v.ParmAddButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.SaveParmFileCommand, v => v.SaveParmFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.LoadParmFileCommand, v => v.LoadParmFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.ReadParmCommand, v => v.ReadParmButton).DisposeWith(d);
             });
         }
         #region ViewModel

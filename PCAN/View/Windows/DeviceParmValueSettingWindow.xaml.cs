@@ -34,7 +34,7 @@ namespace PCAN.View.Windows
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.ID, v => v.ID.Text).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.IDReadOnlay, v => v.ID.IsReadOnly).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.Name, v => v.Name.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ShowPCanParmData.Size, v => v.Size.Text).DisposeWith(d);
+               
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.StatrtIndex, v => v.StatrtIndex.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.EndIndex, v => v.EndIndex.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.DataStatrtIndex, v => v.DataStatrtIndex.Text).DisposeWith(d);
