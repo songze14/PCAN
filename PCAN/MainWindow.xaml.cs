@@ -71,6 +71,12 @@ namespace PCAN
             AppViewModle.NavigateTo(UrlDefines.URL_Upload);
 
         }
+
+        private void DeviceParmTuning_Click(object sender, RoutedEventArgs e)
+        {
+            AppViewModle.NavigateTo(UrlDefines.URL_DeviceParmTuning);
+
+        }
     }
   
 }

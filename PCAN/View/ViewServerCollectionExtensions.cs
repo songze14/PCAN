@@ -19,7 +19,7 @@ namespace PCAN.View
             services.AddTransient<IViewFor<PCanClientUsercontrolViewModel>, PCanClientUsercontrol>();
             services.AddSingleton<IViewFor<UploadPageViewModel>, UploadPage>();
             services.AddSingleton<IViewFor<UILogsViewModel>, UILogsView>();
-            
+            services.AddSingleton<IViewFor<DeviceParmTuningPageViewModel>, DeviceParmTuningPage>();
             return services;
         }
     }

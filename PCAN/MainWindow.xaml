@@ -13,12 +13,12 @@
 
     <Grid >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="200"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <!--#region菜单-->
-        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="260" Visibility="Visible" >
+        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="200" Visibility="Visible" >
             <Menu>
                 <Menu.Resources>
                     <Style TargetType="MenuItem">
@@ -35,8 +35,9 @@
                     </ItemsPanelTemplate>
                 </Menu.ItemsPanel>
                 <MenuItem x:Name="BasicFunctions" Header="基本功能" Click="MenuItem_Click"/>
-                <MenuItem x:Name="PCANDataParse" Header="PCANDATA信息解析" Click="PCANDataParse_Click"/>
+                <MenuItem x:Name="PCANDataParse" Header="PCAN信息解析" Click="PCANDataParse_Click"/>
                 <MenuItem x:Name="Upload" Header="升级" Click="Upload_Click"/>
+                <MenuItem x:Name="DeviceParmTuning" Header="设备参数调试" Click="DeviceParmTuning_Click"/>
 
             </Menu>
         </Border>

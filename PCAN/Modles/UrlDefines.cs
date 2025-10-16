@@ -12,6 +12,7 @@ namespace PCAN.Modles
         public const string URL_Upload = "升级";
         public const string URL_Curve = "曲线";
         public const string URL_PCANDataParse = "PCANDATA数据解析";
+        public const string URL_DeviceParmTuning = "设备参数调试";
 
     }
 }

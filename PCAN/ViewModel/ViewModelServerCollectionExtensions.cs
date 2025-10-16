@@ -22,7 +22,7 @@ namespace PCAN.ViewModel
                     UrlDefines.URL_BasicFunctions => sp.GetRequiredService<IViewFor<BasicFunctionsPageViewModel>>() as Page,
                     UrlDefines.URL_PCANDataParse => sp.GetRequiredService<IViewFor<ParmValueSettingPageViewModel>>() as Page,
                     UrlDefines.URL_Upload => sp.GetRequiredService<IViewFor<UploadPageViewModel>>() as Page,
-
+                    UrlDefines.URL_DeviceParmTuning => sp.GetRequiredService<IViewFor<DeviceParmTuningPageViewModel>>() as Page,
                 }
                 ;
                 return appvm;
@@ -31,6 +31,7 @@ namespace PCAN.ViewModel
             services.AddSingleton<UploadPageViewModel>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<UILogsViewModel>();
+            services.AddSingleton<DeviceParmTuningPageViewModel>();
             return services;
         }
     }
