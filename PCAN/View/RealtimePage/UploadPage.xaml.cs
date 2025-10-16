@@ -37,7 +37,7 @@ namespace PCAN.View.UserPage
                 this.OneWayBind(ViewModel, vm => vm.MCU, v => v.MCUTextBox.Text).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UploadCommand, v => v.UploadFileButton).DisposeWith(d);
-                this.BindCommand(ViewModel, vm => vm.ReloadCommand, v => v.ReloadButton).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.PackSize, v => v.PackSizeTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel,vm=>vm.MaxResendCount,v=>v.RetryCountTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.TimeOutSeconds, v => v.TimeoutTextBox.Text).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.UploadDataGridModels, v => v.UploadDataGrid.ItemsSource).DisposeWith(d);

@@ -54,11 +54,16 @@ namespace PCAN.ViewModel.RunPage
                 }
             }
             );
-            UploadCommand = ReactiveCommand.Create(() =>
+            UploadCommand = ReactiveCommand.CreateFromTask(async () =>
             {
                 if (IsUploading)
                 {
                     MessageBox.Show("正在升级中，请勿重复点击");
+                    return;
+                }
+                var reloadresult= await Reload();
+                if (!reloadresult)
+                {
                     return;
                 }
                 _cancellationtokensource = new CancellationTokenSource();
@@ -312,17 +317,7 @@ namespace PCAN.ViewModel.RunPage
                 }
 
             });
-            this.ReloadCommand = ReactiveCommand.Create(() =>
-            {
-                _timecancellationtokensource.Cancel();
-                _cancellationtokensource.Cancel();
-                UploadStep = UploadStep.NON;
-                _semaphoreslim=new SemaphoreSlim(0,1);
-                UploadProgress = 0;
-                _sourceUploadDataGridModels.Clear();
-                IsUploading = false;
-                MessageBox.Show("信号初始化完成");
-            });
+           
             this.EncryptionFileCommand = ReactiveCommand.Create(() =>
             {
                 if (string.IsNullOrEmpty(SelectedFilePath))
@@ -392,6 +387,29 @@ namespace PCAN.ViewModel.RunPage
             catch (Exception ex)
             {
             }
+        }
+        private async Task<bool> Reload()
+        {
+            try
+            {
+                _timecancellationtokensource.Cancel();
+                _cancellationtokensource.Cancel();
+                UploadStep = UploadStep.NON;
+                _semaphoreslim = new SemaphoreSlim(0, 1);
+                UploadProgress = 0;
+                _sourceUploadDataGridModels.Clear();
+                IsUploading = false;
+                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"信号初始化完成" });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"信号初始化时出现错误:{ex.Message}" });
+
+                return false;
+
+            }
+
         }
         [Reactive]
         

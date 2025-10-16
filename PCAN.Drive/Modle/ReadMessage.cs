@@ -10,9 +10,23 @@ namespace PCAN.Drive.Modle
         [Reactive]
         public TPCANMessageType MSGTYPE { get; set; }
         public byte LEN { get; set; }
-        [Reactive]
+        private byte[] _DATA;
 
-        public byte[] DATA { get; set; }
+        public byte[] DATA { 
+            get=> _DATA;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _DATA, value);
+                if (value != null)
+                {
+                    DATASTR = BitConverter.ToString(value);
+                }
+                
+            }
+        }
+        [Reactive]
+        public string DATASTR { get; set; }
+        
         [Reactive]
 
         public double TimeStamp { get; set; }
