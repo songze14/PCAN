@@ -21,13 +21,14 @@ namespace PCAN.Drive
         private TPCANType m_HwType;
         private int m_SleepTime;
         private CancellationTokenSource _tokensource=new CancellationTokenSource();
-        private Subject<PCanWriteMessage> CanMessages { get; set; } = new Subject<PCanWriteMessage>();
+        private Subject<PCanWriteMessage> CanWriteMessages { get; set; } = new Subject<PCanWriteMessage>();
         /// <summary>
         /// 读取的信息
         /// </summary>
-        private Subject<ReadMessage> CANMsgSubject { get; set; }
-        public IObservable<ReadMessage> CANMsg { get; set; }
+        private Subject<ReadMessage> CANReadMsgSubject { get; set; }
+        public IObservable<ReadMessage> CANReadMsg { get; set; }
         public bool IsReadly { get; set; } = false;
+        private bool UseFD { get; set; }
         /// <summary>
         /// 构造
         /// </summary>
@@ -41,8 +42,8 @@ namespace PCAN.Drive
             m_Baudrate = Baudrate;
             _mediator = mediator;
             m_SleepTime = sleeptime;
-            CANMsgSubject = new Subject<ReadMessage>();
-            CANMsg = CANMsgSubject.AsObservable();
+            CANReadMsgSubject = new Subject<ReadMessage>();
+            CANReadMsg = CANReadMsgSubject.AsObservable();
             if (CANInit()== TPCANStatus.PCAN_ERROR_OK)
             {
                 this.IsReadly = true;
@@ -65,7 +66,7 @@ namespace PCAN.Drive
                 //    }
                 //}, token);
             } ;
-            this.CanMessages.AsObservable().Subscribe(writemsg =>
+            this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
             {
                 try
                 {
@@ -99,7 +100,7 @@ namespace PCAN.Drive
                             });
                             return;
                         }
-                        CanMessages.OnNext(writemsg);
+                        CanWriteMessages.OnNext(writemsg);
                     }
                     ResendCount = 0;
 
@@ -114,7 +115,89 @@ namespace PCAN.Drive
                     });
                 }
             });
+        }
+        public CANDrive(TPCANHandle handle, uint driveid, string Baudrate, int sleeptime,bool useFD)
+        {
+            PcanHandle = handle;
+            m_DeviceID = driveid;
+     
+            //_mediator = mediator;
+            m_SleepTime = sleeptime;
+            CANReadMsgSubject = new Subject<ReadMessage>();
+            CANReadMsg = CANReadMsgSubject.AsObservable();
+            if (CANInitFD(Baudrate) == TPCANStatus.PCAN_ERROR_OK)
+            {
+                this.IsReadly = true;
+                var token = _tokensource.Token;
+                Task.Run(async () =>
+                {
+                    while (!token.IsCancellationRequested)
+                    {
+                        ReadMessagesFD();
+                        await Task.Delay(m_SleepTime);
+                    }
+                }, token);
+                //Task.Run(async () =>
+                //{
+                //    while (!token.IsCancellationRequested)
+                //    {
+                //        WriteMessages();
+                //        await Task.Delay(m_SleepTime);
 
+                //    }
+                //}, token);
+            }
+            ;
+            this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
+            {
+                try
+                {
+
+                    TPCANMsgFD msg = new TPCANMsgFD();
+                    msg.ID = (uint)writemsg.Id;
+                    msg.DLC = (byte)writemsg.Data.Length;
+                    msg.DATA = writemsg.Data;
+                    msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
+                    if (msg.DATA.Length < 64)
+                    {
+                        Array.Resize(ref msg.DATA, 64);
+                    }
+                    var result = WriteFD(msg);
+                    if (result != TPCANStatus.PCAN_ERROR_OK)
+                    {
+                        _mediator.Publish(new LogNotification
+                        {
+                            LogLevel = LogLevel.Error,
+                            LogSource = LogSource.CanDevice,
+                            Message = $"写入时出现错误：信息状态{result},重试ID{writemsg.Id}"
+                        });
+                        ResendCount++;
+                        if (ResendCount >= 10)
+                        {
+                            _mediator.Publish(new LogNotification
+                            {
+                                LogLevel = LogLevel.Error,
+                                LogSource = LogSource.CanDevice,
+                                Message = $"写入时出现错误：已重试10次，取消发送！"
+                            });
+                            return;
+                        }
+                       Thread.Sleep(m_SleepTime);
+                        CanWriteMessages.OnNext(writemsg);
+                    }
+                    ResendCount = 0;
+
+                }
+                catch (Exception ex)
+                {
+                    _mediator.Publish(new LogNotification
+                    {
+                        LogLevel = LogLevel.Error,
+                        LogSource = LogSource.CanDevice,
+                        Message = $"写入时出现系统错误：{ex.Message}"
+                    });
+                }
+            });
         }
         #region Read
         private TPCANStatus ReadMessage()
@@ -136,7 +219,7 @@ namespace PCAN.Drive
                         TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
                     };
 
-                    CANMsgSubject.OnNext(message);
+                    CANReadMsgSubject.OnNext(message);
                 }
                 return stsResult;
             }
@@ -157,6 +240,47 @@ namespace PCAN.Drive
             ReadMessage();
             
         }
+        private TPCANStatus ReadMessageFD()
+        {
+            try
+            {
+                TPCANMsgFD _CANMsg;
+                ulong CANTimeStamp;
+                ushort length;
+                var stsResult = PCANBasic.ReadFD(PcanHandle, out _CANMsg, out CANTimeStamp);
+                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                {
+                    var message = new ReadMessage()
+                    {
+                        ID = (int)_CANMsg.ID,
+                        LEN = _CANMsg.DLC,
+                        MSGTYPE = _CANMsg.MSGTYPE,
+                        DATA = _CANMsg.DATA,
+                        TimeStamp = CANTimeStamp / 1000.0
+                    };
+
+                    CANReadMsgSubject.OnNext(message);
+                }
+                return stsResult;
+            }
+            catch (Exception ex)
+            {
+                _mediator.Publish(new LogNotification
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"读取时出现系统错误：{ex.Message}"
+                });
+                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+            }
+
+        }
+        private void ReadMessagesFD()
+        {
+            ReadMessageFD();
+
+        }
+
         #endregion
 
         #region Write
@@ -179,8 +303,26 @@ namespace PCAN.Drive
                 return TPCANStatus.PCAN_ERROR_UNKNOWN;
             }
         }
+        private TPCANStatus WriteFD(TPCANMsgFD msg)
+        {
+            try
+            {
+                return PCANBasic.WriteFD(PcanHandle, ref msg);
 
-       
+            }
+            catch (Exception ex)
+            {
+
+                _mediator.Publish(new LogNotification
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"写入时出现系统错误：{ex.Message}"
+                });
+                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+            }
+        }
+
         public void AddMessage(PCanWriteMessage message)
         {
             if (message.Data.Length < 8)
@@ -190,7 +332,7 @@ namespace PCAN.Drive
                 //Array.Copy(data, newdata, data.Length);
                 //message.Data = newdata;
             }
-            CanMessages.OnNext(message);
+            CanWriteMessages.OnNext(message);
         }
         #endregion
 
@@ -198,7 +340,11 @@ namespace PCAN.Drive
         private TPCANStatus CANInit()
         {
            return PCANBasic.Initialize(PcanHandle, m_Baudrate);
-            
+        }
+        private TPCANStatus CANInitFD(string bitrateFD)
+        {
+            var a= PCANBasic.InitializeFD(PcanHandle, bitrateFD);
+            return a;
         }
         public void CLose()
         {

@@ -24,7 +24,20 @@ namespace Peak.Can.Basic
     using TPCANHandle = System.UInt16;
     using TPCANBitrateFD = System.String;
     using TPCANTimestampFD = System.UInt64;
+    public static class BitrateFD
+    {
+        //
+        // 摘要:
+        //     A string representing the bit rate FD SAE J2284-4: Nominal: 500 kBit/s | Data:
+        //     2 MBit/s.
+        public const string BitrateSaeJ2284_4 = "f_clock=80000000,nom_brp=2,nom_tseg1=63,nom_tseg2=16,nom_sjw=16,data_brp=2,data_tseg1=15,data_tseg2=4,data_sjw=4";
+        //
+        // 摘要:
+        //     A string representing the bit rate FD SAE J2284-5: Nominal: 500 kBit/s | Data:
+        //     5 MBit/s.
+        public const string BitrateSaeJ2284_5 = "f_clock=80000000,nom_brp=1,nom_tseg1=127,nom_tseg2=32,nom_sjw=32,data_brp=1,data_tseg1=11,data_tseg2=4,data_sjw=4";
 
+    }
     #region 枚举
     /// <summary>
     /// 表示PCAN状态/错误代码
@@ -1148,7 +1161,16 @@ namespace Peak.Can.Basic
         ///*必须填写以下参数：f_clock，data_brp，data_sjw，data_tseg1，data_tseg2，
         ///nom_brp，nom_sjw，nom_tseg1，nom_tseg2。
         ///*以下参数是可选的（尚未使用）：data_ssp_offset，nom_sam </reverns>
-        ///<example> f_clock = 80000000，nom_brp = 10，nom_tseg1 = 5，nom_tseg2 = 2，nom_sjw = 1，data_tseg1 = 7，data_tseg1 = 7，data_tseg2 = 2，data_sjw = 1 </exampe> </exampe>> 1 </exampe>
+        ///<example> 
+        ///f_clock = 80000000，
+        ///nom_brp = 10，
+        ///nom_tseg1 = 5，
+        ///nom_tseg2 = 2，
+        ///nom_sjw = 1，，
+        ///data_tseg1 = 7，
+        ///data_tseg2 = 2，
+        ///data_sjw = 1
+        /// </exampe>
         ///<返回> tpcanstatus错误代码</returns>
         [DllImport("PCANBasic.dll", EntryPoint = "CAN_InitializeFD")]
         public static extern TPCANStatus InitializeFD(

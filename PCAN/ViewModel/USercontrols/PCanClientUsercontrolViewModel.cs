@@ -68,7 +68,7 @@ namespace PCAN.ViewModel.USercontrols
                 }
                 //logger.LogDebug($"{SelectedPort}:{SelectedBaudrate}");
                 CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
-                this.CanDrive.CANMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
+                this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                 {
                     NewMessage.Value = msg;
                     var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
