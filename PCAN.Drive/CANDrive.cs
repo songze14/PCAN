@@ -116,12 +116,12 @@ namespace PCAN.Drive
                 }
             });
         }
-        public CANDrive(TPCANHandle handle, uint driveid, string Baudrate, int sleeptime,bool useFD)
+        public CANDrive(TPCANHandle handle, uint driveid, string Baudrate, IMediator mediator, int sleeptime,bool useFD)
         {
             PcanHandle = handle;
             m_DeviceID = driveid;
      
-            //_mediator = mediator;
+            _mediator = mediator;
             m_SleepTime = sleeptime;
             CANReadMsgSubject = new Subject<ReadMessage>();
             CANReadMsg = CANReadMsgSubject.AsObservable();
@@ -137,15 +137,7 @@ namespace PCAN.Drive
                         await Task.Delay(m_SleepTime);
                     }
                 }, token);
-                //Task.Run(async () =>
-                //{
-                //    while (!token.IsCancellationRequested)
-                //    {
-                //        WriteMessages();
-                //        await Task.Delay(m_SleepTime);
-
-                //    }
-                //}, token);
+               
             }
             ;
             this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
@@ -253,9 +245,9 @@ namespace PCAN.Drive
                     var message = new ReadMessage()
                     {
                         ID = (int)_CANMsg.ID,
-                        LEN = _CANMsg.DLC,
+                        LEN = _CANMsg.DLC>8?(byte)(8+(_CANMsg.DLC-8)*4):_CANMsg.DLC,
                         MSGTYPE = _CANMsg.MSGTYPE,
-                        DATA = _CANMsg.DATA,
+                        DATA = _CANMsg.DATA[0..(_CANMsg.DLC > 8 ? (byte)(8 + (_CANMsg.DLC - 8) * 4) : _CANMsg.DLC)],
                         TimeStamp = CANTimeStamp / 1000.0
                     };
 

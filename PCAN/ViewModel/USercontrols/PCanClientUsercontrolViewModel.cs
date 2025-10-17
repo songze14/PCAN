@@ -24,6 +24,8 @@ namespace PCAN.ViewModel.USercontrols
     {
         public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator)
         {
+            _logger = logger;
+            _mediator = mediator;
             this.RefreshPortCommand = ReactiveCommand.Create(() =>
             {
                 Ports.Clear();
@@ -67,7 +69,16 @@ namespace PCAN.ViewModel.USercontrols
                     return;
                 }
                 //logger.LogDebug($"{SelectedPort}:{SelectedBaudrate}");
-                CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
+                if (UseCANFD)
+                {
+                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval,useFD:true);
+
+                }
+                else
+                {
+                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
+
+                }
                 this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                 {
                     NewMessage.Value = msg;
@@ -107,8 +118,7 @@ namespace PCAN.ViewModel.USercontrols
             });
 
             this.RefreshPortCommand.Execute(null);
-            _logger = logger;
-            _mediator = mediator;
+           
         }
         public void WriteMsg(uint id, byte[] data,Action? action=null)
         {
@@ -143,7 +153,10 @@ namespace PCAN.ViewModel.USercontrols
         [Reactive]
         public bool NoConnected { get; set; } = true;
 
+        [Reactive]
+        public bool UseCANFD { get; set; } = false;
         public TPCANBaudrate SelectedBaudrate { get; set; }
+        public string SelectedBaudrateFD { get; set; }= BitrateFD.BitrateSaeJ2284_4;
         public string DeviceID { get; set; }
         public ReactiveProperty<ReadMessage> NewMessage { get; set; } = new ReactiveProperty<ReadMessage>();
         public ObservableCollection<LocalPorts> Ports { get; set; } = [];
@@ -185,6 +198,21 @@ namespace PCAN.ViewModel.USercontrols
                 Baudrate= TPCANBaudrate.PCAN_BAUD_50K,
                 BaudRateName="50  kBit/sec"
             },
+
+        ];
+        public ObservableCollection<LocalFDBaudRate> LocalFDBaudRates { get; set; } =
+        [
+            new LocalFDBaudRate()
+            {
+                Baudrate= BitrateFD.BitrateSaeJ2284_5,
+                BaudRateName="BitrateSaeJ2284_5"
+            },
+            new LocalFDBaudRate()
+            {
+                Baudrate= BitrateFD.BitrateSaeJ2284_4,
+                BaudRateName="BitrateSaeJ2284_4"
+            },
+           
 
         ];
         public ICommand ConnectCommand { get; }

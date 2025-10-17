@@ -2,6 +2,7 @@
 using PCAN.ViewModel;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +29,17 @@ namespace PCAN.UserControls
         public PCanClientUsercontrol()
         {
             InitializeComponent();
+            this.ViewModel = Locator.Current.GetService<PCanClientUsercontrolViewModel>();
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.Ports, v => v.PortsList.ItemsSource).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.SelectedPort, v => v.PortsList.SelectedValue).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.LocalBaudRates, v => v.BaudRatesList.ItemsSource).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.SelectedBaudrate, v => v.BaudRatesList.SelectedValue).DisposeWith(d);
+
+                this.OneWayBind(ViewModel, vm => vm.LocalFDBaudRates, v => v.BaudFDRatesList.ItemsSource).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SelectedBaudrateFD, v => v.BaudFDRatesList.SelectedValue).DisposeWith(d);
+
                 this.Bind(ViewModel, vm => vm.DeviceID, v => v.DeviceIDList.Text).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ConnectCommand, v => v.Connect).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.RefreshPortCommand, v => v.RefreshPort).DisposeWith(d);
@@ -42,6 +48,8 @@ namespace PCAN.UserControls
                 this.OneWayBind(ViewModel, vm => vm.IsConnected, v => v.UnConnect.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.NoConnected, v => v.RefreshPort.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.ConnectLab, v => v.ConnectLab.Content).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.UseCANFD, v => v.EnableCanFdCheckBox.IsChecked).DisposeWith(d);
+                
                 this.Bind(ViewModel, vm => vm.FrameInterval, v => v.FrameInterval.Text).DisposeWith(d);
             });
         }

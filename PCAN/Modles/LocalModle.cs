@@ -17,6 +17,11 @@ namespace PCAN.Modles
         public string BaudRateName { get; set; }
         public TPCANBaudrate  Baudrate { get; set; }
     }
+    public class LocalFDBaudRate
+    {
+        public string BaudRateName { get; set; }
+        public string Baudrate { get; set; }
+    }
     public class LocalDevice
     {
         public string DeviceID { get; set; }
