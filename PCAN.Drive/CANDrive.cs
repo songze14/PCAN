@@ -197,7 +197,7 @@ namespace PCAN.Drive
         public int ResendCount;
         private TPCANStatus CANInit()
         {
-           return PCANBasic.Initialize(PcanHandle, m_Baudrate, 0, 0, 0);
+           return PCANBasic.Initialize(PcanHandle, m_Baudrate);
             
         }
         public void CLose()

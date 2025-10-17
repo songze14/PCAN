@@ -24,7 +24,7 @@
                     <Style TargetType="MenuItem">
                         <Setter Property="Background" Value="#FF00FFFF"></Setter>
                         <Setter Property="FontFamily" Value="微软雅黑"></Setter>
-                        <Setter Property="FontSize" Value="18pt"></Setter>
+                        <Setter Property="FontSize" Value="15pt"></Setter>
                         <Setter Property="FontWeight" Value="Bold"></Setter>
                         <Setter Property="Height" Value="50"></Setter>
                     </Style>
