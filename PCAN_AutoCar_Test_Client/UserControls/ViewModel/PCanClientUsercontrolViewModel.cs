@@ -19,7 +19,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace PCAN.ViewModel.USercontrols
+namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 {
     public class PCanClientUsercontrolViewModel:ReactiveObject
     {

@@ -1,4 +1,9 @@
-﻿using System.Text;
+﻿using PCAN_AutoCar_Test_Client.Models;
+using PCAN_AutoCar_Test_Client.ViewModel;
+using ReactiveUI;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,31 +19,38 @@ namespace PCAN_AutoCar_Test_Client
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IViewFor<MainWindowViewModel>
     {
-        public MainWindow()
+        public MainWindow(AppViewModel appViewModle )
         {
             InitializeComponent();
+            this.WhenActivated(d =>
+            {
+                this.OneWayBind(ViewModel, vm => vm.UILogsViewModel, v => v.uilogView.ViewModel).DisposeWith(d);
+            });
+            AppViewModle = appViewModle;
+            AppViewModle.NavigateTo(UrlDefines.URL_Test);
+            this.AppViewModle.CurrentPage.ObserveOn(RxApp.MainThreadScheduler).Subscribe(page =>
+            {
+                if (page != null)
+                {
+                    this.navWin.Navigate(page);
+                }
+            });
         }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        #region ViewModel
+        public MainWindowViewModel ViewModel
         {
-
+            get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        private void PCANDataParse_Click(object sender, RoutedEventArgs e)
-        {
+        object IViewFor.ViewModel { get => this.ViewModel; set => this.ViewModel = (MainWindowViewModel)value; }
 
-        }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(MainWindowViewModel), typeof(MainWindow), new PropertyMetadata(null));
+        #endregion
+        public AppViewModel AppViewModle { get; set; }
 
-        private void Upload_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void DeviceParmTuning_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="PCAN.UserControls.PCanClientUsercontrol"
+﻿<UserControl x:Class="PCAN_AutoCar_Test_Client.UserControls.PCanClientUsercontrol"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PCAN.UserControls"
+             xmlns:local="clr-namespace:PCAN_AutoCar_Test_Client.UserControls"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="1200" d:Background="AliceBlue">

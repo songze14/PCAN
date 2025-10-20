@@ -439,7 +439,7 @@ namespace PCAN.ViewModel.RunPage
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
         private UploadStep UploadStep;
-        private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
+        private SemaphoreSlim _semaphoreslim = new(0, 1);
         private  CancellationTokenSource _cancellationtokensource;
         private CancellationTokenSource _timecancellationtokensource;
         public IObservable<IChangeSet<UploadDataGridModel>> ChangeObs { get; }

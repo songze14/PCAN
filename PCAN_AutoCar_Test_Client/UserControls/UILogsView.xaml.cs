@@ -1,12 +1,12 @@
 ﻿using PCAN.Shard.Models;
-using PCAN.ViewModel.USercontrols;
+using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PCAN.UserControls
+namespace PCAN_AutoCar_Test_Client.UserControls
 {
     /// <summary>
     /// UILogsView.xaml 的交互逻辑

@@ -4,16 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PCAN_AutoCar_Test_Client"
+        xmlns:usercontrols="clr-namespace:PCAN_AutoCar_Test_Client.UserControls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="电控测试" Height="450" Width="800">
     <Grid >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <!--<ColumnDefinition Width="200"/>-->
             <ColumnDefinition/>
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <!--#region菜单-->
-        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="200" Visibility="Visible" >
+        <!--<Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="200" Visibility="Visible" >
             <Menu>
                 <Menu.Resources>
                     <Style TargetType="MenuItem">
@@ -35,9 +36,9 @@
                 <MenuItem x:Name="DeviceParmTuning" Header="设备参数调试" Click="DeviceParmTuning_Click"/>
 
             </Menu>
-        </Border>
+        </Border>-->
         <Frame Name="navWin" 
-    Margin="0,0,0,0" Grid.Column="1"
+    Margin="0,0,0,0" Grid.Column="0"
     NavigationUIVisibility="Hidden" 
     HorizontalAlignment="Stretch" 
     VerticalAlignment="Stretch"
@@ -49,6 +50,6 @@
         </Frame>
         <!--#endregion-->
         <!--#region连接设置-->
-        <!--<usercontrols:UILogsView x:Name="uilogView" Grid.Column="2"/>-->
+        <usercontrols:UILogsView x:Name="uilogView" Grid.Column="2"/>
     </Grid>
 </Window>

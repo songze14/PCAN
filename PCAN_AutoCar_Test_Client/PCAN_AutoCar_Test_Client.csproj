@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ExcelTool" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
   </ItemGroup>
 	<ItemGroup>

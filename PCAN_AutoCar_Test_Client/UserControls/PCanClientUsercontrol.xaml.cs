@@ -1,11 +1,11 @@
-﻿using PCAN.ViewModel.USercontrols;
+﻿using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
 using ReactiveUI;
 using Splat;
 using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PCAN.UserControls
+namespace PCAN_AutoCar_Test_Client.UserControls
 {
     /// <summary>
     /// PCanClientUsercontrol.xaml 的交互逻辑

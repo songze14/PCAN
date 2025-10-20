@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using PCAN_AutoCar_Test_Client.ViewModel;
 using ReactiveUI;
 using Serilog;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -51,21 +51,21 @@ namespace PCAN_AutoCar_Test_Client
             RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             try
             {
-                //var mainWin = this.RootServiceProvider.GetRequiredService<IViewFor<MainWindowViewModel>>() as Window;
-                //mainWin.Show();
-                //var thread = new Thread(async () =>
-                //{
-                //    try
-                //    {
-                //        await _host.RunAsync(cts.Token);
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        MessageBox.Show(ex.Message);
-                //        this.Shutdown();
-                //    }
-                //});
-                //thread.Start();
+                var mainWin = this.RootServiceProvider.GetRequiredService<IViewFor<MainWindowViewModel>>() as Window;
+                mainWin.Show();
+                var thread = new Thread(async () =>
+                {
+                    try
+                    {
+                        await _host.RunAsync(cts.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        this.Shutdown();
+                    }
+                });
+                thread.Start();
             }
             catch (Exception ex)
             {

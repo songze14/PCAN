@@ -8,7 +8,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
-namespace PCAN.ViewModel.USercontrols
+namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 {
     public class UILogsViewModel : ReactiveObject, IDisposable
     {
