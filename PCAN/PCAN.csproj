@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
-    <ProjectReference Include="..\PCAN.Shard\PCAN.Shard.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="View\Windows\DeviceParmValueSettingWindow.xaml.cs">

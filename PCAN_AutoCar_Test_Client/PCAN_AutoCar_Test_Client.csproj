@@ -7,9 +7,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
+  </ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
-		<ProjectReference Include="..\PCAN.Shard\PCAN.Shard.csproj" />
+	  <Compile Update="UserControls\PCanClientUsercontrol.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
 	</ItemGroup>
 	<Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

@@ -1,6 +1,5 @@
 ﻿using DynamicData;
 using Microsoft.Extensions.Logging;
-using PCAN.Modles;
 using PCAN.Shard.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

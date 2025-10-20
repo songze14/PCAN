@@ -20,5 +20,25 @@ namespace PCAN_AutoCar_Test_Client
         {
             InitializeComponent();
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void PCANDataParse_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Upload_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DeviceParmTuning_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

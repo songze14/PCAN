@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="PCAN.UserControls.UILogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PCAN.UserControls" 
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+
+        <DockPanel >
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,2,0,8">
+                <TextBox x:Name="logsEventGroup" Width="200" Margin="2,2,8,2"></TextBox>
+
+                <Button x:Name="clearFilter"  Margin="2,2,20,2">
+                    <md:PackIcon Kind="FilterOff"></md:PackIcon>
+                </Button>
+
+                <Button x:Name="clear" Width="100" HorizontalAlignment="Right" Background="Salmon">
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="Remove" FontSize="40" VerticalAlignment="Stretch"></md:PackIcon>
+                        <TextBlock>清屏</TextBlock>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <ScrollViewer Name="scroll"
+                HorizontalScrollBarVisibility="Auto" 
+                VerticalScrollBarVisibility="Auto" 
+                Background="Azure" 
+                Grid.Row="3" Grid.Column="1"  >
+                <ItemsControl x:Name="logs" >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" >
+                                <StackPanel.ContextMenu >
+                                    <ContextMenu MinWidth="200" >
+                                        <MenuItem Header="筛选" Click="MenuItem_Click"></MenuItem>
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <StackPanel.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                <Setter Property="Foreground" Value="Red"></Setter>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                <Setter Property="Foreground" Value="Red"></Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Resources>
+                                <TextBlock Text="{Binding Timestamp,StringFormat={}{0:HH:mm:ss.ff}:}"></TextBlock>
+                                <TextBlock Text="{Binding EventSource}"></TextBlock>
+                                <TextBlock Text="{Binding Content}" ></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </DockPanel>
+
+
+
+    </Grid>
+</UserControl>

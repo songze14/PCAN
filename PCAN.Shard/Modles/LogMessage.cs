@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCAN.Modles
+namespace PCAN.Shard.Models
 {
     public class LogMessage
     {

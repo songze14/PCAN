@@ -6,7 +6,49 @@
         xmlns:local="clr-namespace:PCAN_AutoCar_Test_Client"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
+        <!--#region菜单-->
+        <Border x:Name="left" BorderThickness="2" BorderBrush="CadetBlue"  Grid.Column="0" Width="200" Visibility="Visible" >
+            <Menu>
+                <Menu.Resources>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Background" Value="#FF00FFFF"></Setter>
+                        <Setter Property="FontFamily" Value="微软雅黑"></Setter>
+                        <Setter Property="FontSize" Value="15pt"></Setter>
+                        <Setter Property="FontWeight" Value="Bold"></Setter>
+                        <Setter Property="Height" Value="50"></Setter>
+                    </Style>
+                </Menu.Resources>
+                <Menu.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </Menu.ItemsPanel>
+                <MenuItem x:Name="BasicFunctions" Header="基本功能" Click="MenuItem_Click"/>
+                <MenuItem x:Name="PCANDataParse" Header="PCAN信息解析" Click="PCANDataParse_Click"/>
+                <MenuItem x:Name="Upload" Header="升级" Click="Upload_Click"/>
+                <MenuItem x:Name="DeviceParmTuning" Header="设备参数调试" Click="DeviceParmTuning_Click"/>
 
+            </Menu>
+        </Border>
+        <Frame Name="navWin" 
+    Margin="0,0,0,0" Grid.Column="1"
+    NavigationUIVisibility="Hidden" 
+    HorizontalAlignment="Stretch" 
+    VerticalAlignment="Stretch"
+    VerticalContentAlignment="Stretch"
+    HorizontalContentAlignment="Stretch"
+    Background="#FF1E3853"
+    ScrollViewer.VerticalScrollBarVisibility="Visible" 
+    ScrollViewer.HorizontalScrollBarVisibility="Visible"  >
+        </Frame>
+        <!--#endregion-->
+        <!--#region连接设置-->
+        <!--<usercontrols:UILogsView x:Name="uilogView" Grid.Column="2"/>-->
     </Grid>
 </Window>
