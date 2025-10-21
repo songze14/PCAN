@@ -14,11 +14,11 @@ namespace PCAN.Drive
     /// </summary>
     public class CANDrive 
     {
-        private TPCANHandle PcanHandle;
+        private PcanChannel PcanHandle;
         private uint m_DeviceID;
-        private TPCANBaudrate m_Baudrate;
+        private Bitrate m_Baudrate;
         private readonly IMediator _mediator;
-        private TPCANType m_HwType;
+     
         private int m_SleepTime;
         private CancellationTokenSource _tokensource=new CancellationTokenSource();
         private Subject<PCanWriteMessage> CanWriteMessages { get; set; } = new Subject<PCanWriteMessage>();
@@ -35,9 +35,9 @@ namespace PCAN.Drive
         /// <param name="driveid">设备ID</param>
         /// <param name="Baudrate">波特率</param>
         /// <param name="mediator">消息中转</param>
-        public CANDrive(TPCANHandle handle,uint driveid, TPCANBaudrate Baudrate,IMediator mediator,int sleeptime)
+        public CANDrive(ushort handle,uint driveid, Bitrate Baudrate,IMediator mediator,int sleeptime)
         {
-            PcanHandle = handle;
+            PcanHandle = (PcanChannel)handle;
             m_DeviceID = driveid;
             m_Baudrate = Baudrate;
             _mediator = mediator;
@@ -45,7 +45,7 @@ namespace PCAN.Drive
             CANReadMsgSubject = new Subject<ReadMessage>();
             CANReadMsg = CANReadMsgSubject.AsObservable();
             var status = CANInit();
-            if (status == TPCANStatus.PCAN_ERROR_OK)
+            if (status == PcanStatus.OK)
             {
                 this.IsReadly = true;
                 var token = _tokensource.Token;
@@ -83,17 +83,17 @@ namespace PCAN.Drive
                 try
                 {
                     
-                    TPCANMsg msg = new TPCANMsg();
+                    PcanMessage msg = new PcanMessage();
                     msg.ID = (uint)writemsg.Id;
-                    msg.LEN = (byte)writemsg.Data.Length;
-                    msg.DATA = writemsg.Data;
-                    msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
-                    if (msg.DATA.Length<8)
-                    {
-                        Array.Resize(ref msg.DATA, 8);
-                    }
+                    msg.DLC = (byte)writemsg.Data.Length;
+                    msg.Data = writemsg.Data;
+                    msg.MsgType = MessageType.Standard;
+                    //if (msg.DATA.Length<8)
+                    //{
+                    //    Array.Resize(ref msg.DATA, 8);
+                    //}
                     var result = Write(msg);
-                    if (result != TPCANStatus.PCAN_ERROR_OK)
+                    if (result != PcanStatus.OK)
                     {
                         _mediator.Publish(new LogNotification
                         {
@@ -128,9 +128,9 @@ namespace PCAN.Drive
                 }
             });
         }
-        public CANDrive(TPCANHandle handle, uint driveid, string Baudrate, IMediator mediator, int sleeptime,bool useFD)
+        public CANDrive(ushort handle, uint driveid, string Baudrate, IMediator mediator, int sleeptime,bool useFD)
         {
-            PcanHandle = handle;
+            PcanHandle = (PcanChannel)handle;
             m_DeviceID = driveid;
      
             _mediator = mediator;
@@ -138,7 +138,7 @@ namespace PCAN.Drive
             CANReadMsgSubject = new Subject<ReadMessage>();
             CANReadMsg = CANReadMsgSubject.AsObservable();
             var status = CANInitFD(Baudrate);
-            if (status == TPCANStatus.PCAN_ERROR_OK)
+            if (status == PcanStatus.OK)
             {
                 this.IsReadly = true;
                 var token = _tokensource.Token;
@@ -167,17 +167,17 @@ namespace PCAN.Drive
                 try
                 {
 
-                    TPCANMsgFD msg = new TPCANMsgFD();
+                    PcanMessage msg = new PcanMessage();
                     msg.ID = (uint)writemsg.Id;
                     msg.DLC = (byte)writemsg.Data.Length;
-                    msg.DATA = writemsg.Data;
-                    msg.MSGTYPE = TPCANMessageType.PCAN_MESSAGE_STANDARD;
-                    if (msg.DATA.Length < 64)
-                    {
-                        Array.Resize(ref msg.DATA, 64);
-                    }
+                    msg.Data = writemsg.Data;
+                    msg.MsgType = MessageType.Standard;
+                    //if (msg.Data < 64)
+                    //{
+                    //    Array.Resize(ref msg.DATA, 64);
+                    //}
                     var result = WriteFD(msg);
-                    if (result != TPCANStatus.PCAN_ERROR_OK)
+                    if (result != PcanStatus.OK)
                     {
                         _mediator.Publish(new LogNotification
                         {
@@ -214,23 +214,23 @@ namespace PCAN.Drive
             });
         }
         #region Read
-        private TPCANStatus ReadMessage()
+        private PcanStatus ReadMessage()
         {
             try
             {
-                TPCANMsg _CANMsg;
-                TPCANTimestamp CANTimeStamp;
+                PcanMessage _CANMsg;
+                ulong CANTimeStamp;
                 ushort length;
-                var stsResult = PCANBasic.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
-                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                var stsResult = Api.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
+                if (stsResult == PcanStatus.OK)
                 {
                     var message = new ReadMessage()
                     {
                         ID = (int)_CANMsg.ID,
-                        LEN = _CANMsg.LEN,
-                        MSGTYPE = _CANMsg.MSGTYPE,
-                        DATA = _CANMsg.DATA,
-                        TimeStamp = CANTimeStamp.millis + CANTimeStamp.micros / 1000.0
+                        LEN = _CANMsg.Length,
+                        MSGTYPE = _CANMsg.MsgType,
+                        DATA = _CANMsg.Data,
+                        TimeStamp = CANTimeStamp / 1000.0
                     };
 
                     CANReadMsgSubject.OnNext(message);
@@ -245,7 +245,7 @@ namespace PCAN.Drive
                     LogSource = LogSource.CanDevice,
                     Message = $"读取时出现系统错误：{ex.Message}"
                 });
-                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+                return PcanStatus.Unknown;
             }
            
         }
@@ -254,22 +254,22 @@ namespace PCAN.Drive
             ReadMessage();
             
         }
-        private TPCANStatus ReadMessageFD()
+        private PcanStatus ReadMessageFD()
         {
             try
             {
-                TPCANMsgFD _CANMsg;
+                PcanMessage _CANMsg;
                 ulong CANTimeStamp;
                 ushort length;
-                var stsResult = PCANBasic.ReadFD(PcanHandle, out _CANMsg, out CANTimeStamp);
-                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                var stsResult = Api.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
+                if (stsResult == PcanStatus.OK)
                 {
                     var message = new ReadMessage()
                     {
                         ID = (int)_CANMsg.ID,
                         LEN = _CANMsg.DLC>8?(byte)(8+(_CANMsg.DLC-8)*4):_CANMsg.DLC,
-                        MSGTYPE = _CANMsg.MSGTYPE,
-                        DATA = _CANMsg.DATA[0..(_CANMsg.DLC > 8 ? (byte)(8 + (_CANMsg.DLC - 8) * 4) : _CANMsg.DLC)],
+                        MSGTYPE = _CANMsg.MsgType,
+                        DATA = _CANMsg.Data,
                         TimeStamp = CANTimeStamp / 1000.0
                     };
 
@@ -285,7 +285,7 @@ namespace PCAN.Drive
                     LogSource = LogSource.CanDevice,
                     Message = $"读取时出现系统错误：{ex.Message}"
                 });
-                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+                return PcanStatus.Unknown;
             }
 
         }
@@ -298,11 +298,11 @@ namespace PCAN.Drive
         #endregion
 
         #region Write
-        private TPCANStatus Write(TPCANMsg msg)
+        private PcanStatus Write(PcanMessage msg)
         {
             try
             {
-                return PCANBasic.Write(PcanHandle, ref msg);
+                return Api.Write(PcanHandle,  msg);
 
             }
             catch (Exception ex)
@@ -314,14 +314,14 @@ namespace PCAN.Drive
                     LogSource = LogSource.CanDevice,
                     Message = $"写入时出现系统错误：{ex.Message}"
                 });
-                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+                return PcanStatus.Unknown;
             }
         }
-        private TPCANStatus WriteFD(TPCANMsgFD msg)
+        private PcanStatus WriteFD(PcanMessage msg)
         {
             try
             {
-                return PCANBasic.WriteFD(PcanHandle, ref msg);
+                return Api.Write(PcanHandle,  msg);
 
             }
             catch (Exception ex)
@@ -333,7 +333,7 @@ namespace PCAN.Drive
                     LogSource = LogSource.CanDevice,
                     Message = $"写入时出现系统错误：{ex.Message}"
                 });
-                return TPCANStatus.PCAN_ERROR_UNKNOWN;
+                return PcanStatus.Unknown;
             }
         }
 
@@ -351,19 +351,19 @@ namespace PCAN.Drive
         #endregion
 
         public int ResendCount;
-        private TPCANStatus CANInit()
+        private PcanStatus CANInit()
         {
-           return PCANBasic.Initialize(PcanHandle, m_Baudrate);
+           return Api.Initialize(PcanHandle, m_Baudrate);
         }
-        private TPCANStatus CANInitFD(string bitrateFD)
+        private PcanStatus CANInitFD(string bitrateFD)
         {
-            var a= PCANBasic.InitializeFD(PcanHandle, bitrateFD);
+            var a= Api.Initialize(PcanHandle,new BitrateFD( bitrateFD));
             return a;
         }
         public void CLose()
         {
             _tokensource.Cancel();
-            PCANBasic.Uninitialize(PcanHandle);
+            Api.Uninitialize(PcanHandle);
             this.IsReadly = false;
 
         }

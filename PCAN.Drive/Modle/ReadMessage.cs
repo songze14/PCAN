@@ -8,7 +8,7 @@ namespace PCAN.Drive.Modle
     {
         public int ID { get; set; }
         [Reactive]
-        public TPCANMessageType MSGTYPE { get; set; }
+        public MessageType MSGTYPE { get; set; }
         public byte LEN { get; set; }
         private byte[] _DATA;
 

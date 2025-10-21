@@ -22,3 +22,4 @@ nuget Serilog.Sinks.File 7.0.0
 nuget Splat.Microsoft.Extensions.DependencyInjection 17.1.1
 nuget System.Reactive 6.1.0
 nuget System.IO.Hashing
+nuget Peak.PCANBasic.NET

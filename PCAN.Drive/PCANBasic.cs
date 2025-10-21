@@ -19,7 +19,7 @@ using System;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Peak.Can.Basic
+namespace Peak.Can.Basic1
 {
     using TPCANHandle = System.UInt16;
     using TPCANBitrateFD = System.String;

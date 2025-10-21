@@ -15,7 +15,7 @@ namespace PCAN.Shard.Models
     public class LocalBaudRate
     {
         public string BaudRateName { get; set; }
-        public TPCANBaudrate  Baudrate { get; set; }
+        public Bitrate Baudrate { get; set; }
     }
     public class LocalFDBaudRate
     {
@@ -25,6 +25,6 @@ namespace PCAN.Shard.Models
     public class LocalDevice
     {
         public string DeviceID { get; set; }
-        public TPCANBaudrate Baudrate { get; set; }
+        public Bitrate Baudrate { get; set; }
     }
 }

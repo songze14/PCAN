@@ -6,6 +6,7 @@ using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
 using Peak.Can.Basic;
+using Peak.Can.Basic.BackwardCompatibility;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -156,7 +157,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 
         [Reactive]
         public bool UseCANFD { get; set; } = false;
-        public TPCANBaudrate SelectedBaudrate { get; set; }
+        public Bitrate SelectedBaudrate { get; set; }
         public string SelectedBaudrateFD { get; set; }= BitrateFD.BitrateSaeJ2284_4;
         public string DeviceID { get; set; }
         public ReactiveProperty<ReadMessage> NewMessage { get; set; } = new ReactiveProperty<ReadMessage>();
@@ -164,39 +165,39 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
         public ObservableCollection<ReadMessage> TPCANMsgs { get; set; } = [];
         public ObservableCollection<LocalBaudRate> LocalBaudRates { get; set; } =
      [
-         new LocalBaudRate()
+        new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_1M,
+                Baudrate= Bitrate.Pcan1000,
                 BaudRateName="1M  kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_800K,
+                Baudrate= Bitrate.Pcan800,
                 BaudRateName="800 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_500K,
+                Baudrate= Bitrate.Pcan500,
                 BaudRateName="500 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_250K,
+                Baudrate= Bitrate.Pcan250,
                 BaudRateName="250 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_125K,
+                Baudrate= Bitrate.Pcan125,
                 BaudRateName="125 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_100K,
+                Baudrate= Bitrate.Pcan100,
                 BaudRateName="100 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= TPCANBaudrate.PCAN_BAUD_50K,
+                Baudrate= Bitrate.Pcan50,
                 BaudRateName="50  kBit/sec"
             },
 
@@ -213,11 +214,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 Baudrate= BitrateFD.BitrateSaeJ2284_4,
                 BaudRateName="BitrateSaeJ2284_4"
             },
-           new LocalFDBaudRate()
-            {
-                Baudrate= BitrateFD.greenworks_40Mhz_500k_2M,
-                BaudRateName="greenworks_40Mhz_500k_2M"
-            },
+           //new LocalFDBaudRate()
+           // {
+           //     Baudrate= BitrateFD.greenworks_40Mhz_500k_2M,
+           //     BaudRateName="greenworks_40Mhz_500k_2M"
+           // },
 
         ];
         public ICommand ConnectCommand { get; }
