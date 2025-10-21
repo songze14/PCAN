@@ -18,8 +18,11 @@ namespace PCAN_AutoCar_Test_Client.Models
       
         [Reactive]
         public string SendData { get; set; }
-      
+        [Reactive]
+        public string ParmName { get; set; }
+
         public string RecvId { get; set; }
+        public string RecvCommandId { get; set; }
         /// <summary>
         /// 回复开始解析数据
         /// </summary>
@@ -29,7 +32,7 @@ namespace PCAN_AutoCar_Test_Client.Models
         /// </summary>
         public int RecvEnDataIndex { get; set; }
         [Reactive]
-        public ushort RecvData { get; set; }
+        public string RecvData { get; set; }
 
         public string DataType { get; set; } = string.Empty;
        

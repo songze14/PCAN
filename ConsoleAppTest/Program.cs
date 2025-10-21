@@ -1,6 +1,4 @@
-﻿using MediatR;
-using PCAN.Drive;
-using PCAN.Notification.Log;
+﻿
 using Peak.Can.Basic;
 
 namespace ConsoleAppTest
@@ -9,10 +7,28 @@ namespace ConsoleAppTest
     {
         static void Main(string[] args)
         {
-            PcanStatus result;
-            result = Api.Initialize(PcanChannel.Usb01, Bitrate.Pcan500);
-            Console.WriteLine("按任意键退出...");
-            Console.ReadKey();
+            var canFd = new CanFdCommunicator();
+
+            if (canFd.Initialize())
+            {
+                // 发送CAN FD消息
+                byte[] data = new byte[1]; // CAN FD支持最多64字节
+                data[0] = 0x02;
+
+                canFd.SendCanFdMessage(0x31c, data);
+
+                // 启动接收线程
+                var receiveThread = new System.Threading.Thread(() =>
+                {
+                    canFd.ReceiveMessages();
+                });
+                receiveThread.Start();
+
+                Console.WriteLine("按任意键退出...");
+                Console.ReadKey();
+
+                canFd.Close();
+            }
 
         }
     }

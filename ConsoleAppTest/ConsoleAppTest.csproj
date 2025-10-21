@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="PCANBasic.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

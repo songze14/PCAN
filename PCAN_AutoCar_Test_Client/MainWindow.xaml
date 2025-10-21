@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PCAN_AutoCar_Test_Client"
         xmlns:usercontrols="clr-namespace:PCAN_AutoCar_Test_Client.UserControls"
         mc:Ignorable="d"
+        WindowState="Maximized"
         Title="电控测试" Height="450" Width="800">
     <Grid >
         <Grid.ColumnDefinitions>

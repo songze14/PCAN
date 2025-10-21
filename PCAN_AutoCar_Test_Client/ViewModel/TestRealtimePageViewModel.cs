@@ -19,6 +19,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Unit = System.Reactive.Unit;
 
@@ -41,8 +42,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             {
                 if (msg==null)
                  return;
-                var recvId = msg.ID.ToString("X");
-                var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId);
+                var recvId ="0X"+msg.ID.ToString("X");
+                var recvCommandId = msg.DATA.Length > 0 ? "0X" + msg.DATA[0].ToString("X2") : string.Empty;
+                var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId== recvCommandId);
+                if (!findTestExcels.Any())
+                {
+                    return;
+                }
                 foreach (var testExcel in findTestExcels)
                 {
                     //解析数据
@@ -50,7 +56,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         continue;
                     byte[] dataBytes = new byte[testExcel.RecvEnDataIndex - testExcel.RecvBeDataIndex + 1];
                     Array.Copy(msg.DATA, testExcel.RecvBeDataIndex, dataBytes, 0, dataBytes.Length);
-                  
+                    
                     switch (testExcel.DataType)
                     {
                         case "uint8_t":
@@ -58,30 +64,45 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 var recvValue = dataBytes[0];
                                 ulong minValue = Convert.ToUInt64(testExcel.MinData, 16);
                                 ulong maxValue = Convert.ToUInt64(testExcel.MaxData, 16);
+                                testExcel.RecvData = recvValue.ToString("X");
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
                             }
                             break;
                         case "uint16_t":
                             {
                                 var recvValue = BitConverter.ToUInt16(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                ulong minValue = Convert.ToUInt64(testExcel.MinData,16);
+                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData,16);
+                                testExcel.RecvData = recvValue.ToString("X");
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
                             }
                             break;
                         case "uint32_t":
                             {
                                 var recvValue = BitConverter.ToUInt32(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                ulong minValue = Convert.ToUInt64(testExcel.MinData, 16);
+                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData, 16);
+                                testExcel.RecvData = recvValue.ToString("X");
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
+                            }
+                            break;
+                        case "char":
+                            {
+                                var recvValue = Encoding.ASCII.GetString(dataBytes).TrimEnd('\0');
+                                testExcel.RecvData = recvValue;
+                                testExcel.Pass = true;
                             }
                             break;
                     }
                      _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, 
-                         Message = $"收到ID:0x{testExcel.RecvId:X3} 数据:{msg.DATASTR} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}" });
-
+                         Message = $"收到ID:0x{testExcel.RecvId:X3} 数据:{BitConverter.ToString( dataBytes)} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}" });
+                 
+                }
+                _timecancellationtokensource.Cancel();
+                if (_semaphoreslim.CurrentCount==0)
+                {
                     _semaphoreslim.Release();
+
                 }
 
             });
@@ -106,14 +127,16 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         {
                             _sourceTestExcelGridModels.Add(new TestExcelGrid
                             {
-                                DataType = item.DataType,
-                                MaxData = item.MaxData,
-                                MinData = item.MinData,
+                                DataType = item.DataType.Trim(),
+                                MaxData = item.MaxData.Trim(),
+                                MinData = item.MinData.Trim(),
                                 RecvBeDataIndex = item.RecvBeDataIndex,
                                 RecvEnDataIndex = item.RecvEnDataIndex,
-                                RecvId = item.RecvId,
-                                SendData = item.SendData,
-                                SendId = item.SendId,
+                                ParmName=item.ParmName.Trim(),
+                                RecvId = item.RecvId.ToUpper().Trim(),
+                                RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
+                                SendData = item.SendData.Trim(),
+                                SendId = item.SendId.Trim(),
                                 Index = _sourceTestExcelGridModels.Count + 1
                             });
                         }
@@ -130,23 +153,41 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
            );
             TestCommand= ReactiveCommand.Create(async () =>
             {
-                foreach (var testExcel in _sourceTestExcelGridModels.Items)
+                try
                 {
-                    var datastr = testExcel.SendData.Split('-',StringSplitOptions.RemoveEmptyEntries);
-                    if (datastr==null)
+                    await ResetGridStatus();
+                    var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
+
+                    foreach (var sendgroup in sendgroups)
                     {
-                        return;
+                        var sendid = Convert.ToUInt32(sendgroup.Key, 16);
+                        var senddatagroups = sendgroup.GroupBy(t => t.SendData);
+                        foreach (var senddatagroup in senddatagroups)
+                        {
+                            var datastr = senddatagroup.Key.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                            if (datastr == null)
+                            {
+                                return;
+                            }
+                            var commandFrame = new byte[datastr.Length];
+                            for (int i = 0; i < datastr.Length; i++)
+                            {
+                                commandFrame[i] = Convert.ToByte(datastr[i], 16);
+                            }
+                            PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame, async () => {await Reset(); });
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X3} 数据:{senddatagroup.Key}" });
+                            await _semaphoreslim.WaitAsync();
+                        }
+
                     }
-                    var commandFrame = new byte[datastr.Length];
-                    for (int i = 0; i < datastr.Length; i++)
-                    {
-                        commandFrame[i] = Convert.ToByte(datastr[i], 16);
-                    }
-                    var sendid = Convert.ToUInt32(testExcel.SendId, 16);
-                    PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame);
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{testExcel.SendId:X3} 数据:{testExcel.SendData}" });
-                    await _semaphoreslim.WaitAsync();
                 }
+                catch (Exception ex)
+                {
+
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"测试时发生错误{ex.Message}" });
+
+                }
+
             });
             ExportTemplateCommand = ReactiveCommand.Create(async () =>
             {
@@ -169,7 +210,9 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         MinData="00",
                         RecvBeDataIndex=0,
                         RecvEnDataIndex=0,
+                        ParmName="测试参数1",
                         RecvId="0x100",
+                        RecvCommandId="0x01",
                         SendData="01-02-03-04-05-06-07-08",
                         SendId="0x200"
                     }
@@ -180,6 +223,36 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 worksheet.Dispose();
                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已导出测试模板至:{saveFilePath}" });
             });
+        }
+        private async Task Reset()
+        {
+            try
+            {
+                _timecancellationtokensource = new CancellationTokenSource();
+                var periodictimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+                while (await periodictimer.WaitForNextTickAsync(_timecancellationtokensource.Token))
+                {
+                   
+                    if (_semaphoreslim.CurrentCount == 0)
+                    {
+                        _semaphoreslim.Release();
+
+                    }
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"信息回复超时" });
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        private async Task ResetGridStatus()
+        {
+            foreach (var item in _sourceTestExcelGridModels.Items)
+            {
+                item.Pass = false;
+                item.RecvData = string.Empty;
+            }
         }
         [Reactive]
         public string SelectedFilePath { get; set; }
@@ -193,6 +266,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         private readonly ReadOnlyObservableCollection<TestExcelGrid> _testExcelGridModels;
         private readonly IMediator _mediator;
         private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
+        private CancellationTokenSource _timecancellationtokensource;
+
         public ReadOnlyObservableCollection<TestExcelGrid> TestExcelGridModels => _testExcelGridModels;
     }
 }

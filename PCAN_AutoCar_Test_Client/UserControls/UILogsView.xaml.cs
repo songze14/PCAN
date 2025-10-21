@@ -1,6 +1,7 @@
 ﻿using PCAN.Shard.Models;
 using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
 using ReactiveUI;
+using Splat;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
@@ -16,7 +17,7 @@ namespace PCAN_AutoCar_Test_Client.UserControls
         public UILogsView()
         {
             InitializeComponent();
-
+            this.ViewModel= Locator.Current.GetService<UILogsViewModel>();
             this.WhenActivated(d => {
                 this.OneWayBind(this.ViewModel, vm => vm.Logs, v => v.logs.ItemsSource).DisposeWith(d);
                 this.Bind(this.ViewModel, vm => vm.EventGroup, v => v.logsEventGroup.Text).DisposeWith(d);

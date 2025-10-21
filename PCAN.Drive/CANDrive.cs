@@ -44,7 +44,8 @@ namespace PCAN.Drive
             m_SleepTime = sleeptime;
             CANReadMsgSubject = new Subject<ReadMessage>();
             CANReadMsg = CANReadMsgSubject.AsObservable();
-            if (CANInit()== TPCANStatus.PCAN_ERROR_OK)
+            var status = CANInit();
+            if (status == TPCANStatus.PCAN_ERROR_OK)
             {
                 this.IsReadly = true;
                 var token = _tokensource.Token;
@@ -65,7 +66,18 @@ namespace PCAN.Drive
 
                 //    }
                 //}, token);
-            } ;
+            }
+            else
+            {
+                mediator.Publish(new LogNotification
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"CAN初始化失败，请检查参数:{status}"
+                });
+            }
+            ;
+
             this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
             {
                 try
@@ -125,7 +137,8 @@ namespace PCAN.Drive
             m_SleepTime = sleeptime;
             CANReadMsgSubject = new Subject<ReadMessage>();
             CANReadMsg = CANReadMsgSubject.AsObservable();
-            if (CANInitFD(Baudrate) == TPCANStatus.PCAN_ERROR_OK)
+            var status = CANInitFD(Baudrate);
+            if (status == TPCANStatus.PCAN_ERROR_OK)
             {
                 this.IsReadly = true;
                 var token = _tokensource.Token;
@@ -138,6 +151,15 @@ namespace PCAN.Drive
                     }
                 }, token);
                
+            }
+            else
+            {
+                mediator.Publish(new LogNotification
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.CanDevice,
+                    Message = $"CANFD初始化失败，请检查参数:{status}"
+                });
             }
             ;
             this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
