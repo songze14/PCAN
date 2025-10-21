@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Peak.PCANBasic.NET" Version="4.10.1.968" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
   </ItemGroup>
 

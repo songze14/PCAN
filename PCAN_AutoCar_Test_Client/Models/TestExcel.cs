@@ -11,25 +11,25 @@ namespace PCAN_AutoCar_Test_Client.Models
     {
         [EntityToexcel("发送命令",1)]
         [ExcelToEntity(1)]
-        public ushort SendId { get; set; }
+        public string SendId { get; set; }
         [EntityToexcel("发送数据/1byte用-隔开",2)]
         [ExcelToEntity(2)]
         public string SendData { get; set; }
         [EntityToexcel("回复命令", 3)]
         [ExcelToEntity(3)]
-        public ushort RecvId { get; set; }
+        public string RecvId { get; set; }
         /// <summary>
         /// 回复开始解析数据
         /// </summary>
         [EntityToexcel("回复解析开始位",4)]
         [ExcelToEntity(4)]
-        public ushort RecvBeDataIndex { get; set; }
+        public int RecvBeDataIndex { get; set; }
         /// <summary>
         /// 回复结束解析数据
         /// </summary>
         [EntityToexcel("回复解析结束位", 5)]
         [ExcelToEntity(5)]
-        public ushort RecvEnDataIndex { get; set; }
+        public int RecvEnDataIndex { get; set; }
         [EntityToexcel("回复解析数据类型", 6)]
         [ExcelToEntity(6)]
         public string DataType { get; set; }=string.Empty;

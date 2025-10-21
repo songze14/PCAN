@@ -213,6 +213,11 @@ namespace PCAN.ViewModel.USercontrols
                 Baudrate= BitrateFD.BitrateSaeJ2284_4,
                 BaudRateName="BitrateSaeJ2284_4"
             },
+             new LocalFDBaudRate()
+            {
+                Baudrate= BitrateFD.greenworks_40Mhz_500k_2M,
+                BaudRateName="greenworks_40Mhz_500k_2M"
+            },
            
 
         ];

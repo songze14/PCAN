@@ -9,27 +9,10 @@ namespace ConsoleAppTest
     {
         static void Main(string[] args)
         {
-            //TPCANChannelInformation handle;
-            //uint iChannelsCount;
-            //var stsResult = PCANBasic.GetValue(PCANBasic.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS_COUNT, out iChannelsCount, sizeof(uint));
-            //if (stsResult == TPCANStatus.PCAN_ERROR_OK)
-            //{
-            //    TPCANChannelInformation[] info = new TPCANChannelInformation[iChannelsCount];
-
-            //    stsResult = PCANBasic.GetValue(PCANBasic.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS, info);
-            //    if (stsResult == TPCANStatus.PCAN_ERROR_OK)
-            //    {
-            //        handle = info[0];
-            //        var can = new CANDrive(handle.channel_handle, 0x77, BitrateFD.BitrateSaeJ2284_4, 10,useFD: true);
-            //        can.CANReadMsg.Subscribe(msg =>
-            //        {
-            //            Console.WriteLine($"ID:{msg.ID:X},Type:{msg.MSGTYPE},Len:{msg.LEN},Data:{BitConverter.ToString(msg.DATA)}");
-            //        });
-
-            //    }
-            //}
-            //Console.WriteLine("按任意键退出...");
-            //Console.ReadKey();
+            PcanStatus result;
+            result = Api.Initialize(PcanChannel.Usb01, Bitrate.Pcan500);
+            Console.WriteLine("按任意键退出...");
+            Console.ReadKey();
 
         }
     }

@@ -39,9 +39,11 @@
                     <TextBox x:Name="FilePathTextBox" Width="400" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsReadOnly="True"/>
                     <Button x:Name="BrowseFileButton" Content="浏览" Width="75" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <Button x:Name="BeTestButton" Content="开始测试" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Button x:Name="ExTestButton" Content="导出模板" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 </DockPanel>
             </GroupBox>
-            <DataGrid x:Name="TestExcelDataGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False">
+            <DataGrid x:Name="TestExcelDataGrid" Grid.Row="1"
+                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" IsReadOnly="True">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -53,9 +55,9 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="序号" Binding="{Binding Index}"/>
-                    <DataGridTextColumn Header="发送ID" Binding="{Binding SendId}"/>
+                    <DataGridTextColumn Header="发送ID" Binding="{Binding SendId,StringFormat={}{0:X2}}"/>
                     <DataGridTextColumn Header="发送数据" Binding="{Binding SendData}"/>
-                    <DataGridTextColumn Header="回复ID" Binding="{Binding RecvId}"/>
+                    <DataGridTextColumn Header="回复ID" Binding="{Binding RecvId,StringFormat={}{0:X2}}"/>
                     <DataGridTextColumn Header="回复数据" Binding="{Binding RecvData}"/>
                     <DataGridTextColumn Header="最大值" Binding="{Binding MinData}"/>
                     <DataGridTextColumn Header="最小值" Binding="{Binding MaxData}"/>

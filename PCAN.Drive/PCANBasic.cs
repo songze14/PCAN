@@ -36,6 +36,7 @@ namespace Peak.Can.Basic
         //     A string representing the bit rate FD SAE J2284-5: Nominal: 500 kBit/s | Data:
         //     5 MBit/s.
         public const string BitrateSaeJ2284_5 = "f_clock=80000000,nom_brp=1,nom_tseg1=127,nom_tseg2=32,nom_sjw=32,data_brp=1,data_tseg1=11,data_tseg2=4,data_sjw=4";
+        public const string greenworks_40Mhz_500k_2M = "f_clock=40000000,nom_brp=1,nom_tseg1=69,nom_tseg2=10,nom_sjw=4,data_brp=4,data_tseg1=3,data_tseg2=1,data_sjw=1";
 
     }
     #region 枚举

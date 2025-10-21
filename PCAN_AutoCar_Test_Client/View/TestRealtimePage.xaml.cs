@@ -1,5 +1,6 @@
 ﻿using PCAN_AutoCar_Test_Client.ViewModel;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,10 +27,17 @@ namespace PCAN_AutoCar_Test_Client.View
         public TestRealtimePage()
         {
             InitializeComponent();
+            ViewModel=Locator.Current.GetService<TestRealtimePageViewModel>();
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.pcanClientUsercontrol.ViewModel).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.TestExcelGridModels, v => v.TestExcelDataGrid.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.FilePathTextBox.Text).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.TestCommand, v => v.BeTestButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.ExportTemplateCommand, v => v.ExTestButton).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.TestExcelGridModels, v => v.TestExcelDataGrid.ItemsSource).DisposeWith(d);
+
             });
         }
         #region ViewModel

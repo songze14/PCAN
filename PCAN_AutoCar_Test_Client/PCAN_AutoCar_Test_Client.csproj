@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelTool" Version="1.0.0" />
+    <PackageReference Include="ExcelTool" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>

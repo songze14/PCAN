@@ -14,20 +14,20 @@ namespace PCAN_AutoCar_Test_Client.Models
         [Reactive]
         public int Index { get; set; }
         [Reactive]
-        public ushort SendId { get; set; }
+        public string SendId { get; set; }
       
         [Reactive]
         public string SendData { get; set; }
       
-        public ushort RecvId { get; set; }
+        public string RecvId { get; set; }
         /// <summary>
         /// 回复开始解析数据
         /// </summary>
-        public ushort RecvBeDataIndex { get; set; }
+        public int RecvBeDataIndex { get; set; }
         /// <summary>
         /// 回复结束解析数据
         /// </summary>
-        public ushort RecvEnDataIndex { get; set; }
+        public int RecvEnDataIndex { get; set; }
         [Reactive]
         public ushort RecvData { get; set; }
 

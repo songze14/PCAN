@@ -3,6 +3,7 @@ using Excel.Tool;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using OfficeOpenXml;
 using PCAN.Notification.Log;
 using PCAN_AutoCar_Test_Client.Models;
 using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -39,7 +41,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             {
                 if (msg==null)
                  return;
-                var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == msg.ID);
+                var recvId = msg.ID.ToString("X");
+                var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId);
                 foreach (var testExcel in findTestExcels)
                 {
                     //解析数据
@@ -82,32 +85,47 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 }
 
             });
-            BrowseFileCommand = ReactiveCommand.Create(() =>
+            BrowseFileCommand = ReactiveCommand.Create(async () =>
             {
-                var openFileDialog = new OpenFileDialog
+                try
                 {
-                    Filter = "升级文件/excel|*.excel",
-                };
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    SelectedFilePath = openFileDialog.FileName;
-                    var excelTools = ExcelToEntity.WorksheetToDataRow<TestExcel>(File.OpenRead(SelectedFilePath),1,1,0,0);
-                    foreach (var item in excelTools)
+                    _sourceTestExcelGridModels.Clear();
+                    var openFileDialog = new OpenFileDialog
                     {
-                        _sourceTestExcelGridModels.Add(new TestExcelGrid 
+                        Filter = "测试文件/xlsx|*.xlsx",
+                    };
+                    if (openFileDialog.ShowDialog() == true)
+                    {
+                        SelectedFilePath = openFileDialog.FileName;
+                        ExcelPackage excelPackage = new ExcelPackage(File.OpenRead(SelectedFilePath));
+                        ExcelWorksheets worksheets = excelPackage.Workbook.Worksheets;
+                      
+                        var worksheet = worksheets[0];
+                        var excelTools = ExcelToEntity.WorksheetToDataRow<TestExcel>(File.OpenRead(SelectedFilePath), 1, 2, 0, 0);
+                        foreach (var item in excelTools)
                         {
-                            DataType=item.DataType,
-                            MaxData=item.MaxData,
-                            MinData=item.MinData,
-                            RecvBeDataIndex=item.RecvBeDataIndex,
-                            RecvEnDataIndex=item.RecvEnDataIndex,
-                            RecvId=item.RecvId,
-                            SendData=item.SendData,
-                            SendId=item.SendId,
-                            Index=_sourceTestExcelGridModels.Count+ 1
-                        });
+                            _sourceTestExcelGridModels.Add(new TestExcelGrid
+                            {
+                                DataType = item.DataType,
+                                MaxData = item.MaxData,
+                                MinData = item.MinData,
+                                RecvBeDataIndex = item.RecvBeDataIndex,
+                                RecvEnDataIndex = item.RecvEnDataIndex,
+                                RecvId = item.RecvId,
+                                SendData = item.SendData,
+                                SendId = item.SendId,
+                                Index = _sourceTestExcelGridModels.Count + 1
+                            });
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"获取检测内容出现错误:{ex.Message}" });
+
+                }
+
             }
            );
             TestCommand= ReactiveCommand.Create(async () =>
@@ -124,16 +142,50 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     {
                         commandFrame[i] = Convert.ToByte(datastr[i], 16);
                     }
-                    PCanClientUsercontrolViewModel.WriteMsg(testExcel.SendId, commandFrame);
+                    var sendid = Convert.ToUInt32(testExcel.SendId, 16);
+                    PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame);
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{testExcel.SendId:X3} 数据:{testExcel.SendData}" });
                     await _semaphoreslim.WaitAsync();
                 }
+            });
+            ExportTemplateCommand = ReactiveCommand.Create(async () =>
+            {
+                var templateSaveFileDialog = new SaveFileDialog
+                {
+                    Filter = "测试文件/xlsx|*.xlsx",
+                    FileName = "TestTemplate.xlsx"
+                };
+                if (templateSaveFileDialog.ShowDialog() != true)
+                {
+                    return;
+                }
+                var saveFilePath = templateSaveFileDialog.FileName;
+                var savedata = new List<TestExcel>
+                {
+                    new TestExcel
+                    {
+                        DataType="uint8_t",
+                        MaxData="FF",
+                        MinData="00",
+                        RecvBeDataIndex=0,
+                        RecvEnDataIndex=0,
+                        RecvId="0x100",
+                        SendData="01-02-03-04-05-06-07-08",
+                        SendId="0x200"
+                    }
+                };
+                ExcelPackage excelPackage = new ExcelPackage();
+                var worksheet = ExcelToEntity.ListToExcel<TestExcel>(excelPackage, "TestTemplate", 1, savedata);
+                worksheet.SaveAs(new FileInfo(saveFilePath));
+                worksheet.Dispose();
+                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已导出测试模板至:{saveFilePath}" });
             });
         }
         [Reactive]
         public string SelectedFilePath { get; set; }
         public ReactiveCommand<Unit,Task> TestCommand { get; set; }
-        public ReactiveCommand<Unit,Unit> BrowseFileCommand { get; set; }
+        public ReactiveCommand<Unit,Task> ExportTemplateCommand { get; set; }
+        public ReactiveCommand<Unit, Task> BrowseFileCommand { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
         public IObservable<IChangeSet<TestExcelGrid>> ChangeObs { get; }
 
