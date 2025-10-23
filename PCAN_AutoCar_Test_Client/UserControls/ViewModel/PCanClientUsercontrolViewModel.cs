@@ -27,31 +27,45 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
             _canSettings= cansettingsoptions.Value;
             this.RefreshPortCommand = ReactiveCommand.Create(() =>
             {
-                Ports.Clear();
-                UInt16 deviceID = 1;
-                uint iChannelsCount;
-                var stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsCount, out iChannelsCount);
-                if (stsResult == PcanStatus.OK)
+                try
                 {
-                    PcanChannelInformation[] info = new PcanChannelInformation[iChannelsCount];
-
-                    stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsInformation, info);
+                    Ports.Clear();
+                    UInt16 deviceID = 1;
+                    uint iChannelsCount;
+                    var stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsCount, out iChannelsCount);
                     if (stsResult == PcanStatus.OK)
                     {
-                        foreach (var channel in info)
-                            if ((channel.ChannelCondition & ChannelCondition.ChannelAvailable) == ChannelCondition.ChannelAvailable)
-                            {
-                                Ports.Add(new LocalPorts() { PortName = channel.DeviceName, PortsNum = (ushort)channel.ChannelHandle });
-                            }
-                        mediator.Publish(new LogNotification()
+                        PcanChannelInformation[] info = new PcanChannelInformation[iChannelsCount];
+
+                        stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsInformation, info);
+                        if (stsResult == PcanStatus.OK)
                         {
-                            LogSource = LogSource.CanDevice,
-                            Message = $"刷新端口成功,共{Ports.Count}个端口"
-                        });
+                            foreach (var channel in info)
+                                if ((channel.ChannelCondition & ChannelCondition.ChannelAvailable) == ChannelCondition.ChannelAvailable)
+                                {
+                                    Ports.Add(new LocalPorts() { PortName = channel.DeviceName, PortsNum = (ushort)channel.ChannelHandle });
+                                }
+                            mediator.Publish(new LogNotification()
+                            {
+                                LogSource = LogSource.CanDevice,
+                                Message = $"刷新端口成功,共{Ports.Count}个端口"
+                            });
+                        }
+
+
                     }
-
-
                 }
+                catch (Exception ex)
+                {
+
+                    mediator.Publish(new LogNotification()
+                    {
+                        LogLevel = LogLevel.Error,
+                        LogSource = LogSource.CanDevice,
+                        Message = $"刷新端口失败,{ex.Message}"
+                    });
+                }
+                
             });
 
             this.ConnectCommand = ReactiveCommand.Create(() =>
