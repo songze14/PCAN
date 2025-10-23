@@ -43,5 +43,6 @@ namespace PCAN_AutoCar_Test_Client.Models
         public string MaxData { get; set; } = string.Empty;
         [Reactive]
         public bool Pass { get; set; }
+        public int 帧间隔 { get; set; }
     }
 }

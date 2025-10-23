@@ -45,5 +45,9 @@ namespace PCAN_AutoCar_Test_Client.Models
         [EntityToexcel("最大值/允许相等", 10)]
         [ExcelToEntity(10)]
         public string MaxData { get; set; } = string.Empty;
+
+        [EntityToexcel("帧间隔/单位ms", 11)]
+        [ExcelToEntity(11)]
+        public int 帧间隔 { get; set; } 
     }
 }

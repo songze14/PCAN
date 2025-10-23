@@ -137,7 +137,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
                                 SendData = item.SendData.Trim(),
                                 SendId = item.SendId.Trim(),
-                                Index = _sourceTestExcelGridModels.Count + 1
+                                Index = _sourceTestExcelGridModels.Count + 1,
+                                帧间隔=item.帧间隔,
                             });
                         }
                     }
@@ -161,10 +162,10 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     foreach (var sendgroup in sendgroups)
                     {
                         var sendid = Convert.ToUInt32(sendgroup.Key, 16);
-                        var senddatagroups = sendgroup.GroupBy(t => t.SendData);
+                        var senddatagroups = sendgroup.GroupBy(t => (t.SendData,t.帧间隔));
                         foreach (var senddatagroup in senddatagroups)
                         {
-                            var datastr = senddatagroup.Key.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                            var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
                             if (datastr == null)
                             {
                                 return;
@@ -177,6 +178,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame, async () => {await Reset(); });
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X3} 数据:{senddatagroup.Key}" });
                             await _semaphoreslim.WaitAsync();
+                            await Task.Delay(senddatagroup.Key.帧间隔);
                         }
 
                     }
@@ -214,7 +216,9 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         RecvId="0x100",
                         RecvCommandId="0x01",
                         SendData="01-02-03-04-05-06-07-08",
-                        SendId="0x200"
+                        SendId="0x200",
+                        帧间隔=10,
+                        
                     }
                 };
                 ExcelPackage excelPackage = new ExcelPackage();
