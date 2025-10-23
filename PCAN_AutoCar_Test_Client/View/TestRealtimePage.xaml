@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PCAN_AutoCar_Test_Client.View"
       xmlns:usercontrols="clr-namespace:PCAN_AutoCar_Test_Client.UserControls"
+      xmlns:localm="clr-namespace:PCAN_AutoCar_Test_Client.Models"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="TestRealtimePage" d:Background="AliceBlue">
@@ -47,8 +48,14 @@
                 <DataGrid.Resources>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Pass}" Value="True">
-                                <Setter Property="Background" Value="Green"/>
+                            <DataTrigger Binding="{Binding Pass}" Value="{x:Static localm:TestPassEnum.Pass}">
+                                <Setter Property="Background" Value="PaleGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pass}" Value="{x:Static localm:TestPassEnum.NG}">
+                                <Setter Property="Background" Value="DarkRed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pass}" Value="{x:Static localm:TestPassEnum.人工}">
+                                <Setter Property="Background" Value="YellowGreen"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

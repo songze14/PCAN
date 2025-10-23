@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using PCAN.Notification.Log;
 using PCAN_AutoCar_Test_Client.Models;
 using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
+using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -40,114 +41,172 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 .Subscribe();
             PCanClientUsercontrolViewModel.NewMessage.Subscribe(msg =>
             {
-                if (msg==null)
-                 return;
-                var recvId ="0X"+msg.ID.ToString("X");
-                var recvCommandId = msg.DATA.Length > 0 ? "0X" + msg.DATA[0].ToString("X2") : string.Empty;
-                var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId== recvCommandId);
-                if (!findTestExcels.Any())
+                try
                 {
-                    return;
-                }
-                foreach (var testExcel in findTestExcels)
-                {
-                    //解析数据
-                    if (testExcel.RecvEnDataIndex >= msg.LEN)
-                        continue;
-                    byte[] dataBytes = new byte[testExcel.RecvEnDataIndex - testExcel.RecvBeDataIndex + 1];
-                    Array.Copy(msg.DATA, testExcel.RecvBeDataIndex, dataBytes, 0, dataBytes.Length);
-                    
-                    switch (testExcel.DataType)
+                    if (msg == null)
+                        return;
+                    var recvId = "0X" + msg.ID.ToString("X");
+                    var recvCommandId = msg.DATA.Length > 0 ? "0X" + msg.DATA[0].ToString("X2") : string.Empty;
+                    var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId == recvCommandId);
+                    if (!findTestExcels.Any())
                     {
-                        case "uint8_t":
-                            {
-                                var recvValue = dataBytes[0];
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
-                                testExcel.RecvData = recvValue.ToString();
-                                testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
-                            }
-                            break;
-                        case "uint16_t":
-                            {
-                                var recvValue = BitConverter.ToUInt16(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
-                                testExcel.RecvData = recvValue.ToString();
-                                testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
-                            }
-                            break;
-                        case "uint32_t":
-                            {
-                                var recvValue = BitConverter.ToUInt32(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
-                                testExcel.RecvData = recvValue.ToString();
-                                testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
-                            }
-                            break;
-                        case "char":
-                            {
-                                var recvValue = Encoding.ASCII.GetString(dataBytes).TrimEnd('\0');
-                                testExcel.RecvData = recvValue;
-                                testExcel.Pass = true;
-                            }
-                            break;
+                        return;
                     }
-                     _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, 
-                         Message = $"收到ID:0x{testExcel.RecvId:X3} 数据:{BitConverter.ToString( dataBytes)} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}" });
-                 
+                    foreach (var testExcel in findTestExcels)
+                    {
+                        //解析数据
+                        if (testExcel.RecvEnDataIndex >= msg.LEN)
+                            continue;
+                        byte[] dataBytes = new byte[testExcel.RecvEnDataIndex - testExcel.RecvBeDataIndex + 1];
+                        Array.Copy(msg.DATA, testExcel.RecvBeDataIndex, dataBytes, 0, dataBytes.Length);
+
+                        switch (testExcel.DataType)
+                        {
+                            case "uint8_t":
+                                {
+                                    var recvValue = dataBytes[0];
+                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue)? TestPassEnum.Pass: TestPassEnum.NG;
+                                }
+                                break;
+                            case "uint16_t":
+                                {
+                                    if (dataBytes.Length<2)
+                                    {
+                                        _mediator.Publish(new LogNotification()
+                                        {
+                                            LogLevel = LogLevel.Error,
+                                            LogSource = LogSource.TestRealtime,
+                                            Message = $"数据目标格式uint16_t数据长度应为2，实际为{dataBytes.Length}"
+                                        });
+                                    }
+                                    var recvValue = BitConverter.ToUInt16(dataBytes);
+                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                                break;
+                            case "uint32_t":
+                                {
+                                    if (dataBytes.Length < 4)
+                                    {
+                                        _mediator.Publish(new LogNotification()
+                                        {
+                                            LogLevel = LogLevel.Error,
+                                            LogSource = LogSource.TestRealtime,
+                                            Message = $"数据目标格式uint32_t数据长度应为4，实际为{dataBytes.Length}"
+                                        });
+                                    }
+                                    var recvValue = BitConverter.ToUInt32(dataBytes);
+                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                                break;
+                            case "char":
+                                {
+                                    var recvValue = Encoding.ASCII.GetString(dataBytes).TrimEnd('\0');
+                                    testExcel.RecvData = recvValue;
+                                    testExcel.Pass = TestPassEnum.人工;
+                                }
+                                break;
+                        }
+                        _mediator.Publish(new LogNotification()
+                        {
+                            LogLevel = LogLevel.Information,
+                            LogSource = LogSource.TestRealtime,
+                            Message = $"收到ID:0x{testExcel.RecvId:X3} 数据:{BitConverter.ToString(dataBytes)} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}"
+                        });
+
+                    }
+                   
                 }
-                _timecancellationtokensource.Cancel();
-                if (_semaphoreslim.CurrentCount==0)
+                catch (Exception ex)
                 {
-                    _semaphoreslim.Release();
+                    _mediator.Publish(new LogNotification()
+                    {
+                        LogLevel = LogLevel.Error,
+                        LogSource = LogSource.TestRealtime,
+                        Message = $"解析回复数据时出现错误:{ex.Message}"
+                    });
 
                 }
+                finally
+                {
+                    if (_timecancellationtokensource!=null)
+                    {
+                        _timecancellationtokensource.Cancel();
+                        if (_semaphoreslim.CurrentCount == 0)
+                        {
+                            _semaphoreslim.Release();
+
+                        }
+                    }
+                    
+                }
+                
 
             });
             BrowseFileCommand = ReactiveCommand.Create(async () =>
             {
+                CanStartTest = false;
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "测试文件/xlsx|*.xlsx",
+                };
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    SelectedFilePath = openFileDialog.FileName;
+                }
+                if (string.IsNullOrWhiteSpace(SelectedFilePath))
+                {
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"文件未选择！" });
+                    return;
+
+                }
+                var stream = File.OpenRead(SelectedFilePath);
+
                 try
                 {
                     _sourceTestExcelGridModels.Clear();
-                    var openFileDialog = new OpenFileDialog
+                    ExcelPackage excelPackage = new ExcelPackage(File.OpenRead(SelectedFilePath));
+                    ExcelWorksheets worksheets = excelPackage.Workbook.Worksheets;
+                    var excelTools = ExcelToEntity.WorksheetToDataRow<TestExcel>(stream, 1, 2, 0, 0);
+                    foreach (var item in excelTools)
                     {
-                        Filter = "测试文件/xlsx|*.xlsx",
-                    };
-                    if (openFileDialog.ShowDialog() == true)
-                    {
-                        SelectedFilePath = openFileDialog.FileName;
-                        ExcelPackage excelPackage = new ExcelPackage(File.OpenRead(SelectedFilePath));
-                        ExcelWorksheets worksheets = excelPackage.Workbook.Worksheets;
-                      
-                        var worksheet = worksheets[0];
-                        var excelTools = ExcelToEntity.WorksheetToDataRow<TestExcel>(File.OpenRead(SelectedFilePath), 1, 2, 0, 0);
-                        foreach (var item in excelTools)
+                        _sourceTestExcelGridModels.Add(new TestExcelGrid
                         {
-                            _sourceTestExcelGridModels.Add(new TestExcelGrid
-                            {
-                                DataType = item.DataType.Trim(),
-                                MaxData = item.MaxData.Trim(),
-                                MinData = item.MinData.Trim(),
-                                RecvBeDataIndex = item.RecvBeDataIndex,
-                                RecvEnDataIndex = item.RecvEnDataIndex,
-                                ParmName=item.ParmName.Trim(),
-                                RecvId = item.RecvId.ToUpper().Trim(),
-                                RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
-                                SendData = item.SendData.Trim(),
-                                SendId ="0x"+item.SendId.Trim(),
-                                Index = _sourceTestExcelGridModels.Count + 1,
-                                帧间隔=item.帧间隔,
-                            });
-                        }
+                            DataType = item.DataType.Trim(),
+                            MaxData = item.MaxData.Trim(),
+                            MinData = item.MinData.Trim(),
+                            RecvBeDataIndex = item.RecvBeDataIndex,
+                            RecvEnDataIndex = item.RecvEnDataIndex,
+                            ParmName=item.ParmName.Trim(),
+                            RecvId = item.RecvId.ToUpper().Trim(),
+                            RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
+                            SendData = item.SendData.Trim(),
+                            SendId =item.SendId.Trim(),
+                            Index = _sourceTestExcelGridModels.Count + 1,
+                            帧间隔=item.帧间隔,
+                        });
                     }
+                    CanStartTest = true;
+
+
                 }
                 catch (Exception ex)
                 {
 
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"获取检测内容出现错误:{ex.Message}" });
 
+                }
+                finally
+                {
+                    stream.Close();
                 }
 
             }
@@ -156,6 +215,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             {
                 try
                 {
+                    if (!PCanClientUsercontrolViewModel.IsConnected)
+                    {
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"设备未连接，请先连接设备！" });
+                        return;
+
+                    }
+                    this.CanStartTest = false;  
                     await ResetGridStatus();
                     var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
 
@@ -189,6 +255,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"测试时发生错误{ex.Message}" });
 
                 }
+                finally
+                {
+                    this.CanStartTest = true;
+
+                }
 
             });
             ExportTemplateCommand = ReactiveCommand.Create(async () =>
@@ -208,7 +279,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     new TestExcel
                     {
                         DataType="uint8_t",
-                        MaxData="FF",
+                        MaxData="100",
                         MinData="00",
                         RecvBeDataIndex=0,
                         RecvEnDataIndex=0,
@@ -254,12 +325,15 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         {
             foreach (var item in _sourceTestExcelGridModels.Items)
             {
-                item.Pass = false;
+                item.Pass = TestPassEnum.Non;
                 item.RecvData = string.Empty;
             }
         }
         [Reactive]
         public string SelectedFilePath { get; set; }
+       
+        [Reactive]
+        public bool CanStartTest { get; set; }
         public ReactiveCommand<Unit,Task> TestCommand { get; set; }
         public ReactiveCommand<Unit,Task> ExportTemplateCommand { get; set; }
         public ReactiveCommand<Unit, Task> BrowseFileCommand { get; set; }
