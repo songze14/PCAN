@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PCAN.Drive;
 using PCAN.Drive.Modle;
 
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
+using PCAN_AutoCar_Test_Client.Models;
 using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -17,10 +19,12 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 {
     public class PCanClientUsercontrolViewModel:ReactiveObject
     {
-        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator)
+        private CANSetting _canSettings;
+        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator,IOptions<CANSetting> cansettingsoptions)
         {
             _logger = logger;
             _mediator = mediator;
+            _canSettings= cansettingsoptions.Value;
             this.RefreshPortCommand = ReactiveCommand.Create(() =>
             {
                 Ports.Clear();
@@ -52,7 +56,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 
             this.ConnectCommand = ReactiveCommand.Create(() =>
             {
-                if (string.IsNullOrWhiteSpace(DeviceID))
+                if (string.IsNullOrWhiteSpace(DeviceID) && !UseCANFD)
                 {
                     MessageBox.Show("设备ID不能为空");
                     return;
@@ -112,7 +116,16 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
             });
 
             this.RefreshPortCommand.Execute(null);
-           
+            foreach (var fdconstr in _canSettings.FDConStrEx)
+            {
+                LocalFDBaudRates.Add(new LocalFDBaudRate()
+                {
+                    Baudrate = fdconstr.ConStr,
+                    BaudRateName = fdconstr.Name
+                });
+            }
+            this.UseCANFD = _canSettings.UseFD;
+
         }
         public void WriteMsg(uint id, byte[] data,Action? action=null)
         {

@@ -15,6 +15,11 @@ namespace PCAN_AutoCar_Test_Client
     {
         public static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            #region Config
+            var a = context.Configuration.GetSection("CANSettings");
+            services.AddOptions<CANSetting>().Bind(context.Configuration.GetSection("CANSettings"));
+            #endregion
+
             services.UseMicrosoftDependencyResolver();
             var resolver = Locator.CurrentMutable;
             resolver.InitializeSplat();

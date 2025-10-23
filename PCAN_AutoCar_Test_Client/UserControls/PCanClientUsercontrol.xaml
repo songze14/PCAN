@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="端口"  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"/>
-                <ComboBox x:Name="PortsList" Grid.Column="1" DisplayMemberPath="PortName" SelectedValuePath="PortsNum" Margin="5" Width="150"/>
+                <ComboBox x:Name="PortsList" Grid.Column="1" DisplayMemberPath="PortName" SelectedValuePath="PortsNum" Margin="5" />
             </Grid>
             <Grid Grid.Column="1" Grid.Row="1">
               
@@ -71,8 +71,7 @@
                 <ComboBox x:Name="BaudRatesList" Grid.Column="1" DisplayMemberPath="BaudRateName" SelectedValuePath="Baudrate" Margin="5" >
                     <ComboBox.Style>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-                            <Setter Property="Height" Value="50"/>
-                            <Setter Property="Width" Value="250"/>
+                          
                             <Style.Triggers >
                                 <DataTrigger Binding="{Binding Path=IsChecked ,ElementName=EnableCanFdCheckBox}" Value="True">
                                     <Setter Property="Visibility" Value="Hidden"/>
@@ -87,8 +86,7 @@
                 <ComboBox x:Name="BaudFDRatesList" Grid.Column="1" DisplayMemberPath="BaudRateName" SelectedValuePath="Baudrate" Margin="5">
                     <ComboBox.Style>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-                            <Setter Property="Height" Value="50"/>
-                            <Setter Property="Width" Value="250"/>
+                          
                             <Style.Triggers >
                                 <DataTrigger Binding="{Binding Path=IsChecked ,ElementName=EnableCanFdCheckBox}" Value="False">
                                     <Setter Property="Visibility" Value="Hidden"/>
@@ -132,7 +130,7 @@
             <Button x:Name="Connect" Grid.Column="2" Grid.Row="1"  Content="连接"  Margin="5" />
             <Button x:Name="UnConnect" Grid.Row="2" Grid.Column="2"  Content="断开"  Margin="5" />
             <Button x:Name="RefreshPort" Grid.Column="0" Grid.Row="0"  Content="刷新端口"  Margin="5" />
-            <DockPanel Grid.Column="1" LastChildFill="False">
+            <DockPanel Grid.Column="1" LastChildFill="False" Visibility="Hidden">
                 <CheckBox Content="CANFD" x:Name="EnableCanFdCheckBox" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"/> 
             </DockPanel>
             <Label x:Name="ConnectLab" Grid.Row="0" Grid.Column="3"/>

@@ -20,5 +20,10 @@
 	    <SubType>Code</SubType>
 	  </Compile>
 	</ItemGroup>
+	<ItemGroup>
+	  <None Update="appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 	<Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
