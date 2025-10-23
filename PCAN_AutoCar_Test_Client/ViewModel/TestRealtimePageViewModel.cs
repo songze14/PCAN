@@ -66,8 +66,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             case "uint8_t":
                                 {
                                     var recvValue = dataBytes[0];
-                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    var minValue =byte.Parse (testExcel.MinData);
+                                    var maxValue = byte.Parse(testExcel.MaxData);
                                     testExcel.RecvData = recvValue.ToString();
                                     testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue)? TestPassEnum.Pass: TestPassEnum.NG;
                                 }
@@ -84,8 +84,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                         });
                                     }
                                     var recvValue = BitConverter.ToUInt16(dataBytes);
-                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    var minValue = Convert.ToUInt16(testExcel.MinData);
+                                    var maxValue = Convert.ToUInt16(testExcel.MaxData);
                                     testExcel.RecvData = recvValue.ToString();
                                     testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
                                 }
@@ -102,8 +102,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                         });
                                     }
                                     var recvValue = BitConverter.ToUInt32(dataBytes);
-                                    ulong minValue = Convert.ToUInt64(testExcel.MinData);
-                                    ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                    var minValue = Convert.ToUInt32(testExcel.MinData);
+                                    var maxValue = Convert.ToUInt32(testExcel.MaxData);
                                     testExcel.RecvData = recvValue.ToString();
                                     testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
                                 }
@@ -114,6 +114,70 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                     testExcel.RecvData = recvValue;
                                     testExcel.Pass = TestPassEnum.人工;
                                 }
+                                break;
+                            case "int8_t":
+                                {
+                                    var recvValue =(sbyte)dataBytes[0];
+                                    var minValue =sbyte.Parse( testExcel.MinData);
+                                    var maxValue = sbyte.Parse(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                                break;
+                            case "int16_t":
+                                {
+                                    if (dataBytes.Length < 2)
+                                    {
+                                        _mediator.Publish(new LogNotification()
+                                        {
+                                            LogLevel = LogLevel.Error,
+                                            LogSource = LogSource.TestRealtime,
+                                            Message = $"数据目标格式int16_t数据长度应为2，实际为{dataBytes.Length}"
+                                        });
+                                    }
+                                    var recvValue = BitConverter.ToInt16(dataBytes);
+                                    var minValue = Convert.ToInt16(testExcel.MinData);
+                                    var maxValue = Convert.ToInt16(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                                break;
+                            case "int32_t":
+                                {
+                                    if (dataBytes.Length < 4)
+                                    {
+                                        _mediator.Publish(new LogNotification()
+                                        {
+                                            LogLevel = LogLevel.Error,
+                                            LogSource = LogSource.TestRealtime,
+                                            Message = $"数据目标格式int32_t数据长度应为4，实际为{dataBytes.Length}"
+                                        });
+                                    }
+                                    var recvValue = BitConverter.ToInt32(dataBytes);
+                                    var minValue = Convert.ToInt32(testExcel.MinData);
+                                    var maxValue = Convert.ToInt32(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                                break;
+                            case "float":
+                                {
+                                    if (dataBytes.Length < 4)
+                                    {
+                                        _mediator.Publish(new LogNotification()
+                                        {
+                                            LogLevel = LogLevel.Error,
+                                            LogSource = LogSource.TestRealtime,
+                                            Message = $"数据目标格式float数据长度应为4，实际为{dataBytes.Length}"
+                                        });
+                                    }
+                                    var recvValue = BitConverter.ToSingle(dataBytes);
+                                    var minValue = Convert.ToSingle(testExcel.MinData);
+                                    var maxValue = Convert.ToSingle(testExcel.MaxData);
+                                    testExcel.RecvData = recvValue.ToString();
+                                    testExcel.Pass = (recvValue >= minValue && recvValue <= maxValue) ? TestPassEnum.Pass : TestPassEnum.NG;
+                                }
+                               
                                 break;
                         }
                         _mediator.Publish(new LogNotification()
