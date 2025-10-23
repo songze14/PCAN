@@ -62,27 +62,27 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         case "uint8_t":
                             {
                                 var recvValue = dataBytes[0];
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData, 16);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData, 16);
-                                testExcel.RecvData = recvValue.ToString("X");
+                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                testExcel.RecvData = recvValue.ToString();
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
                             }
                             break;
                         case "uint16_t":
                             {
                                 var recvValue = BitConverter.ToUInt16(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData,16);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData,16);
-                                testExcel.RecvData = recvValue.ToString("X");
+                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                testExcel.RecvData = recvValue.ToString();
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
                             }
                             break;
                         case "uint32_t":
                             {
                                 var recvValue = BitConverter.ToUInt32(dataBytes);
-                                ulong minValue = Convert.ToUInt64(testExcel.MinData, 16);
-                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData, 16);
-                                testExcel.RecvData = recvValue.ToString("X");
+                                ulong minValue = Convert.ToUInt64(testExcel.MinData);
+                                ulong maxValue = Convert.ToUInt64(testExcel.MaxData);
+                                testExcel.RecvData = recvValue.ToString();
                                 testExcel.Pass = recvValue >= minValue && recvValue <= maxValue;
                             }
                             break;
@@ -176,7 +176,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 commandFrame[i] = Convert.ToByte(datastr[i], 16);
                             }
                             PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame, async () => {await Reset(); });
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X3} 数据:{senddatagroup.Key}" });
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
                             await _semaphoreslim.WaitAsync();
                             await Task.Delay(senddatagroup.Key.帧间隔);
                         }
