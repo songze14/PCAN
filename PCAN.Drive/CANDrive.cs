@@ -87,7 +87,7 @@ namespace PCAN.Drive
                     msg.ID = (uint)writemsg.Id;
                     msg.DLC = (byte)writemsg.Data.Length;
                     msg.Data = writemsg.Data;
-                    msg.MsgType = MessageType.Standard;
+                    msg.MsgType = writemsg.MessageType;
                     //if (msg.DATA.Length<8)
                     //{
                     //    Array.Resize(ref msg.DATA, 8);

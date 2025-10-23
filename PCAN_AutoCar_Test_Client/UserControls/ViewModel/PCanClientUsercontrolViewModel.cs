@@ -149,7 +149,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 MessageBox.Show("请先连接设备");
                 return;
             }
-            CanDrive.AddMessage(new PCanWriteMessage() { Data = data, Id = id });
+            CanDrive.AddMessage(new PCanWriteMessage() { Data = data,MessageType=MessageType.Extended, Id = id });
             if (action != null)
             {
                 action();

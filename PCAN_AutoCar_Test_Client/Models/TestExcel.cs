@@ -24,30 +24,33 @@ namespace PCAN_AutoCar_Test_Client.Models
         [EntityToexcel("回复子命令/0x16进制", 5)]
         [ExcelToEntity(5)]
         public string RecvCommandId { get; set; }
+        [EntityToexcel("回复子命令/0x16进制", 6)]
+        [ExcelToEntity(6)]
+        public string RecvSunCommandId { get; set; }
         /// <summary>
         /// 回复开始解析数据
         /// </summary>
-        [EntityToexcel("回复解析开始位",6)]
-        [ExcelToEntity(6)]
+        [EntityToexcel("回复解析开始位",7)]
+        [ExcelToEntity(7)]
         public int RecvBeDataIndex { get; set; }
         /// <summary>
         /// 回复结束解析数据
         /// </summary>
-        [EntityToexcel("回复解析结束位", 7)]
-        [ExcelToEntity(7)]
-        public int RecvEnDataIndex { get; set; }
-        [EntityToexcel("回复解析数据类型", 8)]
+        [EntityToexcel("回复解析结束位", 8)]
         [ExcelToEntity(8)]
-        public string DataType { get; set; }=string.Empty;
-        [EntityToexcel("最小值/允许相等", 9)]
+        public int RecvEnDataIndex { get; set; }
+        [EntityToexcel("回复解析数据类型", 9)]
         [ExcelToEntity(9)]
-        public string MinData { get; set; } = string.Empty;
-        [EntityToexcel("最大值/允许相等", 10)]
+        public string DataType { get; set; }=string.Empty;
+        [EntityToexcel("最小值/允许相等", 10)]
         [ExcelToEntity(10)]
+        public string MinData { get; set; } = string.Empty;
+        [EntityToexcel("最大值/允许相等", 11)]
+        [ExcelToEntity(11)]
         public string MaxData { get; set; } = string.Empty;
 
-        [EntityToexcel("帧间隔/单位ms", 11)]
-        [ExcelToEntity(11)]
+        [EntityToexcel("帧间隔/单位ms", 12)]
+        [ExcelToEntity(12)]
         public int 帧间隔 { get; set; } 
     }
 }

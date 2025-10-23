@@ -23,6 +23,7 @@ namespace PCAN_AutoCar_Test_Client.Models
 
         public string RecvId { get; set; }
         public string RecvCommandId { get; set; }
+        public string RecvSunCommandId { get; set; }
         /// <summary>
         /// 回复开始解析数据
         /// </summary>

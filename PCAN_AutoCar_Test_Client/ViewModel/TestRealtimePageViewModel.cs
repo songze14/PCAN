@@ -46,8 +46,9 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     if (msg == null)
                         return;
                     var recvId = "0X" + msg.ID.ToString("X");
-                    var recvCommandId = msg.DATA.Length > 0 ? "0X" + msg.DATA[0].ToString("X2") : string.Empty;
-                    var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId == recvCommandId);
+                    var recvCommandId = "0X" + (msg.ID>>18>>16).ToString("X");
+                    var sunrecvCommandId = "0X" + (msg.ID >> 16).ToString("X");
+                    var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId == recvCommandId && t.RecvSunCommandId==sunrecvCommandId);
                     if (!findTestExcels.Any())
                     {
                         return;
@@ -231,17 +232,17 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         var senddatagroups = sendgroup.GroupBy(t => (t.SendData,t.帧间隔));
                         foreach (var senddatagroup in senddatagroups)
                         {
-                            var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
-                            if (datastr == null)
-                            {
-                                return;
-                            }
-                            var commandFrame = new byte[datastr.Length];
-                            for (int i = 0; i < datastr.Length; i++)
-                            {
-                                commandFrame[i] = Convert.ToByte(datastr[i], 16);
-                            }
-                            PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame, async () => {await Reset(); });
+                            //var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                            //if (datastr == null)
+                            //{
+                            //    return;
+                            //}
+                            //var commandFrame = new byte[datastr.Length];
+                            //for (int i = 0; i < datastr.Length; i++)
+                            //{
+                            //    commandFrame[i] = Convert.ToByte(datastr[i], 16);
+                            //}
+                            PCanClientUsercontrolViewModel.WriteMsg(sendid, [], async () => {await Reset(); });
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
                             await _semaphoreslim.WaitAsync();
                             await Task.Delay(senddatagroup.Key.帧间隔);
