@@ -136,7 +136,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 RecvId = item.RecvId.ToUpper().Trim(),
                                 RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
                                 SendData = item.SendData.Trim(),
-                                SendId = item.SendId.Trim(),
+                                SendId ="0x"+item.SendId.Trim(),
                                 Index = _sourceTestExcelGridModels.Count + 1,
                                 帧间隔=item.帧间隔,
                             });
