@@ -10,7 +10,7 @@ namespace PCAN.Shard.Models
     public class LocalPorts
     {
         public string PortName { get; set; }
-        public UInt16 PortsNum { get; set; }
+        public ushort PortsNum { get; set; }
     }
     public class LocalBaudRate
     {

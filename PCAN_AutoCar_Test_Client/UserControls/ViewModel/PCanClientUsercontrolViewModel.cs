@@ -6,19 +6,12 @@ using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
 using Peak.Can.Basic;
-using Peak.Can.Basic.BackwardCompatibility;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 {
@@ -33,27 +26,26 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 Ports.Clear();
                 UInt16 deviceID = 1;
                 uint iChannelsCount;
-                var stsResult = PCANBasic.GetValue(PCANBasic.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS_COUNT, out iChannelsCount, sizeof(uint));
-                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                var stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsCount, out iChannelsCount);
+                if (stsResult == PcanStatus.OK)
                 {
-                    TPCANChannelInformation[] info = new TPCANChannelInformation[iChannelsCount];
+                    PcanChannelInformation[] info = new PcanChannelInformation[iChannelsCount];
 
-                    stsResult = PCANBasic.GetValue(PCANBasic.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS, info);
-                    if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                    stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsInformation, info);
+                    if (stsResult == PcanStatus.OK)
                     {
                         foreach (var channel in info)
-                            if ((channel.channel_condition & PCANBasic.PCAN_CHANNEL_AVAILABLE) == PCANBasic.PCAN_CHANNEL_AVAILABLE)
+                            if ((channel.ChannelCondition & ChannelCondition.ChannelAvailable) == ChannelCondition.ChannelAvailable)
                             {
-                                var bIsFD = (channel.device_features & PCANBasic.FEATURE_FD_CAPABLE) == PCANBasic.FEATURE_FD_CAPABLE;
-                                Ports.Add(new LocalPorts() { PortName = channel.device_name, PortsNum = channel.channel_handle });
+                                Ports.Add(new LocalPorts() { PortName = channel.DeviceName, PortsNum = (ushort)channel.ChannelHandle });
                             }
                         mediator.Publish(new LogNotification()
                         {
-                            LogSource =LogSource.CanDevice,
+                            LogSource = LogSource.CanDevice,
                             Message = $"刷新端口成功,共{Ports.Count}个端口"
                         });
                     }
-                       
+
 
                 }
             });
