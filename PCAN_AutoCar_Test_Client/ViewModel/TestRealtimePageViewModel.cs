@@ -2,6 +2,7 @@
 using Excel.Tool;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using PCAN.Notification.Log;
@@ -28,10 +29,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 {
     public class TestRealtimePageViewModel :ReactiveObject
     {
-        public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator)
+        private RepetitiveInstruction _repetitiveinstruction;
+        public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator,IOptions<Repetitiveinstructions> repetitiveinstructionoptions)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _mediator = mediator;
+            _repetitiveinstruction= repetitiveinstructionoptions.Value.LinTest;
+            _testcancellationtokensource = new CancellationTokenSource();
             this.ChangeObs = this._sourceTestExcelGridModels.Connect();
 
             var d = this.ChangeObs
@@ -45,6 +49,38 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 {
                     if (msg == null)
                         return;
+                    if (!string.IsNullOrWhiteSpace( _repetitiveinstruction.ReciveId))
+                    {
+                        var repetitiveinstructionrecvId = "0X" + msg.ID.ToString("X");
+                      
+                        if (repetitiveinstructionrecvId == _repetitiveinstruction.ReciveId.ToUpper())
+                        {
+                          
+                            if (BitConverter.ToString(msg.DATA[0..msg.LEN]) == _repetitiveinstruction.ReciveOkData.ToUpper())
+                            {
+                                _mediator.Publish(new LogNotification()
+                                {
+                                    LogLevel = LogLevel.Information,
+                                    LogSource = LogSource.TestRealtime,
+                                    Message = $"回复正确数据，进入产测！！！！！回复数据:{msg.DATASTR }"
+                                });
+                                RestRecTimeOut();
+                                return;
+                            }
+                            else if (msg.DATASTR == _repetitiveinstruction.ReciveNgData)
+                            {
+                                _mediator.Publish(new LogNotification()
+                                {
+                                    LogLevel = LogLevel.Error,
+                                    LogSource = LogSource.TestRealtime,
+                                    Message = $"回复NG数据，不进入产测！！！！！回复数据:{msg.DATASTR}"
+                                });
+                                RestRecTimeOut();
+                                return;
+                            }
+                        }
+                    }
+                   
                     var recvId = "0X" + msg.ID.ToString("X");
                     var recvCommandId = "0X" + (msg.ID>>18>>16).ToString("X");
                     var sunrecvCommandId = "0X" + (msg.ID >> 16).ToString("X");
@@ -82,6 +118,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             LogSource = LogSource.TestRealtime,
                                             Message = $"数据目标格式uint16_t数据长度应为2，实际为{dataBytes.Length}"
                                         });
+                                        return;
                                     }
                                     var recvValue = BitConverter.ToUInt16(dataBytes);
                                     var minValue = Convert.ToUInt16(testExcel.MinData);
@@ -100,6 +137,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             LogSource = LogSource.TestRealtime,
                                             Message = $"数据目标格式uint32_t数据长度应为4，实际为{dataBytes.Length}"
                                         });
+                                        return;
+
                                     }
                                     var recvValue = BitConverter.ToUInt32(dataBytes);
                                     var minValue = Convert.ToUInt32(testExcel.MinData);
@@ -134,6 +173,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             LogSource = LogSource.TestRealtime,
                                             Message = $"数据目标格式int16_t数据长度应为2，实际为{dataBytes.Length}"
                                         });
+                                        return;
+
                                     }
                                     var recvValue = BitConverter.ToInt16(dataBytes);
                                     var minValue = Convert.ToInt16(testExcel.MinData);
@@ -152,6 +193,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             LogSource = LogSource.TestRealtime,
                                             Message = $"数据目标格式int32_t数据长度应为4，实际为{dataBytes.Length}"
                                         });
+                                        return;
+
                                     }
                                     var recvValue = BitConverter.ToInt32(dataBytes);
                                     var minValue = Convert.ToInt32(testExcel.MinData);
@@ -170,6 +213,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             LogSource = LogSource.TestRealtime,
                                             Message = $"数据目标格式float数据长度应为4，实际为{dataBytes.Length}"
                                         });
+                                        return;
+
                                     }
                                     var recvValue = BitConverter.ToSingle(dataBytes);
                                     var minValue = Convert.ToSingle(testExcel.MinData);
@@ -188,7 +233,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         });
 
                     }
-                   
+                    RestRecTimeOut();
+
                 }
                 catch (Exception ex)
                 {
@@ -198,22 +244,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         LogSource = LogSource.TestRealtime,
                         Message = $"解析回复数据时出现错误:{ex.Message}"
                     });
-
+                    RestRecTimeOut();
                 }
-                finally
-                {
-                    if (_timecancellationtokensource!=null)
-                    {
-                        _timecancellationtokensource.Cancel();
-                        if (_semaphoreslim.CurrentCount == 0)
-                        {
-                            _semaphoreslim.Release();
-
-                        }
-                    }
-                    
-                }
-                
 
             });
             BrowseFileCommand = ReactiveCommand.Create(async () =>
@@ -276,7 +308,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
             }
            );
-            TestCommand= ReactiveCommand.Create(async () =>
+            TestCommand= ReactiveCommand.Create<Task>(async () =>
             {
                 try
                 {
@@ -288,6 +320,46 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     }
                     this.CanStartTest = false;  
                     await ResetGridStatus();
+                    if (string.IsNullOrWhiteSpace( _repetitiveinstruction.Id))
+                    {
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"未配置开启产测指令！" });
+                    }
+                    else
+                    {
+                        ///若配置了产测指令，则发送产测指令
+                        var repetitiveinstructionid = Convert.ToUInt32(_repetitiveinstruction.Id, 16);
+                        byte[] repetitiveinstructiondata;
+                        var datastr = _repetitiveinstruction.Data.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                        if (datastr != null)
+                        {
+                            repetitiveinstructiondata = new byte[datastr.Length];
+                            for (int i = 0; i < datastr.Length; i++)
+                            {
+                                repetitiveinstructiondata[i] = Convert.ToByte(datastr[i], 16);
+                            }
+                        }
+                        else
+                        {
+                            //无数据
+                            repetitiveinstructiondata = [];
+                        }
+                        PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, async () => { await RecTimeOut(true); });
+                        await Task.Delay(_repetitiveinstruction.SendDelay);
+                        for (int i = 1; i < _repetitiveinstruction.SendCount; i++)
+                        {
+                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended);
+
+                            await Task.Delay(_repetitiveinstruction.SendDelay);
+                        }
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:0x{_repetitiveinstruction.Id} 数据:{_repetitiveinstruction.Data}" });
+                        await _semaphoreslim.WaitAsync();
+                        if (_testcancellationtokensource.IsCancellationRequested)
+                        {
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"超时未回应进入产测，退出测试！！！！！！" });
+
+                            return;
+                        } 
+                    }
                     var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
 
                     foreach (var sendgroup in sendgroups)
@@ -296,17 +368,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         var senddatagroups = sendgroup.GroupBy(t => (t.SendData,t.帧间隔));
                         foreach (var senddatagroup in senddatagroups)
                         {
-                            //var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
-                            //if (datastr == null)
-                            //{
-                            //    return;
-                            //}
-                            //var commandFrame = new byte[datastr.Length];
-                            //for (int i = 0; i < datastr.Length; i++)
-                            //{
-                            //    commandFrame[i] = Convert.ToByte(datastr[i], 16);
-                            //}
-                            PCanClientUsercontrolViewModel.WriteMsg(sendid, [], async () => {await Reset(); });
+                            PCanClientUsercontrolViewModel.WriteMsg(sendid, [],true, async () => {await RecTimeOut(); });
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
                             await _semaphoreslim.WaitAsync();
                             await Task.Delay(senddatagroup.Key.帧间隔);
@@ -350,7 +412,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         RecvEnDataIndex=0,
                         ParmName="测试参数1",
                         RecvId="0x100",
-                        RecvCommandId="0x01",
+                        RecvCommandId="0x00",
+                        RecvSunCommandId="0x02",
                         SendData="01-02-03-04-05-06-07-08",
                         SendId="0x200",
                         帧间隔=10,
@@ -364,7 +427,12 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已导出测试模板至:{saveFilePath}" });
             });
         }
-        private async Task Reset()
+        /// <summary>
+        /// 回复超时
+        /// </summary>
+        /// <param name="canceltest">是否取消测试</param>
+        /// <returns></returns>
+        private async Task RecTimeOut(bool canceltest=false)
         {
             try
             {
@@ -378,13 +446,50 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         _semaphoreslim.Release();
 
                     }
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"信息回复超时" });
+                    if (canceltest)
+                    {
+                        _testcancellationtokensource.Cancel();
+                        CanStartTest = true;
+
+                    }
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"信息回复超时,退出测试！！！！！！" });
                     return;
                 }
             }
             catch (Exception ex)
             {
+               
             }
+        }
+        /// <summary>
+        /// 重置回复超时
+        /// </summary>
+        private void RestRecTimeOut()
+        {
+            try
+            {
+                if (_timecancellationtokensource != null)
+                {
+                    _timecancellationtokensource.Cancel();
+                    ///尝试清除，一般情况下，线程取消信号量会自动回收，这里做个保险
+                    if (_semaphoreslim.CurrentCount == 0)
+                    {
+                        _semaphoreslim.Release();
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                 _mediator.Publish(new LogNotification()
+                {
+                    LogLevel = LogLevel.Error,
+                    LogSource = LogSource.TestRealtime,
+                    Message = $"解除超时计时器时出现错误:{ex.Message}"
+                });
+            }
+           
         }
         private async Task ResetGridStatus()
         {
@@ -410,6 +515,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         private readonly IMediator _mediator;
         private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
         private CancellationTokenSource _timecancellationtokensource;
+        private CancellationTokenSource _testcancellationtokensource;
 
         public ReadOnlyObservableCollection<TestExcelGrid> TestExcelGridModels => _testExcelGridModels;
     }

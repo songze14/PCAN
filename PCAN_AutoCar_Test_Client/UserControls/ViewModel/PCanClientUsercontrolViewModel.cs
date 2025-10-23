@@ -70,63 +70,91 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 
             this.ConnectCommand = ReactiveCommand.Create(() =>
             {
-                if (string.IsNullOrWhiteSpace(DeviceID) && !UseCANFD)
+                try
                 {
-                    MessageBox.Show("设备ID不能为空");
-                    return;
-                }
-                if (CanDrive != null)
-                {
-                    MessageBox.Show("已连接设备，请先断开");
-                    return;
-                }
-                //logger.LogDebug($"{SelectedPort}:{SelectedBaudrate}");
-                if (UseCANFD)
-                {
-                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval,useFD:true);
-
-                }
-                else
-                {
-                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
-
-                }
-                this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
-                {
-                    NewMessage.Value = msg;
-                    var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
-                    if (oldmsg != null)
+                    if (string.IsNullOrWhiteSpace(DeviceID) && !UseCANFD)
                     {
-                        oldmsg.MSGTYPE = msg.MSGTYPE;
-                        oldmsg.LEN = msg.LEN;
-                        oldmsg.DATA = msg.DATA;
-                        oldmsg.Count++;
+                        MessageBox.Show("设备ID不能为空");
+                        return;
+                    }
+                    if (CanDrive != null)
+                    {
+                        MessageBox.Show("已连接设备，请先断开");
+                        return;
+                    }
+                    //logger.LogDebug($"{SelectedPort}:{SelectedBaudrate}");
+                    if (UseCANFD)
+                    {
+                        CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval, useFD: true);
+
                     }
                     else
                     {
-                        TPCANMsgs.Add(msg);
+                        CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
 
                     }
+                    this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
+                    {
+                        NewMessage.Value = msg;
+                        var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
+                        if (oldmsg != null)
+                        {
+                            oldmsg.MSGTYPE = msg.MSGTYPE;
+                            oldmsg.LEN = msg.LEN;
+                            oldmsg.DATA = msg.DATA;
+                            oldmsg.Count++;
+                        }
+                        else
+                        {
+                            TPCANMsgs.Add(msg);
 
-                });
-                _logger.LogInformation("连接设备");
-                IsConnected = true;
-                ConnectLab = "已连接";
-                NoConnected = false;
+                        }
+
+                    });
+                    _logger.LogInformation("连接设备");
+                    IsConnected = true;
+                    ConnectLab = "已连接";
+                    NoConnected = false;
+                }
+                catch (Exception ex)
+                {
+
+                    mediator.Publish(new LogNotification()
+                    {
+                        LogLevel = LogLevel.Error,
+                        LogSource = LogSource.CanDevice,
+                        Message = $"连接出现错误:{ex.Message}"
+                    });
+                }
+                
             });
             this.UnConnectCommand = ReactiveCommand.Create(() =>
             {
-                if (CanDrive == null)
+                try
                 {
-                    MessageBox.Show("未连接设备");
-                    return;
+                    if (CanDrive == null)
+                    {
+                        MessageBox.Show("未连接设备");
+                        return;
+                    }
+                    CanDrive.CLose();
+                    CanDrive = null;
+                    _logger.LogDebug("断开设备");
+                    IsConnected = false;
+                    ConnectLab = "未连接";
+                    NoConnected = true;
                 }
-                CanDrive.CLose();
-                CanDrive = null;
-                _logger.LogDebug("断开设备");
-                IsConnected = false;
-                ConnectLab = "未连接";
-                NoConnected = true;
+                catch (Exception ex)
+                {
+
+                    mediator.Publish(new LogNotification()
+                    {
+                        LogLevel = LogLevel.Error,
+                        LogSource = LogSource.CanDevice,
+                        Message = $"断开连接出现错误:{ex.Message}"
+                    });
+                }
+                
             });
 
             this.RefreshPortCommand.Execute(null);
@@ -141,7 +169,14 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
             this.UseCANFD = _canSettings.UseFD;
 
         }
-        public void WriteMsg(uint id, byte[] data,Action? action=null)
+        /// <summary>
+        /// 写数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="data"></param>
+        /// <param name="useextended"></param>
+        /// <param name="action"></param>
+        public void WriteMsg(uint id, byte[] data,bool useextended,Action? action=null)
         {
             
             if (CanDrive == null)
@@ -149,7 +184,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 MessageBox.Show("请先连接设备");
                 return;
             }
-            CanDrive.AddMessage(new PCanWriteMessage() { Data = data,MessageType=MessageType.Extended, Id = id });
+            CanDrive.AddMessage(new PCanWriteMessage() { Data = data,MessageType= useextended?MessageType.Extended:MessageType.Standard, Id = id });
             if (action != null)
             {
                 action();

@@ -171,7 +171,7 @@ namespace PCAN.Drive
                     msg.ID = (uint)writemsg.Id;
                     msg.DLC = (byte)writemsg.Data.Length;
                     msg.Data = writemsg.Data;
-                    msg.MsgType = MessageType.Standard;
+                    msg.MsgType = writemsg.MessageType;
                     //if (msg.Data < 64)
                     //{
                     //    Array.Resize(ref msg.DATA, 64);
