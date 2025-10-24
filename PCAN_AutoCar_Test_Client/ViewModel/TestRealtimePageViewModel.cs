@@ -82,9 +82,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     }
                    
                     var recvId = "0X" + msg.ID.ToString("X");
-                    var recvCommandId = "0X" + (msg.ID>>18>>16).ToString("X");
-                    var sunrecvCommandId = "0X" + (msg.ID >> 16).ToString("X");
-                    var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId && t.RecvCommandId == recvCommandId && t.RecvSunCommandId==sunrecvCommandId);
+                
+                    var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId );
                     if (!findTestExcels.Any())
                     {
                         return;
@@ -284,7 +283,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             RecvEnDataIndex = item.RecvEnDataIndex,
                             ParmName=item.ParmName.Trim(),
                             RecvId = item.RecvId.ToUpper().Trim(),
-                            RecvCommandId = item.RecvCommandId.ToUpper().Trim(),
+                            
                             SendData = item.SendData.Trim(),
                             SendId =item.SendId.Trim(),
                             Index = _sourceTestExcelGridModels.Count + 1,
@@ -412,8 +411,6 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         RecvEnDataIndex=0,
                         ParmName="测试参数1",
                         RecvId="0x100",
-                        RecvCommandId="0x00",
-                        RecvSunCommandId="0x02",
                         SendData="01-02-03-04-05-06-07-08",
                         SendId="0x200",
                         帧间隔=10,

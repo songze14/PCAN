@@ -13,6 +13,9 @@
     <None Update="PCANBasic.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="PCAN_USB.sys">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

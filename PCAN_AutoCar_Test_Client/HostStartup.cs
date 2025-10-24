@@ -19,6 +19,7 @@ namespace PCAN_AutoCar_Test_Client
             var a = context.Configuration.GetSection("CANSettings");
             services.AddOptions<CANSetting>().Bind(context.Configuration.GetSection("CANSettings"));
             services.AddOptions<Repetitiveinstructions>().Bind(context.Configuration.GetSection("Repetitiveinstructions"));
+            services.AddOptions<AppSet>().Bind(context.Configuration.GetSection("AppSet"));
             #endregion
 
             services.UseMicrosoftDependencyResolver();

@@ -167,11 +167,7 @@ namespace PCAN.Drive
                 try
                 {
 
-                    PcanMessage msg = new PcanMessage();
-                    msg.ID = (uint)writemsg.Id;
-                    msg.DLC = (byte)writemsg.Data.Length;
-                    msg.Data = writemsg.Data;
-                    msg.MsgType = writemsg.MessageType;
+                    PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, (byte)writemsg.Data.Length, writemsg.Data);
                     //if (msg.Data < 64)
                     //{
                     //    Array.Resize(ref msg.DATA, 64);

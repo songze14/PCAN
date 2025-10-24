@@ -1,6 +1,7 @@
 ﻿using PCAN_AutoCar_Test_Client.Models;
 using PCAN_AutoCar_Test_Client.ViewModel;
 using ReactiveUI;
+using Splat;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
@@ -24,9 +25,11 @@ namespace PCAN_AutoCar_Test_Client
         public MainWindow(AppViewModel appViewModle )
         {
             InitializeComponent();
+            ViewModel = Locator.Current.GetService<MainWindowViewModel>();
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.UILogsViewModel, v => v.uilogView.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.Title, v => v.TitleTextblock.Text).DisposeWith(d);
             });
             AppViewModle = appViewModle;
             AppViewModle.NavigateTo(UrlDefines.URL_Test);
