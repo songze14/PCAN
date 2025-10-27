@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using OfficeOpenXml;
 using PCAN.Notification.Log;
 using PCAN_AutoCar_Test_Client.Models;
+using PCAN_AutoCar_Test_Client.Tools;
 using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
 using Peak.Can.Basic;
 using ReactiveUI;
@@ -36,6 +37,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             _mediator = mediator;
             _repetitiveinstruction= repetitiveinstructionoptions.Value.LinTest;
             _testcancellationtokensource = new CancellationTokenSource();
+            CanStartTest.Subscribe(x => { UIHelper.RunInUIThread(d => { this.CanStartTesta = x; }); });
             this.ChangeObs = this._sourceTestExcelGridModels.Connect();
 
             var d = this.ChangeObs
@@ -236,7 +238,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 {
                                     LogLevel = LogLevel.Information,
                                     LogSource = LogSource.TestRealtime,
-                                    Message = $"收到ID:0x{testExcel.RecvId:X3} 数据:{BitConverter.ToString(dataBytes)} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}"
+                                    Message = $"收到ID:{testExcel.RecvId:X3} 数据:{BitConverter.ToString(dataBytes)} 最大值{testExcel.MaxData} 最小值{testExcel.MinData} 结果{testExcel.Pass}"
                                 });
 
                             }
@@ -317,7 +319,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             帧间隔=item.帧间隔,
                         });
                     }
-                    CanStartTest = true;
+                    CanStartTest.Value = true;
 
                 }
                 catch (Exception ex)
@@ -331,84 +333,102 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             TestCommand= ReactiveCommand.Create<Task>(async () =>
             {
                 await ResetTest();
-               
-                try
+               _= Task.Run(async () =>
                 {
-                    if (!PCanClientUsercontrolViewModel.IsConnected)
+                    try
                     {
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"设备未连接，请先连接设备！" });
-                        return;
-
-                    }
-                 
-                   
-                    if (string.IsNullOrWhiteSpace( _repetitiveinstruction.Id))
-                    {
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"未配置开启产测指令！" });
-                    }
-                    else
-                    {
-                        ///若配置了产测指令，则发送产测指令
-                        var repetitiveinstructionid = Convert.ToUInt32(_repetitiveinstruction.Id, 16);
-                        byte[] repetitiveinstructiondata;
-                        var datastr = _repetitiveinstruction.Data.Split('-', StringSplitOptions.RemoveEmptyEntries);
-                        if (datastr != null)
+                        if (!PCanClientUsercontrolViewModel.IsConnected)
                         {
-                            repetitiveinstructiondata = new byte[datastr.Length];
-                            for (int i = 0; i < datastr.Length; i++)
-                            {
-                                repetitiveinstructiondata[i] = Convert.ToByte(datastr[i], 16);
-                            }
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"设备未连接，请先连接设备！" });
+                            return;
+
+                        }
+
+
+                        if (string.IsNullOrWhiteSpace(_repetitiveinstruction.Id))
+                        {
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"未配置开启产测指令！" });
                         }
                         else
                         {
-                            //无数据
-                            repetitiveinstructiondata = [];
-                        }
-                        PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, async () => { await RecTimeOut(true); });
-                        await Task.Delay(_repetitiveinstruction.SendDelay);
-                        for (int i = 1; i < _repetitiveinstruction.SendCount; i++)
-                        {
-                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended);
-
+                            ///若配置了产测指令，则发送产测指令
+                            var repetitiveinstructionid = Convert.ToUInt32(_repetitiveinstruction.Id, 16);
+                            byte[] repetitiveinstructiondata;
+                            var datastr = _repetitiveinstruction.Data.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                            if (datastr != null)
+                            {
+                                repetitiveinstructiondata = new byte[datastr.Length];
+                                for (int i = 0; i < datastr.Length; i++)
+                                {
+                                    repetitiveinstructiondata[i] = Convert.ToByte(datastr[i], 16);
+                                }
+                            }
+                            else
+                            {
+                                //无数据
+                                repetitiveinstructiondata = [];
+                            }
+                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, async () => { await RecTimeOut(repetitiveinstructionid, true); });
                             await Task.Delay(_repetitiveinstruction.SendDelay);
-                        }
-                        
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:0x{_repetitiveinstruction.Id} 数据:{_repetitiveinstruction.Data}" });
-                        await _semaphoreslim.WaitAsync();
-                        if (_testcancellationtokensource.IsCancellationRequested)
-                        {
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"超时未回应进入产测，退出测试！！！！！！" });
+                            for (int i = 1; i < _repetitiveinstruction.SendCount; i++)
+                            {
+                                PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended);
 
-                            return;
-                        } 
-                    }
-                    var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
+                                await Task.Delay(_repetitiveinstruction.SendDelay);
+                            }
 
-                    foreach (var sendgroup in sendgroups)
-                    {
-                        var sendid = Convert.ToUInt32(sendgroup.Key, 16);
-                        var senddatagroups = sendgroup.GroupBy(t => (t.SendData,t.帧间隔));
-                        foreach (var senddatagroup in senddatagroups)
-                        {
-                            PCanClientUsercontrolViewModel.WriteMsg(sendid, [],true, async () => {await RecTimeOut(); });
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:0x{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:{_repetitiveinstruction.Id} 数据:{_repetitiveinstruction.Data}" });
+
                             await _semaphoreslim.WaitAsync();
-                            await Task.Delay(senddatagroup.Key.帧间隔);
+                            if (_testcancellationtokensource.IsCancellationRequested)
+                            {
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"超时未回应进入产测，退出测试！！！！！！" });
+
+                                return;
+                            }
+                        }
+                        var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
+
+                        foreach (var sendgroup in sendgroups)
+                        {
+                            var sendid = Convert.ToUInt32(sendgroup.Key, 16);
+                            var senddatagroups = sendgroup.GroupBy(t => (t.SendData, t.帧间隔));
+                            foreach (var senddatagroup in senddatagroups)
+                            {
+                                var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                                var senddatas = new byte[datastr.Length];
+                                for (int i = 0; i < datastr.Length; i++)
+                                {
+                                    senddatas[i] = Convert.ToByte(datastr[i], 16);
+                                }
+                                PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true, async () => { await RecTimeOut(sendid); });
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
+                                
+                                await _semaphoreslim.WaitAsync();
+                                Thread.Sleep(senddatagroup.Key.帧间隔);
+                                //await Task.Delay(senddatagroup.Key.帧间隔);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
+                    catch (Exception ex)
+                    {
 
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"测试时发生错误{ex.Message}" });
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"测试时发生错误{ex.Message}" });
 
-                }
-                finally
-                {
-                    this.CanStartTest = true;
-                    this._teststep = TestStep.EndTest;
-                }
+                    }
+                    finally
+                    {
+                        UIHelper.RunInUIThread((a) =>
+                        {
+                            this.CanStartTest.Value = true;
+
+                        });
+                        this._teststep = TestStep.EndTest;
+                    }
+                });
+               
+              
+                
 
             });
             ExportTemplateCommand = ReactiveCommand.Create(async () =>
@@ -452,7 +472,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         /// </summary>
         /// <param name="canceltest">是否取消测试</param>
         /// <returns></returns>
-        private async Task RecTimeOut(bool canceltest=false)
+        private async Task RecTimeOut(uint id,bool canceltest=false)
         {
             try
             {
@@ -463,16 +483,16 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                    
                     if (_semaphoreslim.CurrentCount == 0)
                     {
-                        _semaphoreslim.Release();
+                        var a= _semaphoreslim.Release();
 
                     }
                     if (canceltest)
                     {
                         _testcancellationtokensource.Cancel();
-                        CanStartTest = true;
+                        CanStartTest.Value = true;
 
                     }
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"信息回复超时,退出测试！！！！！！" });
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"信息id:0x{id:X},信息回复超时,退出测试！！！！！！" });
                     return;
                 }
             }
@@ -480,6 +500,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             {
                
             }
+         
         }
         /// <summary>
         /// 重置回复超时
@@ -492,11 +513,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 {
                     _timecancellationtokensource.Cancel();
                     ///尝试清除，一般情况下，线程取消信号量会自动回收，这里做个保险
-                    if (_semaphoreslim.CurrentCount == 0)
+                    if (_semaphoreslim.CurrentCount==0)
                     {
                         _semaphoreslim.Release();
-
                     }
+                    Thread.Sleep(500);
                 }
             }
             catch (Exception ex)
@@ -518,7 +539,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 item.Pass = TestPassEnum.Non;
                 item.RecvData = string.Empty;
             }
-            CanStartTest = false;
+            CanStartTest.Value = false;
             _teststep =TestStep.StartTest;
             _testcancellationtokensource = new CancellationTokenSource();
         }
@@ -526,7 +547,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         public string SelectedFilePath { get; set; }
 
         [Reactive]
-        public bool CanStartTest { get; set; } 
+        public bool CanStartTesta { get; set; }
+        public ReactiveProperty<bool> CanStartTest = new ReactiveProperty<bool>();
         private TestStep _teststep;
         public ReactiveCommand<Unit,Task> TestCommand { get; set; }
         public ReactiveCommand<Unit,Task> ExportTemplateCommand { get; set; }
