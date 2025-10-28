@@ -32,6 +32,12 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
     {
         private RepetitiveInstruction _repetitiveinstruction;
         private Barrier _barrier = new Barrier(2);
+        private readonly ReadOnlyObservableCollection<TestExcelGrid> _testExcelGridModels;
+        private readonly IMediator _mediator;
+        private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
+        private CancellationTokenSource _timecancellationtokensource;
+        private CancellationTokenSource _testcancellationtokensource;
+        private int _sendOrder;
         public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator,IOptions<Repetitiveinstructions> repetitiveinstructionoptions)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
@@ -83,6 +89,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                             Message = $"回复NG数据，不进入产测！！！！！回复数据:{msg.DATASTR}"
                                         });
                                         RestRecTimeOut();
+                                        _teststep = TestStep.EndTest;
                                         return;
                                     }
                                 }
@@ -94,7 +101,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             break;
                         case TestStep.InTest:
                         
-                            var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId);
+                            var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId&& t.Index== _sendOrder);
                             if (!findTestExcels.Any())
                             {
                                 return;
@@ -316,7 +323,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             RecvId = item.RecvId.ToUpper().Trim(),
                             SendData = item.SendData.Trim(),
                             SendId =item.SendId.Trim(),
-                            Index = _sourceTestExcelGridModels.Count + 1,
+                            Index = item.Order,
                             帧间隔=item.帧间隔,
                         });
                     }
@@ -344,8 +351,6 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             return;
 
                         }
-
-
                         if (string.IsNullOrWhiteSpace(_repetitiveinstruction.Id))
                         {
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"未配置开启产测指令！" });
@@ -382,6 +387,10 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                             //_barrier.SignalAndWait();
                             await _semaphoreslim.WaitAsync();
+                            if (_teststep==TestStep.EndTest)
+                            {
+                                return;
+                            }
                             if (_testcancellationtokensource.IsCancellationRequested)
                             {
                                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"超时未回应进入产测，退出测试！！！！！！" });
@@ -389,12 +398,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 return;
                             }
                         }
-                        var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => t.SendId);
+                        var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => (t.SendId));
 
                         foreach (var sendgroup in sendgroups)
                         {
+                            
                             var sendid = Convert.ToUInt32(sendgroup.Key, 16);
-                            var senddatagroups = sendgroup.GroupBy(t => (t.SendData, t.帧间隔));
+                            var senddatagroups = sendgroup.GroupBy(t => (t.SendData, t.帧间隔, t.Index));
                             foreach (var senddatagroup in senddatagroups)
                             {
                                 var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);
@@ -404,13 +414,21 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                     senddatas[i] = Convert.ToByte(datastr[i], 16);
                                 }
                                 PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true, async () => { await RecTimeOut(sendid); });
-                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
-                                //_barrier.SignalAndWait();
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"" +
+                                    $"发送ID:{sendgroup.Key:X} " +
+                                    $"数据:{senddatagroup.Key.SendData}" +
+                                    $",下一帧间隔:{senddatagroup.Key.帧间隔}" +
+                                    $"发送序号{_sendOrder}"
+
+                                });
+                                _sendOrder = senddatagroup.Key.Index;
                                 await _semaphoreslim.WaitAsync();
                                 Thread.Sleep(senddatagroup.Key.帧间隔);
-                                //await Task.Delay(senddatagroup.Key.帧间隔);
+                              
                             }
                         }
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"测试完成！" });
+
                     }
                     catch (Exception ex)
                     {
@@ -426,6 +444,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                         });
                         this._teststep = TestStep.EndTest;
+                        _sendOrder = 0;
                     }
                 });
                
@@ -459,7 +478,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         SendData="01-02-03-04-05-06-07-08",
                         SendId="0x200",
                         帧间隔=10,
-                        
+                        Order=1,
                     }
                 };
                 ExcelPackage excelPackage = new ExcelPackage();
@@ -562,11 +581,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         public IObservable<IChangeSet<TestExcelGrid>> ChangeObs { get; }
 
         public SourceList<TestExcelGrid> _sourceTestExcelGridModels = new SourceList<TestExcelGrid>();
-        private readonly ReadOnlyObservableCollection<TestExcelGrid> _testExcelGridModels;
-        private readonly IMediator _mediator;
-        private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
-        private CancellationTokenSource _timecancellationtokensource;
-        private CancellationTokenSource _testcancellationtokensource;
+       
 
         public ReadOnlyObservableCollection<TestExcelGrid> TestExcelGridModels => _testExcelGridModels;
         private enum TestStep
