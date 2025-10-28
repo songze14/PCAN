@@ -167,7 +167,7 @@ namespace PCAN.Drive
                 try
                 {
 
-                    PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, (byte)writemsg.Data.Length, writemsg.Data);
+                    PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, (byte)writemsg.Data.Length, writemsg.Data,extendedDataLength:true);
                     //if (msg.Data < 64)
                     //{
                     //    Array.Resize(ref msg.DATA, 64);
@@ -260,12 +260,14 @@ namespace PCAN.Drive
                 var stsResult = Api.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
                 if (stsResult == PcanStatus.OK)
                 {
+                    var len = _CANMsg.DLC > 8 ? (byte)(8 + (_CANMsg.DLC - 8) * 4) : _CANMsg.DLC;
+                    byte[] datas = _CANMsg.Data;
                     var message = new ReadMessage()
                     {
                         ID = (int)_CANMsg.ID,
-                        LEN = _CANMsg.DLC>8?(byte)(8+(_CANMsg.DLC-8)*4):_CANMsg.DLC,
+                        LEN = len,
                         MSGTYPE = _CANMsg.MsgType,
-                        DATA = _CANMsg.Data,
+                        DATA = datas[0..len],
                         TimeStamp = CANTimeStamp / 1000.0
                     };
 

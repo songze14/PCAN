@@ -12,10 +12,10 @@ namespace ConsoleAppTest
             if (canFd.Initialize())
             {
                 // 发送CAN FD消息
-                byte[] data = new byte[1]; // CAN FD支持最多64字节
-                data[0] = 0x02;
+                byte[] data = new byte[12]; // CAN FD支持最多64字节
+                data[0] = 1;
 
-                canFd.SendCanFdMessage(0x31c, data);
+                canFd.SendCanFdMessage(0x6280004, data);
 
                 // 启动接收线程
                 var receiveThread = new System.Threading.Thread(() =>

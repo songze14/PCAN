@@ -31,6 +31,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
     public class TestRealtimePageViewModel :ReactiveObject
     {
         private RepetitiveInstruction _repetitiveinstruction;
+        private Barrier _barrier = new Barrier(2);
         public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator,IOptions<Repetitiveinstructions> repetitiveinstructionoptions)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
@@ -379,6 +380,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:{_repetitiveinstruction.Id} 数据:{_repetitiveinstruction.Data}" });
 
+                            //_barrier.SignalAndWait();
                             await _semaphoreslim.WaitAsync();
                             if (_testcancellationtokensource.IsCancellationRequested)
                             {
@@ -403,7 +405,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 }
                                 PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true, async () => { await RecTimeOut(sendid); });
                                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"发送ID:{sendgroup.Key:X} 数据:{senddatagroup.Key.SendData},下一帧间隔:{senddatagroup.Key.帧间隔}" });
-                                
+                                //_barrier.SignalAndWait();
                                 await _semaphoreslim.WaitAsync();
                                 Thread.Sleep(senddatagroup.Key.帧间隔);
                                 //await Task.Delay(senddatagroup.Key.帧间隔);
@@ -480,12 +482,14 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 var periodictimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
                 while (await periodictimer.WaitForNextTickAsync(_timecancellationtokensource.Token))
                 {
-                   
+
                     if (_semaphoreslim.CurrentCount == 0)
                     {
-                        var a= _semaphoreslim.Release();
+                        var a = _semaphoreslim.Release();
 
                     }
+                    //_barrier.SignalAndWait();
+
                     if (canceltest)
                     {
                         _testcancellationtokensource.Cancel();
@@ -513,11 +517,12 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 {
                     _timecancellationtokensource.Cancel();
                     ///尝试清除，一般情况下，线程取消信号量会自动回收，这里做个保险
-                    if (_semaphoreslim.CurrentCount==0)
+                    if (_semaphoreslim.CurrentCount == 0)
                     {
                         _semaphoreslim.Release();
                     }
-                    Thread.Sleep(500);
+                    //_barrier.SignalAndWait();
+                    Thread.Sleep(50);
                 }
             }
             catch (Exception ex)

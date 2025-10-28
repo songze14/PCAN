@@ -46,12 +46,13 @@ namespace ConsoleAppTest
         {
             try
             {
-                var message = new PcanMessage
+                var message = new PcanMessage(extendedDataLength:true)
                 {
                     ID = id,
                     DLC = (byte)data.Length,
-                    MsgType = MessageType.Status,
-                    Data = data
+                    MsgType = MessageType.Extended,
+                    Data = data,
+                    
                 };
 
                 var result = Api.Write(channel,  message);
