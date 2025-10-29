@@ -24,7 +24,7 @@ namespace PCAN_AutoCar_Test_Client.View
                 this.OneWayBind(ViewModel, vm => vm.UploadDevices, v => v.UploadDeviceComboBox.ItemsSource).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UploadCommand, v => v.UploadFileButton).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.SelectedUploadDeviceValue, v => v.UploadDeviceComboBox.SelectedValue).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SelectedUploadDeviceId, v => v.UploadDeviceComboBox.SelectedValue).DisposeWith(d);
                 //this.Bind(ViewModel,vm=>vm.MaxResendCount,v=>v.RetryCountTextBox.Text).DisposeWith(d);
                 //this.Bind(ViewModel, vm => vm.TimeOutSeconds, v => v.TimeoutTextBox.Text).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.UploadDataGridModels, v => v.UploadDataGrid.ItemsSource).DisposeWith(d);

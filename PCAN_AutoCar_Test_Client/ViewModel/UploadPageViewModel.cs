@@ -25,7 +25,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
     public class UploadPageViewModel:ReactiveObject
     {
         private readonly IMediator _mediator;
-        private int ReaciveID;
+        private int _reaciveID;
         public UploadPageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel, IMediator mediator)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
@@ -110,14 +110,14 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         //2.发送升级命令
                         var commandFrame = new byte[8];
 
-                        if (SelectedUploadDeviceValue == 0)
+                        if (SelectedUploadDeviceId == 0)
                         {
                             MessageBox.Show("设备ID错误");
                             IsUploading = false;
                             return;
                         }
                         //拼装升级命令
-                        var sendid =(uint)(SelectedUploadDeviceValue*33554432+1*2097152+262144);
+                        var sendid =(uint)(SelectedUploadDeviceId*33554432+1*2097152+262144);
                         
 
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
@@ -126,6 +126,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         while (_cancellationtokensource.IsCancellationRequested)
                         {
                             PCanClientUsercontrolViewModel.WriteMsg(sendid, commandFrame, true);
+                            await Task.Delay(100);
                         }
                        
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复正常,升级继续" });
@@ -149,42 +150,21 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 {
                     if (msg == null)
                         return;
-                    switch (msg.ID)
+                    ///解设备ID
+                    var deviceid = msg.ID >> 21 & 0xF;
+                    if (deviceid == SelectedUploadDeviceId)
                     {
-                        case 0x70A:
-                            var data = msg.DATA[5];
-                            switch (data)
-                            {
-                                case 0x00:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"下位回复0，升级继续" });
-                                   
-                                    break;
-                                case 0x01:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复1，升级出现错误，重发" });
-
-                                   
-                                    break;
-                                case 0x02:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复2，升级结束后APP区CRC校验不过" });
-
-                                   
-                                    break;
-                                case 0x03:
-                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"下位回复3，芯片型号不匹配,退出升级" });
-                                  
-                                    break;
-                                default:
-                                    break;
-                            }
-                            if (_semaphoreslim.CurrentCount == 0)
-                            {
-                                _semaphoreslim.Release();
-
-                            }
-                            _timecancellationtokensource.Cancel();
-                            break;
-                        default:
-                            break;
+                        ///解包号
+                        var packageindex = msg.ID & 0xffff;
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"收到请求，开始发包！包号{packageindex}" });
+                        var package = _sourceUploadDataGridModels.Items.FirstOrDefault(o => o.Index == packageindex);
+                        if (package==null)
+                        {
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"找不到包号为{packageindex}的包" });
+                            return;
+                        }
+                        var reciveid = (uint)(  1 * 2097152 + SelectedUploadDeviceId * 33554432 + 262144 +65536+ packageindex);
+                        PCanClientUsercontrolViewModel.WriteMsg(reciveid, package.Data, true);
                     }
 
 
@@ -291,7 +271,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         private readonly ReadOnlyObservableCollection<UploadDataGridModel> _uploadDataGridModels;
         public ReadOnlyObservableCollection<UploadDataGridModel> UploadDataGridModels => _uploadDataGridModels;
         [Reactive]
-        public int SelectedUploadDeviceValue { get; set; }
+        public int SelectedUploadDeviceId { get; set; }
         public ObservableCollection<UploadDevice> UploadDevices { get; set; }=new ObservableCollection<UploadDevice>()
         {
             new UploadDevice(){Name="主控板",Value=3},
