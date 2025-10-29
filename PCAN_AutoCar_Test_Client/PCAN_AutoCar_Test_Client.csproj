@@ -25,6 +25,9 @@
 	  <Compile Update="UserControls\PCanClientUsercontrol.xaml.cs">
 	    <SubType>Code</SubType>
 	  </Compile>
+	  <Compile Update="View\UploadPage.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="appsettings.json">
