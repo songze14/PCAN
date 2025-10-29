@@ -50,6 +50,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                                 LogSource = LogSource.CanDevice,
                                 Message = $"刷新端口成功,共{Ports.Count}个端口"
                             });
+                            if (Ports.Count>0)
+                            {
+                                this.SelectedPort = Ports[0].PortsNum;
+
+                            }
                         }
 
 
@@ -165,6 +170,10 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                     Baudrate = fdconstr.ConStr,
                     BaudRateName = fdconstr.Name
                 });
+            }
+            if (_canSettings.FDConStrEx.Count>0)
+            {
+                SelectedBaudrateFD = _canSettings.FDConStrEx[0].ConStr;
             }
             this.UseCANFD = _canSettings.UseFD;
 

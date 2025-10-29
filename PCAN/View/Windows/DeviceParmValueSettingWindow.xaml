@@ -35,10 +35,6 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -48,18 +44,18 @@
         <TextBox x:Name="ID" Grid.Column="1" Width="300" Height="50" />
         <Label Content="名称" Grid.Row="1"/>
         <TextBox x:Name="Name" Grid.Column="1" Grid.Row="1" Width="300" Height="50"/>
-        <Label Content="数据开始位" Grid.Row="2"/>
+        <!--<Label Content="数据开始位" Grid.Row="2"/>
         <TextBox x:Name="DataStatrtIndex" Grid.Column="2" Grid.Row="2" Width="300" Height="50"/>
         <Label Content="数据结束位" Grid.Row="3"/>
-        <TextBox x:Name="DataEndIndex" Grid.Column="3" Grid.Row="3" Width="300" Height="50"/>
+        <TextBox x:Name="DataEndIndex" Grid.Column="3" Grid.Row="3" Width="300" Height="50"/>-->
         <!--<Label Content="大小" Grid.Row="4"/>
         <TextBox x:Name="Size" Grid.Column="1" Grid.Row="4" Width="300" Height="50"/>-->
-        <Label Content="解析开始位" Grid.Row="4"/>
+        <!--<Label Content="解析开始位" Grid.Row="4"/>
         <TextBox x:Name="StatrtIndex" Grid.Column="1" Grid.Row="4" Width="300" Height="50"/>
         <Label Content="解析结束位" Grid.Row="5"/>
-        <TextBox x:Name="EndIndex" Grid.Column="1" Grid.Row="5" Width="300" Height="50"/>
-        <Label Content="数据类型" Grid.Row="6"/>
-        <ComboBox x:Name="TargetType" Grid.Column="1" Grid.Row="6" Width="300" Height="50" DisplayMemberPath="Name"/>
+        <TextBox x:Name="EndIndex" Grid.Column="1" Grid.Row="5" Width="300" Height="50"/>-->
+        <Label Content="数据类型" Grid.Row="2"/>
+        <ComboBox x:Name="TargetType" Grid.Column="1" Grid.Row="2" Width="300" Height="50" DisplayMemberPath="Name"/>
         <Grid Grid.ColumnSpan="2" Grid.Row="7">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

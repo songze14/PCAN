@@ -8,8 +8,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace PCAN.ViewModel.Window
 {
@@ -31,31 +33,44 @@ namespace PCAN.ViewModel.Window
             }
             SaveCommand = ReactiveCommand.Create(() =>
             {
-                if (PCanParmData==null)
+                try
                 {
-                   
-                    ShowPCanParmData.Size = (ushort)(ShowPCanParmData.DataEndIndex - ShowPCanParmData.DataStatrtIndex);
+                    if (SelectTypeInfo==null)
+                    {
+                        MessageBox.Show($"未选择参数类型！");
 
-                    ShowPCanParmData.Index = PCanParmDataGrids.Count+1;
-                    ShowPCanParmData.TargetType = SelectTypeInfo?.FullName ?? string.Empty;
-                    ShowPCanParmData.TargetFullName = SelectTypeInfo?.Name ?? string.Empty;
-                    PCanParmDataGrids.Add(ShowPCanParmData);
+                        return;
+                    }
+                    if (PCanParmData == null)
+                    {
+
+                        ShowPCanParmData.Size = Marshal.SizeOf(SelectTypeInfo.TargetType);
+                        ShowPCanParmData.Index = PCanParmDataGrids.Count + 1;
+                        ShowPCanParmData.TargetType = SelectTypeInfo.FullName;
+                        ShowPCanParmData.TargetFullName = SelectTypeInfo.Name;
+                        PCanParmDataGrids.Add(ShowPCanParmData);
+                    }
+                    else
+                    {
+                        PCanParmDataGrids.Remove(PCanParmData);
+                        PCanParmData.Name = ShowPCanParmData.Name;
+
+                        PCanParmData.Size = Marshal.SizeOf(SelectTypeInfo.TargetType);
+                        PCanParmData.StatrtIndex = ShowPCanParmData.StatrtIndex;
+                        PCanParmData.EndIndex = ShowPCanParmData.EndIndex;
+
+                        PCanParmData.TargetType = SelectTypeInfo.FullName;
+                        PCanParmData.TargetFullName = SelectTypeInfo.Name;
+                        PCanParmDataGrids.Add(PCanParmData);
+
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    PCanParmDataGrids.Remove(PCanParmData);
-                    PCanParmData.Name = ShowPCanParmData.Name;
-                    PCanParmData.DataEndIndex = ShowPCanParmData.DataEndIndex;
-                    PCanParmData.DataStatrtIndex = ShowPCanParmData.DataStatrtIndex;
-                    PCanParmData.Size =(ushort)(ShowPCanParmData.DataEndIndex - ShowPCanParmData.DataStatrtIndex);
-                    PCanParmData.StatrtIndex = ShowPCanParmData.StatrtIndex;
-                    PCanParmData.EndIndex = ShowPCanParmData.EndIndex;
-                   
-                    PCanParmData.TargetType = SelectTypeInfo?.FullName??string.Empty;
-                    PCanParmData.TargetFullName=SelectTypeInfo.Name??string.Empty;
-                    PCanParmDataGrids.Add(PCanParmData);
 
+                    MessageBox.Show($"保存参数时出现错误:{ex.Message}");
                 }
+                
             });
         }
         [Reactive]
@@ -68,5 +83,6 @@ namespace PCAN.ViewModel.Window
         public TypeInfo? SelectTypeInfo { get; set; }
         public SourceList<DevicePCanParmDataGrid> PCanParmDataGrids { get; }
         public DevicePCanParmDataGrid? PCanParmData { get; }
+       
     }
 }

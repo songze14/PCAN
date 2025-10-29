@@ -292,9 +292,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 MemoryStream ms =new MemoryStream();
                 try
                 {
-                   var stream = File.OpenRead(SelectedFilePath);
-                    stream.CopyTo(ms);
-                    stream.Close();
+                    using (var filestrea= File.Open(SelectedFilePath,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))
+                    {
+                        filestrea.CopyTo(ms);
+                        filestrea.Close();
+                    }
+                  
+                   
                 }
                 catch (Exception ex)
                 {
@@ -307,7 +311,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 {
                    
                     _sourceTestExcelGridModels.Clear();
-                    ExcelPackage excelPackage = new ExcelPackage(File.OpenRead(SelectedFilePath));
+                    ExcelPackage excelPackage = new ExcelPackage();
                     ExcelWorksheets worksheets = excelPackage.Workbook.Worksheets;
                     var excelTools = ExcelToEntity.WorksheetToDataRow<TestExcel>(ms, 1, 2, 0, 0);
                     foreach (var item in excelTools)
@@ -335,6 +339,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"获取检测内容出现错误:{ex.Message}" });
 
+                }
+                finally
+                {
+                    ms.Close();
+                    ms.Dispose();
                 }
             }
            );
@@ -398,13 +407,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 return;
                             }
                         }
-                        var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => (t.SendId));
+                        var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => (t.SendId, t.帧间隔));
 
                         foreach (var sendgroup in sendgroups)
                         {
                             
-                            var sendid = Convert.ToUInt32(sendgroup.Key, 16);
-                            var senddatagroups = sendgroup.GroupBy(t => (t.SendData, t.帧间隔, t.Index));
+                            var sendid = Convert.ToUInt32(sendgroup.Key.SendId, 16);
+                            var senddatagroups = sendgroup.GroupBy(t => (t.SendData, t.帧间隔, t.Index)).OrderBy(o=>o.Key.Index);
                             foreach (var senddatagroup in senddatagroups)
                             {
                                 var datastr = senddatagroup.Key.SendData.Split('-', StringSplitOptions.RemoveEmptyEntries);

@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="端口"  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"/>
-                <ComboBox x:Name="PortsList" Grid.Column="1" DisplayMemberPath="PortName" SelectedValuePath="PortsNum" Margin="5" />
+                <ComboBox x:Name="PortsList" Grid.Column="1" DisplayMemberPath="PortName" SelectedValuePath="PortsNum" Margin="5" SelectedIndex="0" />
             </Grid>
             <Grid Grid.Column="1" Grid.Row="1">
               
@@ -83,7 +83,7 @@
                         </Style>
                     </ComboBox.Style>
                 </ComboBox>
-                <ComboBox x:Name="BaudFDRatesList" Grid.Column="1" DisplayMemberPath="BaudRateName" SelectedValuePath="Baudrate" Margin="5">
+                <ComboBox x:Name="BaudFDRatesList" Grid.Column="1" DisplayMemberPath="BaudRateName" SelectedValuePath="Baudrate" Margin="5" SelectedIndex="2">
                     <ComboBox.Style>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
                           

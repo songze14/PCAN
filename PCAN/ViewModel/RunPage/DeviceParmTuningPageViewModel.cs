@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using PCAN.Modles;
 using PCAN.Notification.Log;
+using PCAN.Tools;
 using PCAN.View.Windows;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
@@ -51,10 +52,24 @@ namespace PCAN.ViewModel.RunPage
                             _parmDatas.Add(msg.DATA);
                             break;
                         case 0x772:
+                            UIHelper.RunInUIThread((d) =>
+                            {
+                                var parmbyts = _parmDatas.ToArray();
+                                var allbytes = parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
+                                var datas = ParmDataGridSource.Items.OrderBy(o => o.Index).ToList();
+                                int datasub = 0;
+                                for (var i = 0; i < datas.Count; i++)
+                                {
+                                   
+                                    var data = allbytes[datasub..(datasub + datas[i].Size)];
+                                    datasub += datas[i].Size;
+                                    ParmDataGridSource.Remove(datas[i]);
+                                    datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString();
+                                    ParmDataGridSource.Add(datas[i]);
+                                }
+                            });
                             //解析数据
-                            var parmbyts = _parmDatas.ToArray();
-                            var allbytes= parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
-                          
+                           
                             break;
                         default:
                             break;
@@ -110,7 +125,10 @@ namespace PCAN.ViewModel.RunPage
                         MessageBox.Show(saveselectedFilePath + "文件路径不能为空", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
-
+                    foreach (var item in ParmDataGridSource.Items)
+                    {
+                        item.Value = "";
+                    }
                     var parmstr = JsonSerializer.Serialize(ParmDataGridSource.Items, new JsonSerializerOptions()
                     {
                         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)

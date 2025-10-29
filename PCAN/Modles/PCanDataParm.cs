@@ -33,7 +33,7 @@ namespace PCAN.Modles
         [Reactive]
         public string Name { get; set; }
         [Reactive]
-        public ushort Size { get; set; }
+        public int Size { get; set; }
         /// <summary>
         /// 解析起始位
         /// </summary>
@@ -50,16 +50,16 @@ namespace PCAN.Modles
         [Reactive]
         public string TargetType { get; set; }
         public string TargetFullName { get; set; }
-        /// <summary>
-        /// 数据起始位
-        /// </summary>
-        [Reactive]
-        public ushort DataStatrtIndex { get; set; }
-        /// <summary>
-        /// 数据结束位
-        /// </summary>
-        [Reactive]
-        public ushort DataEndIndex { get; set; }
+        ///// <summary>
+        ///// 数据起始位
+        ///// </summary>
+        //[Reactive]
+        //public ushort DataStatrtIndex { get; set; }
+        ///// <summary>
+        ///// 数据结束位
+        ///// </summary>
+        //[Reactive]
+        //public ushort DataEndIndex { get; set; }
         [Reactive]
         public string Value { get; set; }
 
@@ -68,6 +68,6 @@ namespace PCAN.Modles
     {
         public string Name { get; set; }
         public Type TargetType { get; set; }
-        public string? FullName { get; set; }
+        public string FullName { get; set; }
     }
 }

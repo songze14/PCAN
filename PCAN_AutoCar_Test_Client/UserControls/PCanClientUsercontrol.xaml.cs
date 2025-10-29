@@ -24,6 +24,7 @@ namespace PCAN_AutoCar_Test_Client.UserControls
                 this.Bind(ViewModel, vm => vm.SelectedBaudrate, v => v.BaudRatesList.SelectedValue).DisposeWith(d);
 
                 this.OneWayBind(ViewModel, vm => vm.LocalFDBaudRates, v => v.BaudFDRatesList.ItemsSource).DisposeWith(d);
+                
                 this.Bind(ViewModel, vm => vm.SelectedBaudrateFD, v => v.BaudFDRatesList.SelectedValue).DisposeWith(d);
 
                 this.Bind(ViewModel, vm => vm.DeviceID, v => v.DeviceIDList.Text).DisposeWith(d);

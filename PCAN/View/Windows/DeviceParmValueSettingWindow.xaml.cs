@@ -35,10 +35,10 @@ namespace PCAN.View.Windows
                 this.OneWayBind(ViewModel, vm => vm.IDReadOnlay, v => v.ID.IsReadOnly).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.ShowPCanParmData.Name, v => v.Name.Text).DisposeWith(d);
                
-                this.Bind(ViewModel, vm => vm.ShowPCanParmData.StatrtIndex, v => v.StatrtIndex.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ShowPCanParmData.EndIndex, v => v.EndIndex.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ShowPCanParmData.DataStatrtIndex, v => v.DataStatrtIndex.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ShowPCanParmData.DataEndIndex, v => v.DataEndIndex.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.ShowPCanParmData.StatrtIndex, v => v.StatrtIndex.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.ShowPCanParmData.EndIndex, v => v.EndIndex.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.ShowPCanParmData.DataStatrtIndex, v => v.DataStatrtIndex.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.ShowPCanParmData.DataEndIndex, v => v.DataEndIndex.Text).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.SaveCommand, v => v.SaveButton).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.TypeInfos, v => v.TargetType.ItemsSource).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.SelectTypeInfo, v => v.TargetType.SelectedItem).DisposeWith(d);
