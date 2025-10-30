@@ -179,6 +179,7 @@ namespace PCAN.ViewModel.RunPage
                     ParmDataGridSource.Clear();
                     var parmDataGridSource = JsonSerializer.Deserialize<List<DevicePCanParmDataGrid>>(parmstr);
                     parmDataGridSource?.ForEach(p => ParmDataGridSource.Add(p));
+                    //ParmDataGridSource.Items.OrderBy(o => o.Index);
                 }
                 catch (Exception ex)
                 {
