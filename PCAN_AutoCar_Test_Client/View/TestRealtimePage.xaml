@@ -42,8 +42,9 @@
                     <Button x:Name="BeTestButton" Content="开始测试" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <Button x:Name="DebugStopButton" Content="停止调试" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <CheckBox x:Name="DebugCheckBox" Content="单步调试" />
-                    <Button x:Name="DebugButton" Content="继续调试" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsEnabled="{Binding IsChecked,ElementName=DebugCheckBox}"/>
+                    <Button x:Name="DebugButton" Content="继续调试" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <Button x:Name="ExTestButton" Content="导出模板" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Button x:Name="OpenWriteSNWindowButton" Content="写入SN" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 </DockPanel>
             </GroupBox>
             <DataGrid x:Name="TestExcelDataGrid" Grid.Row="1"

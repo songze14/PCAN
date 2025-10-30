@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using Peak.Can.Basic;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using TPCANHandle = System.UInt16;
@@ -257,6 +258,7 @@ namespace PCAN.Drive
                 PcanMessage _CANMsg;
                 ulong CANTimeStamp;
                 ushort length;
+                
                 var stsResult = Api.Read(PcanHandle, out _CANMsg, out CANTimeStamp);
                 if (stsResult == PcanStatus.OK)
                 {

@@ -8,7 +8,7 @@ namespace PCAN_AutoCar_Test_Client.Models
 {
     public class Repetitiveinstructions
     {
-        public RepetitiveInstruction Upload { get; set; }
+        public RepetitiveInstruction WriteSN { get; set; }
         public RepetitiveInstruction LinTest { get; set; }
     }
     public class RepetitiveInstruction

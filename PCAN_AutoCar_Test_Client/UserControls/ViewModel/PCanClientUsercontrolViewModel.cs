@@ -162,7 +162,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 
             });
 
-            //this.RefreshPortCommand.Execute(null);
+            this.RefreshPortCommand.Execute(null);
             foreach (var fdconstr in _canSettings.FDConStrEx)
             {
                 LocalFDBaudRates.Add(new LocalFDBaudRate()
@@ -185,13 +185,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
         /// <param name="data"></param>
         /// <param name="useextended"></param>
         /// <param name="action"></param>
-        public void WriteMsg(uint id, byte[] data,bool useextended,Action? action=null)
+        public bool WriteMsg(uint id, byte[] data,bool useextended,Action? action=null)
         {
             
             if (CanDrive == null)
             {
                 MessageBox.Show("请先连接设备");
-                return;
+                return false;
             }
             CanDrive.AddMessage(new PCanWriteMessage() { Data = data,MessageType= useextended?MessageType.Extended:MessageType.Standard, Id = id });
             if (action != null)
@@ -199,7 +199,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 action();
 
             }
-           
+            return true;
            
         }
         private CANDrive CanDrive;

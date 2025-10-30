@@ -8,6 +8,7 @@ using OfficeOpenXml;
 using PCAN.Notification.Log;
 using PCAN_AutoCar_Test_Client.Models;
 using PCAN_AutoCar_Test_Client.Tools;
+using PCAN_AutoCar_Test_Client.View;
 using PCAN_AutoCar_Test_Client.ViewModel.USercontrols;
 using Peak.Can.Basic;
 using ReactiveUI;
@@ -30,7 +31,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 {
     public class TestRealtimePageViewModel :ReactiveObject
     {
-        private RepetitiveInstruction _repetitiveinstruction;
+        private RepetitiveInstruction _linTest;
+        private RepetitiveInstruction _writeSN;
         private Barrier _barrier = new Barrier(2);
         private readonly ReadOnlyObservableCollection<TestExcelGrid> _testExcelGridModels;
         private readonly IMediator _mediator;
@@ -39,11 +41,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         private CancellationTokenSource _testcancellationtokensource;
         private CancellationTokenSource _testDeubgcancellationtokensource;
         private int _sendOrder;
+        private string _needRecvid;
         public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator,IOptions<Repetitiveinstructions> repetitiveinstructionoptions)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _mediator = mediator;
-            _repetitiveinstruction= repetitiveinstructionoptions.Value.LinTest;
+            _linTest= repetitiveinstructionoptions.Value.LinTest;
+            _writeSN=repetitiveinstructionoptions.Value.WriteSN;
             _testcancellationtokensource = new CancellationTokenSource();
             _testDeubgcancellationtokensource = new CancellationTokenSource();
             CanStartTest.Subscribe(x => { UIHelper.RunInUIThread(d => { this.CanStartTesta = x; }); });
@@ -66,11 +70,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                         case TestStep.None:
                             break;
                         case TestStep.StartTest:
-                            if (!string.IsNullOrWhiteSpace(_repetitiveinstruction.ReciveId))
+                            if (!string.IsNullOrWhiteSpace(_linTest.ReciveId))
                             {
-                                if (recvId == _repetitiveinstruction.ReciveId.ToUpper())
+                                if (recvId == _linTest.ReciveId.ToUpper())
                                 {
-                                    if (BitConverter.ToString(msg.DATA[0..msg.LEN]) == _repetitiveinstruction.ReciveOkData.ToUpper())
+                                    if (BitConverter.ToString(msg.DATA[0..msg.LEN]) == _linTest.ReciveOkData.ToUpper())
                                     {
                                         _mediator.Publish(new LogNotification()
                                         {
@@ -82,7 +86,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                         _teststep = TestStep.InTest;
                                         return;
                                     }
-                                    else if (msg.DATASTR == _repetitiveinstruction.ReciveNgData)
+                                    else if (msg.DATASTR == _linTest.ReciveNgData)
                                     {
                                         _mediator.Publish(new LogNotification()
                                         {
@@ -102,7 +106,10 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             }
                             break;
                         case TestStep.InTest:
-                        
+                            if (!recvId.Equals(_needRecvid))
+                            {
+                                return;
+                            }
                             var findTestExcels = _sourceTestExcelGridModels.Items.Where(t => t.RecvId == recvId&& t.Index== _sendOrder);
                             if (!findTestExcels.Any())
                             {
@@ -252,7 +259,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 });
 
                             }
-                            RestRecTimeOut();
+                            if (!DebugTesta)
+                            {
+                                RestRecTimeOut();
+
+                            }
                             break;
                         case TestStep.EndTest:
                             break;
@@ -362,16 +373,16 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                             return;
 
                         }
-                        if (string.IsNullOrWhiteSpace(_repetitiveinstruction.Id))
+                        if (string.IsNullOrWhiteSpace(_linTest.Id))
                         {
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"未配置开启产测指令！" });
                         }
                         else
                         {
                             ///若配置了产测指令，则发送产测指令
-                            var repetitiveinstructionid = Convert.ToUInt32(_repetitiveinstruction.Id, 16);
+                            var repetitiveinstructionid = Convert.ToUInt32(_linTest.Id, 16);
                             byte[] repetitiveinstructiondata;
-                            var datastr = _repetitiveinstruction.Data.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                            var datastr = _linTest.Data.Split('-', StringSplitOptions.RemoveEmptyEntries);
                             if (datastr != null)
                             {
                                 repetitiveinstructiondata = new byte[datastr.Length];
@@ -385,17 +396,17 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 //无数据
                                 repetitiveinstructiondata = [];
                             }
-                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, 
+                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _linTest.Extended, 
                                 DebugTesta ? null : async () => { await RecTimeOut(repetitiveinstructionid, true); });
-                            await Task.Delay(_repetitiveinstruction.SendDelay);
-                            for (int i = 1; i < _repetitiveinstruction.SendCount; i++)
+                            await Task.Delay(_linTest.SendDelay);
+                            for (int i = 1; i < _linTest.SendCount; i++)
                             {
-                                PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended);
+                                PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _linTest.Extended);
 
-                                await Task.Delay(_repetitiveinstruction.SendDelay);
+                                await Task.Delay(_linTest.SendDelay);
                             }
 
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:{_repetitiveinstruction.Id} 数据:{_repetitiveinstruction.Data}" });
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已发送开启产测指令，ID:{_linTest.Id} 数据:{_linTest.Data}" });
 
                             //_barrier.SignalAndWait();
                             await _semaphoreslim.WaitAsync();
@@ -431,14 +442,20 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 {
                                     senddatas[i] = Convert.ToByte(datastr[i], 16);
                                 }
-                                PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true,DebugTesta?null: async () => { await RecTimeOut(sendid); });
-                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"" +
-                                    $"发送ID:{sendgroup.Key:X} " +
-                                    $"数据:{senddatagroup.Key.SendData}" +
-                                    $",下一帧间隔:{senddatagroup.Key.帧间隔}" +
-                                    $"发送序号{_sendOrder}"
-
+                                _needRecvid = senddatagroup.First().RecvId;
+                                await _mediator.Publish(new LogNotification()
+                                {
+                                    LogLevel = LogLevel.Information,
+                                    LogSource = LogSource.TestRealtime,
+                                    Message = $"" +
+                                   $"发送ID:{sendgroup.Key:X} " +
+                                   $"数据:{senddatagroup.Key.SendData}" +
+                                   $",下一帧间隔:{senddatagroup.Key.帧间隔}" +
+                                   $"发送序号{_sendOrder}"+
+                                   $"需要回复{_needRecvid}"
                                 });
+                                PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true,DebugTesta?null: async () => { await RecTimeOut(sendid); });
+                               
                                 _sendOrder = senddatagroup.Key.Index;
 
                                 await _semaphoreslim.WaitAsync();
@@ -514,6 +531,13 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             });
             StopTestCommand = ReactiveCommand.CreateFromTask(StopTest);
             StepTestCommand = ReactiveCommand.CreateFromTask(StepTest);
+            this.OpenWriteSNWindowCommand = ReactiveCommand.Create(() =>
+            {
+                var vm = new WriteSNWindowsViewModel(PCanClientUsercontrolViewModel, _writeSN);
+                var windows = new WriteSNWindows();
+                windows.ViewModel = vm;
+                windows.ShowDialog();
+            });
         }
         /// <summary>
         /// 回复超时
@@ -565,7 +589,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         }
         public async Task StepTest()
         {
-            if (_semaphoreslim.CurrentCount == 0 && DebugTesta && !CanStartTesta)
+            if (_semaphoreslim.CurrentCount == 0 && !CanStartTesta)
             {
                 _semaphoreslim.Release();
 
@@ -628,6 +652,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         public ReactiveCommand<Unit, Unit> StepTestCommand { get; set; }
         public ReactiveCommand<Unit,Task> ExportTemplateCommand { get; set; }
         public ReactiveCommand<Unit, Task> BrowseFileCommand { get; set; }
+        public ReactiveCommand<Unit,Unit> OpenWriteSNWindowCommand { get; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
         public IObservable<IChangeSet<TestExcelGrid>> ChangeObs { get; }
 

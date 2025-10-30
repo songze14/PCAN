@@ -42,6 +42,7 @@ namespace PCAN_AutoCar_Test_Client.View
                 this.BindCommand(ViewModel, vm => vm.StepTestCommand, v => v.DebugButton).DisposeWith(d);
                 this.BindCommand(ViewModel,vm=>vm.StopTestCommand,v=>v.DebugStopButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ExportTemplateCommand, v => v.ExTestButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.OpenWriteSNWindowCommand, v => v.OpenWriteSNWindowButton).DisposeWith(d);
 
             });
         }
