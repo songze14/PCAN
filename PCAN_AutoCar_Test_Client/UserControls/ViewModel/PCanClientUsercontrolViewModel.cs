@@ -162,7 +162,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 
             });
 
-            this.RefreshPortCommand.Execute(null);
+            //this.RefreshPortCommand.Execute(null);
             foreach (var fdconstr in _canSettings.FDConStrEx)
             {
                 LocalFDBaudRates.Add(new LocalFDBaudRate()

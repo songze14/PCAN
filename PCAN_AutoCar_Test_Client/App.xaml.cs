@@ -35,7 +35,9 @@ namespace PCAN_AutoCar_Test_Client
                 {
                     builder
                         .SetBasePath(context.HostingEnvironment.ContentRootPath)
-                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        
+                    
                     builder.AddEnvironmentVariables();
                 })
                 .UseSerilog((hostingContext, services, loggerConfiguration) =>
@@ -69,7 +71,7 @@ namespace PCAN_AutoCar_Test_Client
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.InnerException +"\r\n"+ex.StackTrace+"\r\n"+ ex.Message);
                 using (var scope = this.RootServiceProvider.CreateScope())
                 {
                     var sp = scope.ServiceProvider;

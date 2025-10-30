@@ -37,6 +37,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
         private SemaphoreSlim _semaphoreslim = new SemaphoreSlim(0, 1);
         private CancellationTokenSource _timecancellationtokensource;
         private CancellationTokenSource _testcancellationtokensource;
+        private CancellationTokenSource _testDeubgcancellationtokensource;
         private int _sendOrder;
         public TestRealtimePageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator,IOptions<Repetitiveinstructions> repetitiveinstructionoptions)
         {
@@ -44,6 +45,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             _mediator = mediator;
             _repetitiveinstruction= repetitiveinstructionoptions.Value.LinTest;
             _testcancellationtokensource = new CancellationTokenSource();
+            _testDeubgcancellationtokensource = new CancellationTokenSource();
             CanStartTest.Subscribe(x => { UIHelper.RunInUIThread(d => { this.CanStartTesta = x; }); });
             this.ChangeObs = this._sourceTestExcelGridModels.Connect();
 
@@ -383,7 +385,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 //无数据
                                 repetitiveinstructiondata = [];
                             }
-                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, async () => { await RecTimeOut(repetitiveinstructionid, true); });
+                            PCanClientUsercontrolViewModel.WriteMsg(repetitiveinstructionid, repetitiveinstructiondata, _repetitiveinstruction.Extended, 
+                                DebugTesta ? null : async () => { await RecTimeOut(repetitiveinstructionid, true); });
                             await Task.Delay(_repetitiveinstruction.SendDelay);
                             for (int i = 1; i < _repetitiveinstruction.SendCount; i++)
                             {
@@ -406,6 +409,12 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                                 return;
                             }
+                            else if (_testDeubgcancellationtokensource.IsCancellationRequested)
+                            {
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.TestRealtime, Message = $"取消测试!" });
+
+                                return;
+                            }
                         }
                         var sendgroups = _sourceTestExcelGridModels.Items.GroupBy(t => (t.SendId, t.帧间隔));
 
@@ -422,7 +431,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                                 {
                                     senddatas[i] = Convert.ToByte(datastr[i], 16);
                                 }
-                                PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true, async () => { await RecTimeOut(sendid); });
+                                PCanClientUsercontrolViewModel.WriteMsg(sendid, senddatas, true,DebugTesta?null: async () => { await RecTimeOut(sendid); });
                                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"" +
                                     $"发送ID:{sendgroup.Key:X} " +
                                     $"数据:{senddatagroup.Key.SendData}" +
@@ -431,7 +440,14 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
 
                                 });
                                 _sendOrder = senddatagroup.Key.Index;
+
                                 await _semaphoreslim.WaitAsync();
+                                if (DebugTesta && _testDeubgcancellationtokensource.IsCancellationRequested)
+                                {
+                                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"终止测试！" });
+
+                                    return;
+                                }
                                 Thread.Sleep(senddatagroup.Key.帧间隔);
                               
                             }
@@ -496,6 +512,8 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                 worksheet.Dispose();
                 await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.TestRealtime, Message = $"已导出测试模板至:{saveFilePath}" });
             });
+            StopTestCommand = ReactiveCommand.CreateFromTask(StopTest);
+            StepTestCommand = ReactiveCommand.CreateFromTask(StepTest);
         }
         /// <summary>
         /// 回复超时
@@ -521,6 +539,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                     if (canceltest)
                     {
                         _testcancellationtokensource.Cancel();
+                       
                         CanStartTest.Value = true;
 
                     }
@@ -533,6 +552,24 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
                
             }
          
+        }
+        public async Task StopTest()
+        {
+            if (DebugTesta&& !CanStartTesta)
+            {
+                _semaphoreslim.Release();
+                _testDeubgcancellationtokensource.Cancel();
+
+            }
+           
+        }
+        public async Task StepTest()
+        {
+            if (_semaphoreslim.CurrentCount == 0 && DebugTesta && !CanStartTesta)
+            {
+                _semaphoreslim.Release();
+
+            }
         }
         /// <summary>
         /// 重置回复超时
@@ -575,15 +612,20 @@ namespace PCAN_AutoCar_Test_Client.ViewModel
             CanStartTest.Value = false;
             _teststep =TestStep.StartTest;
             _testcancellationtokensource = new CancellationTokenSource();
+            _testDeubgcancellationtokensource = new CancellationTokenSource();
         }
         [Reactive]
         public string SelectedFilePath { get; set; }
 
         [Reactive]
         public bool CanStartTesta { get; set; }
+        [Reactive]
+        public bool DebugTesta { get; set; }
         public ReactiveProperty<bool> CanStartTest = new ReactiveProperty<bool>();
         private TestStep _teststep;
         public ReactiveCommand<Unit,Task> TestCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> StopTestCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> StepTestCommand { get; set; }
         public ReactiveCommand<Unit,Task> ExportTemplateCommand { get; set; }
         public ReactiveCommand<Unit, Task> BrowseFileCommand { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }

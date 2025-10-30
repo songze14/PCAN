@@ -33,13 +33,15 @@ namespace PCAN_AutoCar_Test_Client.View
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.pcanClientUsercontrol.ViewModel).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.TestExcelGridModels, v => v.TestExcelDataGrid.ItemsSource).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.SelectedFilePath, v => v.FilePathTextBox.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.TestExcelGridModels, v => v.TestExcelDataGrid.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.CanStartTesta, v => v.BeTestButton.IsEnabled).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.DebugTesta, v => v.DebugCheckBox.IsChecked).DisposeWith(d);
+
                 this.BindCommand(ViewModel, vm => vm.BrowseFileCommand, v => v.BrowseFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.TestCommand, v => v.BeTestButton).DisposeWith(d);
-                
-                this.OneWayBind(ViewModel, vm => vm.CanStartTesta, v => v.BeTestButton.IsEnabled ).DisposeWith(d);
-                
+                this.BindCommand(ViewModel, vm => vm.StepTestCommand, v => v.DebugButton).DisposeWith(d);
+                this.BindCommand(ViewModel,vm=>vm.StopTestCommand,v=>v.DebugStopButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ExportTemplateCommand, v => v.ExTestButton).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.TestExcelGridModels, v => v.TestExcelDataGrid.ItemsSource).DisposeWith(d);
 
             });
         }
