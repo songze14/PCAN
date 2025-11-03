@@ -30,12 +30,12 @@
                         <Button x:Name="SaveParmFileButton" Content="保存参数" Width="90" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     </DockPanel>
 
-                    <DataGrid x:Name="ParmDataGrid" AutoGenerateColumns="False" >
+                    <DataGrid x:Name="ParmDataGrid" AutoGenerateColumns="False"  >
                             <DataGrid.Columns>
                                 <!--<DataGridTextColumn Header="时间戳" Binding="{Binding Timestamp}" Width="*"/>-->
                                 <!--<DataGridTextColumn Header="ID" Binding="{Binding ID}"  />-->
-                            <DataGridTextColumn Header="序号" Binding="{Binding Index}" />
-                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" />
+                            <DataGridTextColumn Header="序号" Binding="{Binding Index}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" IsReadOnly="True"/>
                             <!--<DataGridTextColumn Header="数据开始位" Binding="{Binding DataStatrtIndex}" />
                             <DataGridTextColumn Header="数据结束位" Binding="{Binding DataEndIndex}" />
                             <DataGridTextColumn Header="大小" Binding="{Binding Size}" />
@@ -43,7 +43,7 @@
                             <DataGridTextColumn Header="解析结束位" Binding="{Binding EndIndex}" />-->
 
                             <DataGridTextColumn Header="数据类型" Binding="{Binding TargetFullName}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="当前值" Binding="{Binding Value}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="当前值" Binding="{Binding Value,StringFormat={}{0:X2}}" IsReadOnly="True" />
                             <DataGridTextColumn Header="参数"  IsReadOnly="False" />
                             <DataGridTextColumn Header="最小值"  IsReadOnly="True" />
                             <DataGridTextColumn Header="最大值"  IsReadOnly="True" />

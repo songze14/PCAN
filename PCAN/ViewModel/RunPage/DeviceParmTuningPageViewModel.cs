@@ -46,12 +46,16 @@ namespace PCAN.ViewModel.RunPage
                     switch (msg.ID)
                     {
                         case 0x751:
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "收到回复，开始接收数据！" });
                             _parmDatas = [];
                             break;
                         case 0x752:
                             _parmDatas.Add(msg.DATA);
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "收到数据！" });
                             break;
                         case 0x772:
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "数据收取完成，正在解析！" });
+
                             UIHelper.RunInUIThread((d) =>
                             {
                                 var parmbyts = _parmDatas.ToArray();
@@ -65,9 +69,11 @@ namespace PCAN.ViewModel.RunPage
                                     datasub += datas[i].Size;
                                     ParmDataGridSource.Remove(datas[i]);
                                     var b = string.Join("", BitConverter.ToString(data).Split("-"));
-                                    datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString();
+                                    datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString("X");
                                     ParmDataGridSource.Add(datas[i]);
                                 }
+                                _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "正在解析完成！" });
+
                             });
                             //解析数据
                            
