@@ -35,8 +35,8 @@ namespace PCAN_AutoCar_Test_Client
                 {
                     builder
                         .SetBasePath(context.HostingEnvironment.ContentRootPath)
-                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                        
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        .AddJsonFile("C:\\AutoCar_Test_Client\\appsettings.json", optional: true, reloadOnChange: true);
                     
                     builder.AddEnvironmentVariables();
                 })

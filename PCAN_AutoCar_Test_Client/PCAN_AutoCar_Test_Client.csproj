@@ -7,11 +7,25 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	  <!-- 基础版本 -->
+	  <MajorVersion>1</MajorVersion>
+	  <MinorVersion>0</MinorVersion>
+	  <PatchVersion>11</PatchVersion>
+
+	  <!-- 自动生成构建号 -->
+	  <BuildNumber>$([System.DateTime]::Now.ToString("yyMMdd"))</BuildNumber>
+	  <RevisionNumber>$([System.DateTime]::Now.ToString("HHmm"))</RevisionNumber>
+
+	  <!-- 组合版本 -->
+	  <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</AssemblyVersion>
+	  <FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(BuildNumber)</FileVersion>
+	  <InformationalVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-build$(BuildNumber)</InformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- 如果已有 InterceptorsNamespaces，请合并而不是覆盖 -->
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
+    <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

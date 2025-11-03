@@ -60,10 +60,11 @@ namespace PCAN.ViewModel.RunPage
                                 int datasub = 0;
                                 for (var i = 0; i < datas.Count; i++)
                                 {
-                                   
                                     var data = allbytes[datasub..(datasub + datas[i].Size)];
+                                    Array.Reverse(data);
                                     datasub += datas[i].Size;
                                     ParmDataGridSource.Remove(datas[i]);
+                                    var b = string.Join("", BitConverter.ToString(data).Split("-"));
                                     datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString();
                                     ParmDataGridSource.Add(datas[i]);
                                 }

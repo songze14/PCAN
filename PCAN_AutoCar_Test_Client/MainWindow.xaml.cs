@@ -30,6 +30,7 @@ namespace PCAN_AutoCar_Test_Client
             {
                 this.OneWayBind(ViewModel, vm => vm.UILogsViewModel, v => v.uilogView.ViewModel).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.Title, v => v.TitleTextblock.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.Version, v => v.Title).DisposeWith(d);
             });
             AppViewModle = appViewModle;
             AppViewModle.NavigateTo(UrlDefines.URL_Test);
