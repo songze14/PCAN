@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PCAN.Notification.Log;
+using PCAN.Shard.Modles;
 using PCAN_AutoCar_Test_Client.Models;
 using PCAN_AutoCar_Test_Client.Notification.Log;
 using PCAN_AutoCar_Test_Client.View;
@@ -20,6 +21,7 @@ namespace PCAN_AutoCar_Test_Client
             services.AddOptions<CANSetting>().Bind(context.Configuration.GetSection("CANSettings"));
             services.AddOptions<Repetitiveinstructions>().Bind(context.Configuration.GetSection("Repetitiveinstructions"));
             services.AddOptions<AppSet>().Bind(context.Configuration.GetSection("AppSet"));
+            services.AddOptions<CanFileSet>().Bind(context.Configuration.GetSection("CanFileSet"));
             #endregion
 
             services.UseMicrosoftDependencyResolver();

@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PCAN.Drive;
 using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
+using PCAN.Shard.Modles;
 using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -16,10 +18,13 @@ namespace PCAN.ViewModel.USercontrols
 {
     public class PCanClientUsercontrolViewModel:ReactiveObject
     {
-        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator)
+        private readonly CanFileSet _canfileset;
+
+        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator,IOptions<CanFileSet> canfilesetoptions)
         {
             _logger = logger;
             _mediator = mediator;
+            _canfileset= canfilesetoptions.Value;
             this.RefreshPortCommand = ReactiveCommand.Create(() =>
             {
                 Ports.Clear();
@@ -72,6 +77,8 @@ namespace PCAN.ViewModel.USercontrols
                     CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
 
                 }
+                CanDrive.FilterMessages(Convert.ToUInt32(_canfileset.FromId, 16), Convert.ToUInt32(_canfileset.ToId, 16));
+
                 this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                 {
                     NewMessage.Value = msg;

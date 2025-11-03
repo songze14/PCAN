@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PCAN.Notification.Log;
+using PCAN.Shard.Modles;
 using PCAN.View;
 using PCAN.ViewModel;
 using ReactiveUI;
@@ -13,6 +14,8 @@ namespace PCAN
     {
         public static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            services.AddOptions<CanFileSet>().Bind(context.Configuration.GetSection("CanFileSet"));
+
             services.UseMicrosoftDependencyResolver();
             var resolver = Locator.CurrentMutable;
             resolver.InitializeSplat();

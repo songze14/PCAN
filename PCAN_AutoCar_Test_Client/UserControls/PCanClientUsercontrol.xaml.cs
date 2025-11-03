@@ -31,13 +31,16 @@ namespace PCAN_AutoCar_Test_Client.UserControls
                 this.BindCommand(ViewModel, vm => vm.ConnectCommand, v => v.Connect).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.RefreshPortCommand, v => v.RefreshPort).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UnConnectCommand, v => v.UnConnect).DisposeWith(d);
+               
                 this.OneWayBind(ViewModel, vm => vm.NoConnected, v => v.Connect.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.IsConnected, v => v.UnConnect.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.NoConnected, v => v.RefreshPort.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.ConnectLab, v => v.ConnectLab.Content).DisposeWith(d);
+
                 this.Bind(ViewModel, vm => vm.UseCANFD, v => v.EnableCanFdCheckBox.IsChecked).DisposeWith(d);
-                
                 this.Bind(ViewModel, vm => vm.FrameInterval, v => v.FrameInterval.Text).DisposeWith(d);
+               
+
             });
         }
         #region ViewModel

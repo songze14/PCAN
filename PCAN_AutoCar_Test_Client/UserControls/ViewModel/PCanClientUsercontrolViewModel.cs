@@ -6,6 +6,7 @@ using PCAN.Drive.Modle;
 
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
+using PCAN.Shard.Modles;
 using PCAN_AutoCar_Test_Client.Models;
 using Peak.Can.Basic;
 using ReactiveUI;
@@ -20,11 +21,16 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
     public class PCanClientUsercontrolViewModel:ReactiveObject
     {
         private CANSetting _canSettings;
-        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,IMediator mediator,IOptions<CANSetting> cansettingsoptions)
+        private readonly CanFileSet _canfileset;
+
+        public PCanClientUsercontrolViewModel(ILogger<PCanClientUsercontrolViewModel> logger,
+            IMediator mediator,IOptions<CANSetting> cansettingsoptions,IOptions<CanFileSet> canfilesetoptions)
         {
             _logger = logger;
             _mediator = mediator;
-            _canSettings= cansettingsoptions.Value;
+            _canfileset = canfilesetoptions.Value;
+            _canSettings = cansettingsoptions.Value;
+
             this.RefreshPortCommand = ReactiveCommand.Create(() =>
             {
                 try
@@ -91,13 +97,14 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                     if (UseCANFD)
                     {
                         CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval, useFD: true);
-
+                        
                     }
                     else
                     {
                         CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
 
                     }
+                    CanDrive.FilterMessages(Convert.ToUInt32( _canfileset.FromId,16),Convert.ToUInt32( _canfileset.ToId,16));
                     this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                     {
                         NewMessage.Value = msg;
@@ -161,7 +168,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                 }
                 
             });
-
+           
             this.RefreshPortCommand.Execute(null);
             foreach (var fdconstr in _canSettings.FDConStrEx)
             {
@@ -220,6 +227,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
 
         [Reactive]
         public bool UseCANFD { get; set; } = false;
+       
         public Bitrate SelectedBaudrate { get; set; }
         public string SelectedBaudrateFD { get; set; }= BitrateFD.BitrateSaeJ2284_4;
         public string DeviceID { get; set; }
@@ -287,6 +295,7 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
         public ICommand ConnectCommand { get; }
         public ICommand UnConnectCommand { get; }
         public ICommand RefreshPortCommand { get; }
+     
 
     }
 }

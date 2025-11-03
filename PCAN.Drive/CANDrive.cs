@@ -133,7 +133,7 @@ namespace PCAN.Drive
         {
             PcanHandle = (PcanChannel)handle;
             m_DeviceID = driveid;
-     
+            UseFD=useFD;
             _mediator = mediator;
             m_SleepTime = sleeptime;
             CANReadMsgSubject = new Subject<ReadMessage>();
@@ -367,7 +367,19 @@ namespace PCAN.Drive
             this.IsReadly = false;
 
         }
-
+        public bool FilterMessages(uint fromid,uint toid)
+        {
+            var status= Api.FilterMessages(PcanHandle, fromid, toid, UseFD ? FilterMode.Extended: FilterMode.Standard);
+            if (status == PcanStatus.OK)
+            {
+                return true;
+            }
+            else
+            {
+                _mediator.Publish(new LogNotification() { LogLevel= LogLevel.Error, LogSource = LogSource.CanDevice, Message = $"设置过滤器失败:{status}" });
+                return false;
+            }
+        }
 
     }
 }
