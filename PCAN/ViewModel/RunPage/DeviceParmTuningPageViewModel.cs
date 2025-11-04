@@ -13,6 +13,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -70,6 +71,7 @@ namespace PCAN.ViewModel.RunPage
                                     ParmDataGridSource.Remove(datas[i]);
                                     var b = string.Join("", BitConverter.ToString(data).Split("-"));
                                     datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString("X");
+                                    datas[i].SetValue =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString("X");
                                     ParmDataGridSource.Add(datas[i]);
                                 }
                                 _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "正在解析完成！" });
@@ -90,20 +92,20 @@ namespace PCAN.ViewModel.RunPage
                 }
 
             });
-            ParmAddCommand = ReactiveCommand.Create(() =>
+            this.ParmAddCommand = ReactiveCommand.Create(() =>
             {
                 var windowviewmodle = new DeviceParmValueSettingWindowViewModel(TypeInfos, ParmDataGridSource, null);
                 var window = new DeviceParmValueSettingWindow(windowviewmodle);
                 window.ShowDialog();
-            }); 
-            ParmDeleteCommand = ReactiveCommand.Create(() =>
+            });
+            this.ParmDeleteCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectData != null)
                 {
                     ParmDataGridSource.Remove(SelectData);
                 }
             });
-            ParmEditCommand = ReactiveCommand.Create(() =>
+            this.ParmEditCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectData != null)
                 {
@@ -151,7 +153,7 @@ namespace PCAN.ViewModel.RunPage
                 }
 
             });
-            BrowseFileCommand = ReactiveCommand.Create(() =>
+            this.BrowseFileCommand = ReactiveCommand.Create(() =>
             {
                 try
                 {
@@ -209,6 +211,20 @@ namespace PCAN.ViewModel.RunPage
                 PCanClientUsercontrolViewModel.WriteMsg(0x710, commandFrame);
 
             });
+            this.OpenImportParmWindowCommand = ReactiveCommand.Create(() =>
+            {
+                var window = new DeviceParmValueImportWindow();
+                var viewmodel = new DeviceParmValueImportWindowViewModel(ParmDataGridSource);
+                window.ViewModel = viewmodel;
+                window.ShowDialog();
+            });
+            this.SendParmCommand = ReactiveCommand.Create(() =>
+            {
+                if (_parmDatas.Count == 0)
+                    return;
+                var parmbyts = _parmDatas.ToArray();
+                var allbytes = parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
+            });
         }
         public ReactiveCommand<Unit, Unit> BrowseFileCommand { get; set; }
 
@@ -218,6 +234,8 @@ namespace PCAN.ViewModel.RunPage
         public ReactiveCommand<Unit, Unit> SaveParmFileCommand { get; }
         public ReactiveCommand<Unit,Unit> LoadParmFileCommand { get; set; }
         public ReactiveCommand<Unit,Unit> ReadParmCommand { get; set; }
+        public ReactiveCommand<Unit,Unit> SendParmCommand { get; set; }
+        public ReactiveCommand<Unit,Unit> OpenImportParmWindowCommand { get; set; }
         [Reactive]
         public string SelectedFilePath { get; set; }
         [Reactive]
@@ -229,16 +247,18 @@ namespace PCAN.ViewModel.RunPage
         public ReadOnlyObservableCollection<DevicePCanParmDataGrid> ParmDataGridCollection => _parmDataGridItems;
         public  ObservableCollection<TypeInfo> TypeInfos { get; set; }=
         [
-            new TypeInfo(){Name="Byte",TargetType=typeof(byte),FullName=typeof(byte).FullName},
-            new TypeInfo(){Name="Int16",TargetType=typeof(short),FullName=typeof(short).FullName},
-            new TypeInfo(){Name="UInt16",TargetType=typeof(ushort),FullName=typeof(ushort).FullName},
-            new TypeInfo(){Name="Int32",TargetType=typeof(int),FullName=typeof(int).FullName},
-            new TypeInfo(){Name="UInt32",TargetType=typeof(uint),FullName=typeof(uint).FullName},
-            new TypeInfo(){Name="Int64",TargetType=typeof(long),FullName=typeof(long).FullName},
-            new TypeInfo(){Name="UInt64",TargetType=typeof(ulong),FullName=typeof(ulong).FullName},
-            new TypeInfo(){Name="Single",TargetType=typeof(float),FullName=typeof(float).FullName},
-            new TypeInfo(){Name="Double",TargetType=typeof(double),FullName=typeof(double).FullName},
-            new TypeInfo(){Name="Boolean",TargetType=typeof(bool),FullName=typeof(bool).FullName},
+            new TypeInfo(){Name="u8",TargetType=typeof(byte),FullName=typeof(byte).FullName,Size=Marshal.SizeOf(typeof(byte))},
+            new TypeInfo(){Name="u16",TargetType=typeof(ushort),FullName=typeof(ushort).FullName,Size=Marshal.SizeOf(typeof(ushort))},
+            new TypeInfo(){Name="u32",TargetType=typeof(uint),FullName=typeof(uint).FullName,Size=Marshal.SizeOf(typeof(uint))},
+            new TypeInfo(){Name="u64",TargetType=typeof(ulong),FullName=typeof(ulong).FullName,Size=Marshal.SizeOf(typeof(ulong))},
+            new TypeInfo(){Name="s8",TargetType=typeof(sbyte),FullName=typeof(sbyte).FullName,Size=Marshal.SizeOf(typeof(sbyte))},
+            new TypeInfo(){Name="s16",TargetType=typeof(short),FullName=typeof(short).FullName,Size=Marshal.SizeOf(typeof(short))},
+            new TypeInfo(){Name="s32",TargetType=typeof(int),FullName=typeof(int).FullName,Size=Marshal.SizeOf(typeof(int))},
+            new TypeInfo(){Name="s64",TargetType=typeof(long),FullName=typeof(long).FullName,Size=Marshal.SizeOf(typeof(long))},
+            new TypeInfo(){Name="float",TargetType=typeof(float),FullName=typeof(float).FullName,Size=Marshal.SizeOf(typeof(float))},
+            new TypeInfo(){Name="double",TargetType=typeof(double),FullName=typeof(double).FullName,Size=Marshal.SizeOf(typeof(double))},
+            new TypeInfo(){Name="bool",TargetType=typeof(bool),FullName=typeof(bool).FullName,Size=Marshal.SizeOf(typeof(bool))},
+            new TypeInfo(){Name="char",TargetType=typeof(char),FullName=typeof(char).FullName,Size=Marshal.SizeOf(typeof(char))},
         ];
 
     }

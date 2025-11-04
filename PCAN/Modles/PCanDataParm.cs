@@ -55,13 +55,15 @@ namespace PCAN.Modles
         ///// </summary>
         //[Reactive]
         //public ushort DataStatrtIndex { get; set; }
-        ///// <summary>
-        ///// 数据结束位
-        ///// </summary>
-        //[Reactive]
-        //public ushort DataEndIndex { get; set; }
+        /// <summary>
+        /// 备注
+        /// </summary>
+        [Reactive]
+        public string Remark { get; set; }
         [Reactive]
         public string Value { get; set; }
+        [Reactive]
+        public string SetValue { get; set; }
 
     }
     public class TypeInfo
@@ -69,5 +71,6 @@ namespace PCAN.Modles
         public string Name { get; set; }
         public Type TargetType { get; set; }
         public string FullName { get; set; }
+        public int Size { get; set; }   
     }
 }
