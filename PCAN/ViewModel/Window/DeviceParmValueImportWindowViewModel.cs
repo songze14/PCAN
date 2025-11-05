@@ -64,7 +64,7 @@ namespace PCAN.ViewModel.Window
                         {
                             ID = sourceList.Count + 1,
                             Index = sourceList.Count,
-                            Name = parms[1],
+                            Name = parms[1][0..(parms[1].Length-1)],
                             Remark = remark,
                             Size = typeinfo.Size,
                             TargetFullName = typeinfo.Name,

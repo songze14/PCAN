@@ -40,6 +40,7 @@ namespace PCAN.View.RealtimePage
                 this.BindCommand(ViewModel, vm => vm.LoadParmFileCommand, v => v.LoadParmFileButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.ReadParmCommand, v => v.ReadParmButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.OpenImportParmWindowCommand, v => v.ImportParmButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.SendParmCommand, v => v.SendParmButton).DisposeWith(d);
             });
         }
         #region ViewModel

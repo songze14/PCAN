@@ -5,12 +5,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using PCAN.Modles;
 using PCAN.Notification.Log;
+using PCAN.Shard.Tools;
 using PCAN.Tools;
 using PCAN.View.Windows;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat.ModeDetection;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -46,7 +48,7 @@ namespace PCAN.ViewModel.RunPage
                         return;
                     switch (msg.ID)
                     {
-                        case 0x751:
+                        case 0x770:
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "收到回复，开始接收数据！" });
                             _parmDatas = [];
                             break;
@@ -59,26 +61,46 @@ namespace PCAN.ViewModel.RunPage
 
                             UIHelper.RunInUIThread((d) =>
                             {
-                                var parmbyts = _parmDatas.ToArray();
-                                var allbytes = parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
-                                var datas = ParmDataGridSource.Items.OrderBy(o => o.Index).ToList();
-                                int datasub = 0;
-                                for (var i = 0; i < datas.Count; i++)
+                                try
                                 {
-                                    var data = allbytes[datasub..(datasub + datas[i].Size)];
-                                    Array.Reverse(data);
-                                    datasub += datas[i].Size;
-                                    ParmDataGridSource.Remove(datas[i]);
-                                    var b = string.Join("", BitConverter.ToString(data).Split("-"));
-                                    datas[i].Value =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString("X");
-                                    datas[i].SetValue =Convert.ToInt64("0x"+string.Join("",BitConverter.ToString(data).Split("-")),16).ToString("X");
-                                    ParmDataGridSource.Add(datas[i]);
+                                    var parmbyts = _parmDatas.ToArray();
+                                    var allbytes = parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
+                                    var datas = ParmDataGridSource.Items.OrderBy(o => o.Index).ToList();
+                                    int datasub = 0;
+                                    for (var i = 0; i < datas.Count; i++)
+                                    {
+                                        var data = allbytes[datasub..(datasub + datas[i].Size)];
+                                        datasub += datas[i].Size;
+                                        ParmDataGridSource.Remove(datas[i]);
+                                        var b = string.Join("", BitConverter.ToString(data).Split("-"));
+                                        string value = GetParmValue(datas[i].TargetFullName,data);
+                                        datas[i].Value = value;
+                                        datas[i].SetValue = value;
+                                        ParmDataGridSource.Add(datas[i]);
+                                    }
+                                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "解析完成！" });
                                 }
-                                _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "正在解析完成！" });
+                                catch (Exception ex)
+                                {
+
+                                     _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.Upload, Message = $"解析参数异常{ex.Message}" });
+
+                                }
+
 
                             });
                             //解析数据
                            
+                            break;
+                        case 0x70A:
+                            var data = msg.DATA;
+                            var functionalcode = data[4];
+                            if (functionalcode==1)
+                            {
+                                var haserr = data[5] == 0;
+                                await _mediator.Publish(new LogNotification() { LogLevel = haserr? LogLevel.Information:LogLevel.Error, LogSource = LogSource.DeviceParm, Message = haserr ?"参数调整完成":"参数调试失败，报告错误！" });
+
+                            }
                             break;
                         default:
                             break;
@@ -209,6 +231,8 @@ namespace PCAN.ViewModel.RunPage
                 var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
                 dirveridBytes.CopyTo(commandFrame, 0);
                 PCanClientUsercontrolViewModel.WriteMsg(0x710, commandFrame);
+                 _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "已发送指令！" });
+
 
             });
             this.OpenImportParmWindowCommand = ReactiveCommand.Create(() =>
@@ -220,10 +244,80 @@ namespace PCAN.ViewModel.RunPage
             });
             this.SendParmCommand = ReactiveCommand.Create(() =>
             {
-                if (_parmDatas.Count == 0)
-                    return;
-                var parmbyts = _parmDatas.ToArray();
-                var allbytes = parmbyts.Where(innerArray => innerArray != null).SelectMany(innerArray => innerArray).ToArray();
+                try
+                {
+                    if (_parmDatas.Count == 0)
+                        return;
+                    int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID, 16);
+                    if (driveid == 0)
+                    {
+                        MessageBox.Show("设备ID错误");
+                        return;
+                    }
+                    var senddatalist = new List<byte[]>();
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "开始数据整合！" });
+                    
+                    foreach (var item in ParmDataGridSource.Items)
+                    {
+                        byte[] bytes = new byte[item.Size];
+                        switch (item.TargetFullName)
+                        {
+                            case "char":
+                                var chardatabyte=Encoding.ASCII.GetBytes(item.SetValue);
+                                chardatabyte.CopyTo(bytes, 0);
+                                break;
+                            case "float":
+                                var floatdatabyte = BitConverter.GetBytes(float.Parse(item.SetValue));
+                                floatdatabyte[0..item.Size].CopyTo(bytes, 0);
+
+                                break;
+                            default:
+                                var databyte = BitConverter.GetBytes(Convert.ToInt64( item.SetValue));
+                                databyte[0..item.Size].CopyTo(bytes, 0);
+                               
+                                break;
+                        }
+                       
+                        senddatalist.Add(bytes);
+                    }
+                    var parmbyts = senddatalist.SelectMany(o => o).ToArray();
+                    senddatalist = [];
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "开始数据切片分包！" });
+
+                    //切片分包
+                    for (int i = 0; i < parmbyts.Length; i += 8)
+                    {
+                        var chunk = parmbyts.Skip(i).Take(8).ToArray();
+                        senddatalist.Add(chunk);
+                    }
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = $"数据分包{senddatalist.Count}！" });
+
+                    var commandFrame = new byte[8];
+                    var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
+                    dirveridBytes.CopyTo(commandFrame, 0);
+                    var datalenght = BitConverter.GetBytes(parmbyts.Length);
+                    datalenght.CopyTo(commandFrame, 4);
+                    PCanClientUsercontrolViewModel.WriteMsg(0x713, commandFrame);
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "开始发送参数！" });
+                    var crc = CRC.CalculateCRC8(parmbyts);
+                    foreach (var item in senddatalist)
+                    {
+                        PCanClientUsercontrolViewModel.WriteMsg(0x714, item);
+                    }
+                    PCanClientUsercontrolViewModel.WriteMsg(0x715, [crc]);
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "参数发送完成！" });
+
+
+                }
+                catch (Exception ex)
+                {
+
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DeviceParm, Message = $"发送参数时出现错误:{ex.Message}！" });
+
+                }
+
+
+
             });
         }
         public ReactiveCommand<Unit, Unit> BrowseFileCommand { get; set; }
@@ -256,10 +350,21 @@ namespace PCAN.ViewModel.RunPage
             new TypeInfo(){Name="s32",TargetType=typeof(int),FullName=typeof(int).FullName,Size=Marshal.SizeOf(typeof(int))},
             new TypeInfo(){Name="s64",TargetType=typeof(long),FullName=typeof(long).FullName,Size=Marshal.SizeOf(typeof(long))},
             new TypeInfo(){Name="float",TargetType=typeof(float),FullName=typeof(float).FullName,Size=Marshal.SizeOf(typeof(float))},
-            new TypeInfo(){Name="double",TargetType=typeof(double),FullName=typeof(double).FullName,Size=Marshal.SizeOf(typeof(double))},
-            new TypeInfo(){Name="bool",TargetType=typeof(bool),FullName=typeof(bool).FullName,Size=Marshal.SizeOf(typeof(bool))},
             new TypeInfo(){Name="char",TargetType=typeof(char),FullName=typeof(char).FullName,Size=Marshal.SizeOf(typeof(char))},
         ];
-
+        private string GetParmValue(string typename, byte[] data) => typename switch
+        {
+            "u8" => data[0].ToString(),
+            "u16"=> BitConverter.ToUInt16(data).ToString(),
+            "u32" => BitConverter.ToUInt32(data).ToString(),
+            "u64"=> BitConverter.ToUInt64(data).ToString(),
+            "s8"=> Convert.ToSByte(data).ToString(),
+            "s16"=> BitConverter.ToInt16(data).ToString(),
+            "s32"=> BitConverter.ToInt32(data).ToString(),
+            "s64"=> BitConverter.ToUInt64(data).ToString(),
+            "float" => BitConverter.ToSingle(data).ToString(),
+            "char" => Encoding.ASCII.GetString(data),
+        };
+       
     }
 }

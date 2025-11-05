@@ -44,11 +44,12 @@
                             <DataGridTextColumn Header="解析结束位" Binding="{Binding EndIndex}" />-->
 
                             <DataGridTextColumn Header="数据类型" Binding="{Binding TargetFullName}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="当前值" Binding="{Binding Value,StringFormat={}{0:X2}}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="参数" Binding="{Binding SetValue,StringFormat={}{0:X2}}" IsReadOnly="False" />
+                            <DataGridTextColumn Header="当前值" Binding="{Binding Value}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="参数" Binding="{Binding SetValue}" IsReadOnly="False" />
                             <DataGridTextColumn Header="最小值"  IsReadOnly="True" />
                             <DataGridTextColumn Header="最大值"  IsReadOnly="True" />
-                            <DataGridTemplateColumn Header="操作">
+                            <DataGridTextColumn Header="备注" Binding="{Binding Remark}" IsReadOnly="True"/>
+                                <DataGridTemplateColumn Header="操作">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <DockPanel>
