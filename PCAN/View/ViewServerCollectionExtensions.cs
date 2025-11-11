@@ -20,7 +20,8 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<UploadPageViewModel>, UploadPage>();
             services.AddSingleton<IViewFor<UILogsViewModel>, UILogsView>();
             services.AddSingleton<IViewFor<DeviceParmTuningPageViewModel>, DeviceParmTuningPage>();
-            
+            services.AddSingleton<IViewFor<DataMonitoringPageViewModel>, DataMonitoringPage>();
+            services.AddTransient<WpfPlotGLUserControl>();
             return services;
         }
     }

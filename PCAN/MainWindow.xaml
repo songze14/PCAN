@@ -38,6 +38,7 @@
                 <MenuItem x:Name="PCANDataParse" Header="PCAN信息解析" Click="PCANDataParse_Click"/>
                 <MenuItem x:Name="Upload" Header="升级" Click="Upload_Click"/>
                 <MenuItem x:Name="DeviceParmTuning" Header="设备参数调试" Click="DeviceParmTuning_Click"/>
+                <MenuItem x:Name="DataMonitoring" Header="数据监控" Click="DataMonitoring_Click"/>
 
             </Menu>
         </Border>

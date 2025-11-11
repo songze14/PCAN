@@ -77,6 +77,11 @@ namespace PCAN
             AppViewModle.NavigateTo(UrlDefines.URL_DeviceParmTuning);
 
         }
+
+        private void DataMonitoring_Click(object sender, RoutedEventArgs e)
+        {
+            AppViewModle.NavigateTo(UrlDefines.URL_DataMonitoring);
+        }
     }
   
 }
