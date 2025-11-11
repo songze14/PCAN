@@ -16,3 +16,4 @@ Serilog.Settings.Configuration
 Serilog.Sinks.File
 Splat.Microsoft.Extensions.DependencyInjection
 System.IO.Hashing
+ScottPlot.WPF

@@ -102,8 +102,6 @@ namespace PCAN.ViewModel.Window
             new TypeInfo(){Name="s32",TargetType=typeof(int),FullName=typeof(int).FullName,Size=Marshal.SizeOf(typeof(int))},
             new TypeInfo(){Name="s64",TargetType=typeof(long),FullName=typeof(long).FullName,Size=Marshal.SizeOf(typeof(long))},
             new TypeInfo(){Name="float",TargetType=typeof(float),FullName=typeof(float).FullName,Size=Marshal.SizeOf(typeof(float))},
-            new TypeInfo(){Name="double",TargetType=typeof(double),FullName=typeof(double).FullName,Size=Marshal.SizeOf(typeof(double))},
-            new TypeInfo(){Name="bool",TargetType=typeof(bool),FullName=typeof(bool).FullName,Size=Marshal.SizeOf(typeof(bool))},
             new TypeInfo(){Name="char",TargetType=typeof(char),FullName=typeof(char).FullName,Size=Marshal.SizeOf(typeof(char))},
         ];
     }
