@@ -14,6 +14,7 @@ namespace PCAN.Modles
         public const string URL_PCANDataParse = "PCANDATA数据解析";
         public const string URL_DeviceParmTuning = "设备参数调试";
         public const string URL_DataMonitoring = "数据监控";
+        public const string URL_SysTemSettings = "系统设置";
 
     }
 }

@@ -21,6 +21,7 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<UILogsViewModel>, UILogsView>();
             services.AddSingleton<IViewFor<DeviceParmTuningPageViewModel>, DeviceParmTuningPage>();
             services.AddSingleton<IViewFor<DataMonitoringPageViewModel>, DataMonitoringPage>();
+            services.AddSingleton<IViewFor<SysTemSettingsPageViewModel>, SysTemSettingsPage>();
             services.AddTransient<WpfPlotGLUserControl>();
             return services;
         }

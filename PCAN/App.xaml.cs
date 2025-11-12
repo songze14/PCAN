@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PCAN.SqlLite.Model;
 using PCAN.ViewModel.Window;
 using ReactiveUI;
 using Serilog;
@@ -51,6 +52,12 @@ namespace PCAN
             RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             try
             {
+                using (var scope = _host.Services.CreateScope())
+                {
+                    var sp = scope.ServiceProvider;
+                    var db = sp.GetRequiredService<SQLDbContext>();
+                    var a= db.Database.EnsureCreated();
+                }
                 var mainWin = this.RootServiceProvider.GetRequiredService<IViewFor<MainWindowViewModel>>() as Window;
                 mainWin.Show();
                 var thread = new Thread(async () =>

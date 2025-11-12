@@ -32,6 +32,30 @@ namespace PCAN.View.RealtimePage
             {
                 this.OneWayBind(ViewModel, vm => vm.WpfPlotGLUserControl, v => v.PlotCon.Content).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PCanClientUsercontrol.ViewModel).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
+                #region SendDataComboxSelect
+                this.Bind(ViewModel, vm => vm.SendData0, v => v.SendData0Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData1, v => v.SendData1Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData2, v => v.SendData2Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData3, v => v.SendData3Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData4, v => v.SendData4Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData5, v => v.SendData5Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData6, v => v.SendData6Combox.SelectedItem).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.SendData7, v => v.SendData7Combox.SelectedItem).DisposeWith(d);
+                #endregion
+                #region SendDataComboxDataSource
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData0Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData1Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData2Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData3Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData4Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData5Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData6Combox.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingDataParm, v => v.SendData7Combox.ItemsSource).DisposeWith(d);
+                #endregion
+                #region 参数文本
+                this.OneWayBind(ViewModel, vm => vm.SendDataText, v => v.SendDataTextBlock.Text).DisposeWith(d);
+                #endregion
             });
         }
         #region ViewModel

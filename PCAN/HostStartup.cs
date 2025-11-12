@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using PCAN.Notification.Log;
 using PCAN.Shard.Modles;
+using PCAN.SqlLite;
 using PCAN.View;
 using PCAN.ViewModel;
 using ReactiveUI;
@@ -23,7 +24,7 @@ namespace PCAN
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LogNotificationHandle).Assembly) );
             services.AddViewModels();
             services.AddViews();
-
+            services.AddSqlLite(context.Configuration);
 
 
 

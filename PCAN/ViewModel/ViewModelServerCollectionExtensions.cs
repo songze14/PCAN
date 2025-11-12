@@ -24,6 +24,7 @@ namespace PCAN.ViewModel
                     UrlDefines.URL_Upload => sp.GetRequiredService<IViewFor<UploadPageViewModel>>() as Page,
                     UrlDefines.URL_DeviceParmTuning => sp.GetRequiredService<IViewFor<DeviceParmTuningPageViewModel>>() as Page,
                     UrlDefines.URL_DataMonitoring => sp.GetRequiredService<IViewFor<DataMonitoringPageViewModel>>() as Page,
+                    UrlDefines.URL_SysTemSettings => sp.GetRequiredService<IViewFor<SysTemSettingsPageViewModel>>() as Page,
                 }
                 ;
                 return appvm;
@@ -34,6 +35,7 @@ namespace PCAN.ViewModel
             services.AddSingleton<UILogsViewModel>();
             services.AddSingleton<DeviceParmTuningPageViewModel>();
             services.AddSingleton<DataMonitoringPageViewModel>();
+            services.AddSingleton<SysTemSettingsPageViewModel>();
             return services;
         }
     }
