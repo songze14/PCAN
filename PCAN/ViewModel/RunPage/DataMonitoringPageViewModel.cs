@@ -48,9 +48,9 @@ namespace PCAN.ViewModel.RunPage
             {
                 var receivedatalenght = 0;
                 var senddatatext = new StringBuilder();
-                senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index,  senddatatext):UpdateSendData( ref receivedatalenght,0,0, senddatatext);
+                senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index,  senddatatext):UpdateSendData( ref receivedatalenght,0,0, senddatatext);
+                senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
                 senddatatext = SendData2 != null ? UpdateSendData(ref receivedatalenght, SendData2.Size, SendData2.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
@@ -60,16 +60,27 @@ namespace PCAN.ViewModel.RunPage
                 senddatatext.Append('-');
                 senddatatext = SendData5 != null ? UpdateSendData(ref receivedatalenght, SendData5.Size, SendData5.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index,  senddatatext):UpdateSendData( ref receivedatalenght,0,0, senddatatext);
+                senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index,  senddatatext):UpdateSendData( ref receivedatalenght,0,0, senddatatext);
-              
+                senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+
                 SendDataText = senddatatext.ToString();
+                HasLockSendParm = true;
             });
-                GetDataMonitoringSettingDataParmSourceList();
+            this.UnLockSendDataCommand= ReactiveCommand.Create(() =>
+            {
+                HasLockSendParm = false;
+            });
+            this.StartCommand = ReactiveCommand.Create(() =>
+            {
+                StartDataText = SendDataText;
+            });
+            GetDataMonitoringSettingDataParmSourceList();
         }
         private async Task GetDataMonitoringSettingDataParmSourceList()
         {
+            DataMonitoringSettingDataParmSourceList.Clear();
+
             DataMonitoringSettingDataParmSourceList.Add(new SqlLite.Model.DataMonitoringSettingDataParm()
             {
                 Index = 0,
@@ -77,7 +88,6 @@ namespace PCAN.ViewModel.RunPage
                 Type = "None"
             });
             var result =await _datamonitoringsettingservice.GetDataMonitoringSettingDataParms();
-            DataMonitoringSettingDataParmSourceList.Clear();
             DataMonitoringSettingDataParmSourceList.AddRange(result);
         }
         private StringBuilder UpdateSendData(ref int receivedatalenght,int addreceivedatalenght,int addsenddatatextIndex,  StringBuilder senddatatext)
@@ -112,10 +122,33 @@ namespace PCAN.ViewModel.RunPage
         #endregion
         #region Command
         public ReactiveCommand<Unit,Unit> LockSendDataCommand { get; }
+        public ReactiveCommand<Unit,Unit> UnLockSendDataCommand { get; }
+        public ReactiveCommand<Unit,Unit> StartCommand { get; }
+        public ReactiveCommand<Unit,Unit> StopCommand { get; }
+        #endregion
+        #region Flag
+        [Reactive]
+        public bool HasLockSendParm { get; set; }
         #endregion
         #region 参数文本
+
+        [Reactive]
+        public string GetDataIDText { get; set; }
         [Reactive]
         public string SendDataText { get; set; }
+        [Reactive]
+        public string StartIdText { get; set; } = "100";
+        [Reactive]
+        public string StartDataText { get; set; }
+
+        [Reactive]
+        public string StopIdText { get; set; } 
+        [Reactive]
+        public string StopDataText { get; set; }
+
+
+        [Reactive]
+        public string ReciveDataIdText { get; set; }
         #endregion
         public WpfPlotGLUserControl WpfPlotGLUserControl { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; set; }
