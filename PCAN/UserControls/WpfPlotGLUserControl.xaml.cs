@@ -1,6 +1,8 @@
-﻿using ReactiveUI;
+﻿using PCAN.Tools;
+using ReactiveUI;
 using ScottPlot;
 using ScottPlot.Plottables;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -29,19 +31,19 @@ namespace PCAN.UserControls
         Dictionary<string, Crosshair> _crosshairs = new Dictionary<string, Crosshair>();
         Dictionary<string, Label> _labelCs = new Dictionary<string, Label>();
         private readonly System.Windows.Threading.DispatcherTimer DispatcherTimer = new() { Interval = TimeSpan.FromMilliseconds(10) };
-        private int datalen = 20000;
+        
         private int currentTime = 1; // 时间增量
         public WpfPlotGLUserControl()
         {
             InitializeComponent();
             this.DataContext= this;
-            DispatcherTimer.Tick += (s, e) =>
-            {
-                double displayDuration = datalen * 0.1; // 显示的时间窗口长度
-                WpfPlot1.Plot.Axes.SetLimitsX(currentTime - displayDuration, currentTime);
-                WpfPlot1.Refresh();
-                currentTime+=10;
-            };
+            //DispatcherTimer.Tick += (s, e) =>
+            //{
+            //    double displayDuration = datalen * 0.1; // 显示的时间窗口长度
+            //    WpfPlot1.Plot.Axes.SetLimitsX(currentTime - displayDuration, currentTime);
+            //    WpfPlot1.Refresh();
+            //    currentTime+=10;
+            //};
 
         }
 
@@ -162,6 +164,15 @@ namespace PCAN.UserControls
                 return false;
             }
         }
+        public void ClearAllSignal()
+        {
+            foreach (var item in _signals)
+            {
+                RemoveSignal(item.Key);
+            }
+           
+           
+        }
         public void StartTimer()
         {
             if (!DispatcherTimer.IsEnabled)
@@ -177,6 +188,17 @@ namespace PCAN.UserControls
                 DispatcherTimer.Stop();
 
             }
+        }
+        public void SetLimit()
+        {
+            UIHelper.RunInUIThread((d) =>
+            {
+             
+                WpfPlot1.Plot.Axes.SetLimitsX(currentTime - 0.1, currentTime);
+                WpfPlot1.Refresh();
+                currentTime ++;
+            });
+            
         }
     }
 }

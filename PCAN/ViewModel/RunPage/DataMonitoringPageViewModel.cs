@@ -3,6 +3,7 @@ using DynamicData.Binding;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using PCAN.Modles;
+using PCAN.Notification.Log;
 using PCAN.SqlLite.Abs;
 using PCAN.SqlLite.Model;
 using PCAN.UserControls;
@@ -38,6 +39,24 @@ namespace PCAN.ViewModel.RunPage
             _mediator = mediator;
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _datamonitoringsettingservice = dataMonitoringSettingService;
+            PCanClientUsercontrolViewModel.NewMessage.Subscribe(msg =>
+            {
+                if (msg == null)
+                    return;
+                var id ="0X"+ msg.ID.ToString("X");
+                if (id == _reciveDataId && HasStart)
+                {
+                    var index = 0;
+                    foreach (var item in DataMonitoringSettingDataParmList)
+                    {
+                        var plotdata = PlotDics[item.Name];
+                        var data =double.Parse( msg.DATA[index..(index+item.Size)]);
+                        index+=item.Size;   
+                        plotdata.Add(data);
+                    }
+                    WpfPlotGLUserControl.SetLimit();
+                }
+            });
             DataMonitoringSettingDataParmSourceList
               .Connect()
               .Sort(SortExpressionComparer<DataMonitoringSettingDataParm>.Ascending(x => x.Index)) // 排序
@@ -46,25 +65,31 @@ namespace PCAN.ViewModel.RunPage
               .Subscribe();
             this.LockSendDataCommand = ReactiveCommand.Create(() =>
             {
+                DataMonitoringSettingDataParmList.Clear();
                 var receivedatalenght = 0;
                 var senddatatext = new StringBuilder();
-                senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index, senddatatext, SendData0) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index, senddatatext, SendData1) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData2 != null ? UpdateSendData(ref receivedatalenght, SendData2.Size, SendData2.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData2 != null ? UpdateSendData(ref receivedatalenght, SendData2.Size, SendData2.Index, senddatatext, SendData2) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData3 != null ? UpdateSendData(ref receivedatalenght, SendData3.Size, SendData3.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData3 != null ? UpdateSendData(ref receivedatalenght, SendData3.Size, SendData3.Index, senddatatext, SendData3) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData4 != null ? UpdateSendData(ref receivedatalenght, SendData4.Size, SendData4.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData4 != null ? UpdateSendData(ref receivedatalenght, SendData4.Size, SendData4.Index, senddatatext, SendData4) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData5 != null ? UpdateSendData(ref receivedatalenght, SendData5.Size, SendData5.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData5 != null ? UpdateSendData(ref receivedatalenght, SendData5.Size, SendData5.Index, senddatatext, SendData5) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index, senddatatext, SendData6) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
                 senddatatext.Append('-');
-                senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index, senddatatext) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+                senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index, senddatatext, SendData7) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
 
                 SendDataText = senddatatext.ToString();
+                if (receivedatalenght>8)
+                {
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "预解析数据长度超过8" });
+                    return;
+                }
                 HasLockSendParm = true;
             });
             this.UnLockSendDataCommand= ReactiveCommand.Create(() =>
@@ -73,7 +98,21 @@ namespace PCAN.ViewModel.RunPage
             });
             this.StartCommand = ReactiveCommand.Create(() =>
             {
-                StartDataText = SendDataText;
+                if (!HasLockSendParm)
+                {
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
+                    return;
+                }
+                WpfPlotGLUserControl.ClearAllSignal();
+                foreach (var item in DataMonitoringSettingDataParmList)
+                {
+                    var datalist = new List<double>();
+                    WpfPlotGLUserControl.AddSignal(datalist, item.Name);
+                    PlotDics.Add(item.Name, datalist);
+                }
+                HasStart = true;
+
+
             });
             GetDataMonitoringSettingDataParmSourceList();
         }
@@ -90,9 +129,13 @@ namespace PCAN.ViewModel.RunPage
             var result =await _datamonitoringsettingservice.GetDataMonitoringSettingDataParms();
             DataMonitoringSettingDataParmSourceList.AddRange(result);
         }
-        private StringBuilder UpdateSendData(ref int receivedatalenght,int addreceivedatalenght,int addsenddatatextIndex,  StringBuilder senddatatext)
+        private StringBuilder UpdateSendData(ref int receivedatalenght,int addreceivedatalenght,int addsenddatatextIndex, StringBuilder senddatatext, DataMonitoringSettingDataParm? dataParm=null)
         {
             receivedatalenght+=addreceivedatalenght;
+            if (dataParm!=null)
+            {
+                DataMonitoringSettingDataParmList.Add(dataParm);
+            }
             return senddatatext.Append(addsenddatatextIndex.ToString("00"));
         }
         #region SendDataComboxSelect
@@ -145,10 +188,17 @@ namespace PCAN.ViewModel.RunPage
         public string StopIdText { get; set; } 
         [Reactive]
         public string StopDataText { get; set; }
-
+        private string _reciveDataId =>ReciveDataId.ToUpper();
 
         [Reactive]
-        public string ReciveDataIdText { get; set; }
+        public string ReciveDataId { get; set; }
+        #endregion
+        #region 本地变量
+        private Dictionary<string, List<double>> PlotDics = new();
+        private List<DataMonitoringSettingDataParm> DataMonitoringSettingDataParmList = new();
+        [Reactive]
+        public bool HasStart { get; set; }
+
         #endregion
         public WpfPlotGLUserControl WpfPlotGLUserControl { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; set; }

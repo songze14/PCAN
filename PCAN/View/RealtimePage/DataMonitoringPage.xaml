@@ -180,8 +180,11 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <Button Content="开始" />
-                    <Button Grid.Row="1" Content="停止" />
+                    <Button x:Name="StartButton" Content="开始" />
+                    <Button
+                        x:Name="StopButton"
+                        Grid.Row="1"
+                        Content="停止" />
                 </Grid>
             </Grid>
         </Border>

@@ -35,7 +35,8 @@ namespace PCAN.View.RealtimePage
                 #region Command
                 this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
-
+                this.BindCommand(ViewModel, vm => vm.StartCommand, v => v.StartButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.StopCommand, v => v.StopButton).DisposeWith(d);
                 #endregion
                 #region SendDataComboxSelect
                 this.Bind(ViewModel, vm => vm.SendData0, v => v.SendData0Combox.SelectedItem).DisposeWith(d);
@@ -66,7 +67,7 @@ namespace PCAN.View.RealtimePage
                 this.OneWayBind(ViewModel, vm => vm.SendDataText, v => v.SendDataTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StartIdText, v => v.StartIdTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StartDataText, v => v.StartDataTextBlock.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ReciveDataIdText, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
                 #endregion
