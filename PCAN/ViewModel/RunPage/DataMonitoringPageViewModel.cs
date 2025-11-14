@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using PCAN.Modles;
 using PCAN.Notification.Log;
+using PCAN.Shard.Tools;
 using PCAN.SqlLite.Abs;
 using PCAN.SqlLite.Model;
 using PCAN.UserControls;
@@ -41,21 +42,41 @@ namespace PCAN.ViewModel.RunPage
             _datamonitoringsettingservice = dataMonitoringSettingService;
             PCanClientUsercontrolViewModel.NewMessage.Subscribe(msg =>
             {
-                if (msg == null)
-                    return;
-                var id ="0X"+ msg.ID.ToString("X");
-                if (id == _reciveDataId && HasStart)
+                try
                 {
-                    var index = 0;
-                    foreach (var item in DataMonitoringSettingDataParmList)
+                    if (msg == null)
+                        return;
+                    var id = "0X" + msg.ID.ToString("X");
+                    if (id == _reciveDataId && HasStart)
                     {
-                        var plotdata = PlotDics[item.Name];
-                        var data =double.Parse( msg.DATA[index..(index+item.Size)]);
-                        index+=item.Size;   
-                        plotdata.Add(data);
+                        var index = 0;
+                        foreach (var item in DataMonitoringSettingDataParmList)
+                        {
+                            if (item.Index != 0)
+                            {
+                               
+                                
+                                var datastr = CTypeToCsharpTypeValue.GetParmValue( item.Type,msg.DATA[index..(index + item.Size)]);
+                                if (datastr != null)
+                                {
+                                    var datavalue = Convert.ToDouble(datastr);
+                                    PlotDics[item.Name].Add(datavalue);
+
+                                }
+
+                            }
+                            index += item.Size;
+                        }
+                        WpfPlotGLUserControl.SetLimit();
+
                     }
-                    WpfPlotGLUserControl.SetLimit();
                 }
+                catch (Exception ex)
+                {
+
+                  _mediator.Publish (new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"数据解析错误:{ex.Message}" });
+                }
+               
             });
             DataMonitoringSettingDataParmSourceList
               .Connect()
@@ -104,15 +125,24 @@ namespace PCAN.ViewModel.RunPage
                     return;
                 }
                 WpfPlotGLUserControl.ClearAllSignal();
+                PlotDics.Clear();
                 foreach (var item in DataMonitoringSettingDataParmList)
                 {
-                    var datalist = new List<double>();
-                    WpfPlotGLUserControl.AddSignal(datalist, item.Name);
-                    PlotDics.Add(item.Name, datalist);
+                    if (item.Index!=0)
+                    {
+                        var datalist = new List<double>();
+                        WpfPlotGLUserControl.AddSignal(datalist, item.Name);
+                        PlotDics.Add(item.Name, datalist);
+                    }
+                 
                 }
                 HasStart = true;
 
 
+            });
+            this.StopCommand = ReactiveCommand.Create(() =>
+            {
+                HasStart = false;
             });
             GetDataMonitoringSettingDataParmSourceList();
         }
@@ -124,7 +154,8 @@ namespace PCAN.ViewModel.RunPage
             {
                 Index = 0,
                 Name = "无",
-                Type = "None"
+                Type = "None",
+                Size=0,
             });
             var result =await _datamonitoringsettingservice.GetDataMonitoringSettingDataParms();
             DataMonitoringSettingDataParmSourceList.AddRange(result);

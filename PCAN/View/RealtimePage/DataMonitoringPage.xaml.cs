@@ -61,6 +61,8 @@ namespace PCAN.View.RealtimePage
                 #region Flag
                 this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.SendParmGroup.IsEnabled,b=>!b).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.UnLockSendDataButton.IsEnabled).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StartButton.IsEnabled,b=>!b).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StopButton.IsEnabled,b=>b).DisposeWith(d);
                 #endregion
                 #region 参数文本
                 this.Bind(ViewModel, vm => vm.GetDataIDText, v => v.GetDataIDTextBox.Text).DisposeWith(d);

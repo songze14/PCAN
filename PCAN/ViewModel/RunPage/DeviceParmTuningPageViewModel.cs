@@ -73,7 +73,7 @@ namespace PCAN.ViewModel.RunPage
                                         datasub += datas[i].Size;
                                         ParmDataGridSource.Remove(datas[i]);
                                         var b = string.Join("", BitConverter.ToString(data).Split("-"));
-                                        string value = GetParmValue(datas[i].TargetFullName,data);
+                                        string value = CTypeToCsharpTypeValue.GetParmValue(datas[i].TargetFullName,data);
                                         datas[i].Value = value;
                                         datas[i].SetValue = value;
                                         ParmDataGridSource.Add(datas[i]);
@@ -352,19 +352,7 @@ namespace PCAN.ViewModel.RunPage
             new TypeInfo(){Name="float",TargetType=typeof(float),FullName=typeof(float).FullName,Size=Marshal.SizeOf(typeof(float))},
             new TypeInfo(){Name="char",TargetType=typeof(char),FullName=typeof(char).FullName,Size=Marshal.SizeOf(typeof(char))},
         ];
-        private string GetParmValue(string typename, byte[] data) => typename switch
-        {
-            "u8" => data[0].ToString(),
-            "u16"=> BitConverter.ToUInt16(data).ToString(),
-            "u32" => BitConverter.ToUInt32(data).ToString(),
-            "u64"=> BitConverter.ToUInt64(data).ToString(),
-            "s8"=> Convert.ToSByte(data).ToString(),
-            "s16"=> BitConverter.ToInt16(data).ToString(),
-            "s32"=> BitConverter.ToInt32(data).ToString(),
-            "s64"=> BitConverter.ToUInt64(data).ToString(),
-            "float" => BitConverter.ToSingle(data).ToString(),
-            "char" => Encoding.ASCII.GetString(data),
-        };
+        
        
     }
 }
