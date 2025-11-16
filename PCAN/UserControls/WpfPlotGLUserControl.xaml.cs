@@ -211,7 +211,7 @@ namespace PCAN.UserControls
             {
                 WpfPlot1.Plot.Axes.AutoScaleExpandY();
                 WpfPlot1.Plot.Axes.AutoScaleExpand();
-                //WpfPlot1.Plot.Axes.SetLimitsX(currentTime - 100, currentTime);
+                WpfPlot1.Plot.Axes.SetLimitsX(currentTime - WpfPlot1.Plot.Axes.Bottom.MinimumSize, currentTime);
                 WpfPlot1.Refresh();
                 currentTime ++;
             });

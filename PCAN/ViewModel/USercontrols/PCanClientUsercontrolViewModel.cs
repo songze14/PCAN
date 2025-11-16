@@ -137,6 +137,10 @@ namespace PCAN.ViewModel.USercontrols
            
            
         }
+        public void Reset()
+        {
+            CanDrive.Reset();
+        }
         private CANDrive CanDrive;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;
         private readonly IMediator _mediator;

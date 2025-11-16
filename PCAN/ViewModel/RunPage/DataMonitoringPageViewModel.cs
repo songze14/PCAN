@@ -46,7 +46,7 @@ namespace PCAN.ViewModel.RunPage
                 {
                     if (msg == null)
                         return;
-                    var id = "0X" + msg.ID.ToString("X");
+                    var id =  msg.ID.ToString("X");
                     if (id == _reciveDataId && HasStart)
                     {
                         var index = 0;
@@ -54,29 +54,22 @@ namespace PCAN.ViewModel.RunPage
                         {
                             if (item.Index != 0)
                             {
-                               
-                                
                                 var datastr = CTypeToCsharpTypeValue.GetParmValue( item.Type,msg.DATA[index..(index + item.Size)]);
                                 if (datastr != null)
                                 {
                                     var datavalue = Convert.ToDouble(datastr);
                                     PlotDics[item.Name].Add(datavalue);
-
                                 }
-
                             }
                             index += item.Size;
                         }
                         WpfPlotGLUserControl.SetLimit();
-
                     }
                 }
                 catch (Exception ex)
                 {
-
                   _mediator.Publish (new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"数据解析错误:{ex.Message}" });
                 }
-               
             });
             DataMonitoringSettingDataParmSourceList
               .Connect()
@@ -111,6 +104,23 @@ namespace PCAN.ViewModel.RunPage
                     _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "预解析数据长度超过8" });
                     return;
                 }
+                var startbye = new byte[8];
+                int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID, 16);
+                var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
+                dirveridBytes.CopyTo(startbye, 0);
+                startbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length+4);
+                startbye[dirveridBytes.Length + 1] = 0;
+                startbye[dirveridBytes.Length + 2] = 0xA5;
+                startbye[dirveridBytes.Length + 3] = 0xA5;
+                StartDataText= BitConverter.ToString(startbye);
+
+                var stopbye = new byte[8];
+                dirveridBytes.CopyTo(stopbye, 0);
+                stopbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length + 4);
+                stopbye[dirveridBytes.Length + 1] = 0;
+                stopbye[dirveridBytes.Length + 2] = 0xCA;
+                stopbye[dirveridBytes.Length + 3] = 0xCA;
+                StopDataText = BitConverter.ToString(stopbye);
                 HasLockSendParm = true;
             });
             this.UnLockSendDataCommand= ReactiveCommand.Create(() =>
@@ -119,29 +129,90 @@ namespace PCAN.ViewModel.RunPage
             });
             this.StartCommand = ReactiveCommand.Create(() =>
             {
-                if (!HasLockSendParm)
+                try
                 {
-                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
-                    return;
-                }
-                WpfPlotGLUserControl.ClearAllSignal();
-                PlotDics.Clear();
-                foreach (var item in DataMonitoringSettingDataParmList)
-                {
-                    if (item.Index!=0)
+                    if (!HasLockSendParm)
                     {
-                        var datalist = new List<double>();
-                        WpfPlotGLUserControl.AddSignal(datalist, item.Name);
-                        PlotDics.Add(item.Name, datalist);
+                        _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
+                        return;
                     }
-                 
+                    WpfPlotGLUserControl.ClearAllSignal();
+                    PlotDics.Clear();
+                    foreach (var item in DataMonitoringSettingDataParmList)
+                    {
+                        if (item.Index != 0)
+                        {
+                            var datalist = new List<double>();
+                            WpfPlotGLUserControl.AddSignal(datalist, item.Name);
+                            PlotDics.Add(item.Name, datalist);
+                        }
+                    }
+                    var startid = uint.Parse(StartIdText, System.Globalization.NumberStyles.HexNumber);
+                    var datastr = StartDataText.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                    byte[] startdata;
+                    if (datastr != null)
+                    {
+                        startdata = new byte[datastr.Length];
+                        for (int i = 0; i < datastr.Length; i++)
+                        {
+                            startdata[i] = Convert.ToByte(datastr[i], 16);
+                        }
+                    }
+                    else
+                    {
+                        //无数据
+                        startdata = [];
+                    }
+                    PCanClientUsercontrolViewModel.WriteMsg(startid, startdata);
+                    byte[] getdatasenddata;
+                    var getdatasenddatastr = SendDataText.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                    if (getdatasenddatastr != null)
+                    {
+                        getdatasenddata = new byte[getdatasenddatastr.Length];
+                        for (int i = 0; i < getdatasenddatastr.Length; i++)
+                        {
+                            getdatasenddata[i] = Convert.ToByte(getdatasenddatastr[i], 16);
+                        }
+                    }
+                    else
+                    {
+                        //无数据
+                        getdatasenddata = [];
+                    }
+                    var getdataid = uint.Parse(GetDataIDText, System.Globalization.NumberStyles.HexNumber);
+                    PCanClientUsercontrolViewModel.WriteMsg(getdataid, getdatasenddata);
+                    PCanClientUsercontrolViewModel.Reset();
+                    HasStart = true;
                 }
-                HasStart = true;
+                catch (Exception ex)
+                {
+
+                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"开始时出现错误:{ex.Message}" });
+
+                }
+
 
 
             });
             this.StopCommand = ReactiveCommand.Create(() =>
             {
+                var stopid = uint.Parse(StartIdText, System.Globalization.NumberStyles.HexNumber);
+                var datastr = StopDataText.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                byte[] startdata;
+                if (datastr != null)
+                {
+                    startdata = new byte[datastr.Length];
+                    for (int i = 0; i < datastr.Length; i++)
+                    {
+                        startdata[i] = Convert.ToByte(datastr[i], 16);
+                    }
+                }
+                else
+                {
+                    //无数据
+                    startdata = [];
+                }
+                PCanClientUsercontrolViewModel.WriteMsg(stopid, startdata);
                 HasStart = false;
             });
             GetDataMonitoringSettingDataParmSourceList();
@@ -207,22 +278,22 @@ namespace PCAN.ViewModel.RunPage
         #region 参数文本
 
         [Reactive]
-        public string GetDataIDText { get; set; }
+        public string GetDataIDText { get; set; } = "3f3";
         [Reactive]
         public string SendDataText { get; set; }
         [Reactive]
-        public string StartIdText { get; set; } = "100";
+        public string StartIdText { get; set; } = "3f3";
         [Reactive]
         public string StartDataText { get; set; }
 
         [Reactive]
-        public string StopIdText { get; set; } 
+        public string StopIdText { get; set; } = "3f3";
         [Reactive]
         public string StopDataText { get; set; }
         private string _reciveDataId =>ReciveDataId.ToUpper();
 
         [Reactive]
-        public string ReciveDataId { get; set; }
+        public string ReciveDataId { get; set; } = "3ff";
         #endregion
         #region 本地变量
         private Dictionary<string, List<double>> PlotDics = new();

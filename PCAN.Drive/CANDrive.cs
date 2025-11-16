@@ -365,7 +365,19 @@ namespace PCAN.Drive
             _tokensource.Cancel();
             Api.Uninitialize(PcanHandle);
             this.IsReadly = false;
-
+        }
+        public bool Reset()
+        {
+            var status = Api.Reset(PcanHandle);
+            if (status == PcanStatus.OK)
+            {
+                return true;
+            }
+            else
+            {
+                _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.CanDevice, Message = $"重置管道失败：{status}" });
+                return false;
+            }
         }
         public bool FilterMessages(uint fromid,uint toid)
         {

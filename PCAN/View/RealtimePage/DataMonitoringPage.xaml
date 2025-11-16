@@ -13,7 +13,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*" />
-            <RowDefinition Height="2.7*" />
+            <RowDefinition Height="3*" />
             <RowDefinition Height="4*" />
             <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
@@ -34,20 +34,22 @@
                                 x:Name="StartIdTextBox"
                                 Width="100"
                                 VerticalAlignment="Top"
-                                Text="0x100" />
+                                Text="3F3"
+                                ToolTip="数据十六进制，不需要写0x" />
                             <Label Content="开始参数" />
                             <TextBox
                                 x:Name="StartDataTextBlock"
-                                Width="100"
+                                Width="200"
                                 VerticalAlignment="Top"
-                                Text="01-02-03"
-                                ToolTip="数据以英文-隔开例如01-02-03" />
+                                IsReadOnly="True"
+                                Text="01-02-03" />
                             <Label Content="获取数据ID" />
                             <TextBox
                                 x:Name="GetDataIDTextBox"
                                 Width="100"
                                 VerticalAlignment="Top"
-                                Text="100" />
+                                Text="3f3"
+                                ToolTip="数据十六进制，不需要写0x" />
                             <GroupBox Margin="5">
                                 <GroupBox.Header>
                                     <StackPanel Height="15">
@@ -162,17 +164,19 @@
                         <TextBox
                             x:Name="ReciveDataIdTextBlock"
                             Width="100"
-                            Text="0x100" />
+                            Text="3f3"
+                            ToolTip="数据十六进制，不需要写0x" />
                         <Label Content="停止ID" />
                         <TextBox
                             x:Name="StopIdTextBox"
                             Width="200"
-                            Text="01 02 03 04 05 06 07 08" />
+                            Text="3f3"
+                            ToolTip="数据十六进制，不需要写0x" />
                         <Label Content="停止数据" />
                         <TextBox
                             x:Name="StopDataTextBlock"
                             Width="200"
-                            Text="01 02 03 04 05 06 07 08" />
+                            IsReadOnly="True" />
                     </WrapPanel>
                 </GroupBox>
                 <Grid Grid.Column="2">
