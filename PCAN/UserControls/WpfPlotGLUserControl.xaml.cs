@@ -144,6 +144,7 @@ namespace PCAN.UserControls
                 labelC.Height = 50;
                 wpfplotdock.Children.Add(labelC);
                 _labelCs.Add(key, labelC);
+                PlotCount++;
                 return (true, key);
             }
             catch (Exception ex)
