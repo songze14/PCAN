@@ -1,6 +1,7 @@
 ﻿using PCAN.Tools;
 using ReactiveUI;
 using ScottPlot;
+using ScottPlot.AxisPanels;
 using ScottPlot.Plottables;
 using Splat;
 using System;
@@ -30,10 +31,9 @@ namespace PCAN.UserControls
         private Dictionary<string, Signal> _signals = new Dictionary<string, Signal>();
         Dictionary<string, Crosshair> _crosshairs = new Dictionary<string, Crosshair>();
         Dictionary<string, Label> _labelCs = new Dictionary<string, Label>();
-        private readonly System.Windows.Threading.DispatcherTimer DispatcherTimer = new() { Interval = TimeSpan.FromMilliseconds(10) };
+        Dictionary<string, LeftAxis> _leftAxis = new Dictionary<string, LeftAxis>();
+       
         private int PlotCount;
-
-        private int currentTime = 1; // 时间增量
         public WpfPlotGLUserControl()
         {
             InitializeComponent();
@@ -111,7 +111,7 @@ namespace PCAN.UserControls
                     var yaxis = WpfPlot1.Plot.Axes.AddLeftAxis();
                     yaxis.Color(color);
                     singnal.Axes.YAxis = yaxis;
-
+                    _leftAxis.Add(key, yaxis);
                 }
                 else
                 {
@@ -127,6 +127,7 @@ namespace PCAN.UserControls
                 crosshair.LineWidth = 2;
                 crosshair.LineColor = color;
                 crosshair.HorizontalLine.LinePattern = LinePattern.Dotted;
+                crosshair.Axes.YAxis = singnal.Axes.YAxis;
                 _crosshairs.Add(key, crosshair);
                 var labelC = new Label();
                 labelC.Visibility = Visibility.Hidden;
@@ -161,11 +162,18 @@ namespace PCAN.UserControls
                 {
                     WpfPlot1.Plot.Remove(_signals[key]);
                     WpfPlot1.Plot.Remove(_crosshairs[key]);
+
                     wpfplotdock.Children.Remove(_labelCs[key]);
+                    if (_leftAxis.ContainsKey(key))
+                    {
+                        WpfPlot1.Plot.Axes.Remove(_leftAxis[key]);
+                        _leftAxis.Remove(key);
+                    }
                     _signals.Remove(key);
                     _crosshairs.Remove(key);
                     _labelCs.Remove(key);
                     WpfPlot1.Refresh();
+                    PlotCount--;
                 }
                 return true;
             }
@@ -180,25 +188,9 @@ namespace PCAN.UserControls
             {
                 RemoveSignal(item.Key);
             }
-            currentTime = 0;
+         
 
 
-        }
-        public void StartTimer()
-        {
-            if (!DispatcherTimer.IsEnabled)
-            {
-                DispatcherTimer.Start();
-
-            }
-        }
-        public void StopTimer()
-        {
-            if (DispatcherTimer.IsEnabled)
-            {
-                DispatcherTimer.Stop();
-
-            }
         }
         public void SetLimit(int limitcount=1000)
         {
@@ -208,7 +200,7 @@ namespace PCAN.UserControls
                 var xlimit = WpfPlot1.Plot.Axes.GetDataLimits().XRange;
                 WpfPlot1.Plot.Axes.SetLimitsX(xlimit.Max - limitcount, xlimit.Max);
                 WpfPlot1.Refresh();
-                currentTime ++;
+               
             });
             
         }

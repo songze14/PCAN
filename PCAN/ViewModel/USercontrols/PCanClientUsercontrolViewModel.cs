@@ -139,7 +139,11 @@ namespace PCAN.ViewModel.USercontrols
         }
         public void Reset()
         {
-            CanDrive.Reset();
+            if (CanDrive!=null)
+            {
+                CanDrive.Reset();
+
+            }
         }
         private CANDrive CanDrive;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;

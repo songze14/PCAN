@@ -45,15 +45,31 @@ namespace PCAN.SqlLite.Imp
 
         public async Task<List<DataMonitoringSettingDataParm>> AddDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas)
         {
-           var olddata=await _dbcontext.DataMonitoringSettingDataParms.ToListAsync();
-            if (olddata.Count!=0)
+            using (var trance = _dbcontext.Database.BeginTransaction())
             {
-                _dbcontext.DataMonitoringSettingDataParms.RemoveRange(olddata);
+                try
+                {
+                    var olddata = await _dbcontext.DataMonitoringSettingDataParms.ToListAsync();
+                    if (olddata.Count != 0)
+                    {
+                        _dbcontext.DataMonitoringSettingDataParms.RemoveRange(olddata);
+                        await _dbcontext.SaveChangesAsync();
 
+                    }
+                    datas.ForEach(o => o.Id = 0);
+                    await _dbcontext.DataMonitoringSettingDataParms.AddRangeAsync(datas);
+                    await _dbcontext.SaveChangesAsync();
+                    await trance.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await trance.RollbackAsync();
+
+                    throw;
+                }
+                
             }
-            datas.ForEach(o => o.Id = 0);
-            await _dbcontext.DataMonitoringSettingDataParms.AddRangeAsync(datas);
-            await _dbcontext.SaveChangesAsync();
+        
             return datas;
         }
     }
