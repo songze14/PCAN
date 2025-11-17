@@ -32,13 +32,13 @@ namespace PCAN.UserControls
         Dictionary<string, Crosshair> _crosshairs = new Dictionary<string, Crosshair>();
         Dictionary<string, Label> _labelCs = new Dictionary<string, Label>();
         Dictionary<string, LeftAxis> _leftAxis = new Dictionary<string, LeftAxis>();
-       
+
         private int PlotCount;
         public WpfPlotGLUserControl()
         {
             InitializeComponent();
-            this.DataContext= this;
-           
+            this.DataContext = this;
+            AddMenu();
 
         }
 
@@ -96,7 +96,7 @@ namespace PCAN.UserControls
         /// </summary>
         /// <param name="ys"></param>
         /// <returns>返回线的名称</returns>
-        public (bool, string) AddSignal(List<double> ys,string? key=null)
+        public (bool, string) AddSignal(List<double> ys, string? key = null)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace PCAN.UserControls
                 }
                 else
                 {
-                  
+
                     singnal.Axes.YAxis = WpfPlot1.Plot.Axes.Left;
 
                 }
@@ -133,7 +133,7 @@ namespace PCAN.UserControls
                 labelC.Visibility = Visibility.Hidden;
                 labelC.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
                 labelC.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-                labelC.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(color.A, color.R, color.G,color.B));
+                labelC.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
                 labelC.FontSize = 15;
                 labelC.Width = 100;
                 labelC.Height = 50;
@@ -188,11 +188,11 @@ namespace PCAN.UserControls
             {
                 RemoveSignal(item.Key);
             }
-         
+
 
 
         }
-        public void SetLimit(int limitcount=1000)
+        public void SetLimit(int limitcount = 1000)
         {
             UIHelper.RunInUIThread((d) =>
             {
@@ -200,9 +200,20 @@ namespace PCAN.UserControls
                 var xlimit = WpfPlot1.Plot.Axes.GetDataLimits().XRange;
                 WpfPlot1.Plot.Axes.SetLimitsX(xlimit.Max - limitcount, xlimit.Max);
                 WpfPlot1.Refresh();
-               
+
             });
-            
+        }
+        public void ResetPlot()
+        {
+            WpfPlot1.Plot.Axes.AutoScaleExpandY();
+        }
+        private void AddMenu()
+        {
+            this.WpfPlot1.Menu?.Clear();
+            this.WpfPlot1.Menu?.Add("重置视图", plot =>
+            {
+                plot.Axes.AutoScale();
+            });
         }
     }
 }

@@ -121,7 +121,23 @@
                                     VerticalAlignment="Center"
                                     Text="01-00-02-00" />
                             </DockPanel>
-
+                            <Button
+                                x:Name="RefParmButton"
+                                Margin="5"
+                                Content="刷新参数">
+                                <Button.Style>
+                                    <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
+                                                <Setter Property="IsEnabled" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                             <Button
                                 x:Name="LockSendDataButton"
                                 Margin="5"
@@ -235,22 +251,10 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
 
-                            <StackPanel.Resources>
-                                <Style TargetType="TextBlock">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Level}" Value="Warning">
-                                            <Setter Property="Foreground" Value="Red" />
-                                        </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding Level}" Value="Error">
-                                            <Setter Property="Foreground" Value="Red" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Resources>
                             <TextBlock Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss.ff}:}" />
-                            <TextBlock Text="{Binding EventSource}" />
-                            <TextBlock Text="{Binding Content}" />
+                            <TextBlock Text="{Binding Direction}" />
+                            <TextBlock Text="{Binding Message}" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

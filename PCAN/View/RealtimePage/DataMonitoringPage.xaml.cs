@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,11 +33,13 @@ namespace PCAN.View.RealtimePage
             {
                 this.OneWayBind(ViewModel, vm => vm.WpfPlotGLUserControl, v => v.PlotCon.Content).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PCanClientUsercontrol.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.DataLogs, v => v.logs.ItemsSource).DisposeWith(d);
                 #region Command
                 this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StartCommand, v => v.StartButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StopCommand, v => v.StopButton).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.RefParmCommand, v => v.RefParmButton).DisposeWith(d);
                 #endregion
                 #region SendDataComboxSelect
                 this.Bind(ViewModel, vm => vm.SendData0, v => v.SendData0Combox.SelectedItem).DisposeWith(d);
@@ -74,6 +77,12 @@ namespace PCAN.View.RealtimePage
                 this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBox.Text).DisposeWith(d);
                 #endregion
+                this.ViewModel?.ChangeObs
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(lm => {
+                        this.scroll.ScrollToEnd();
+                    })
+                    .DisposeWith(d);
             });
         }
         #region ViewModel

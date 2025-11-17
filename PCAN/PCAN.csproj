@@ -8,7 +8,15 @@
     <UseWPF>true</UseWPF>
     <UserSecretsId>8b6eced9-1012-4f31-8171-24eb7545f1aa</UserSecretsId>
 	  <Platforms>AnyCPU;x64</Platforms>
+	  <ApplicationIcon>Image\logo.ico</ApplicationIcon>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Image\logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Image\logo.ico" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PCAN.Drive\PCAN.Drive.csproj" />
     <ProjectReference Include="..\PCAN.SqlLite\PCAN.SqlLite.csproj" />
@@ -23,5 +31,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\logo.ico" />
+  </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
+	
 </Project>
