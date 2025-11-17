@@ -12,10 +12,10 @@ namespace PCAN.SqlLite.Abs
         Task<DataMonitoringSetting?> GetDataMonitoringSetting();
         Task<List< DataMonitoringSettingDataParm>> GetDataMonitoringSettingDataParms();
         Task<DataMonitoringSetting> UpdateDataMonitoringSetting(DataMonitoringSetting data);
-        Task<List<DataMonitoringSettingDataParm>> UpdateDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas);
+        Task<List<DataMonitoringSettingDataParm>> AddDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas);
 
         Task<DataMonitoringSetting> RemoveDataMonitoringSetting(DataMonitoringSetting data);
-        Task<List<DataMonitoringSettingDataParm>> RemoveDataMonitoringSetting(DataMonitoringSettingDataParm data);
+     
 
     }
 }

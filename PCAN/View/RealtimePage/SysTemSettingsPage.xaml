@@ -5,13 +5,20 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PCAN.View.RealtimePage"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:usercontrol="clr-namespace:PCAN.UserControls"
     Title="SysTemSettingsPage"
     d:Background="AliceBlue"
     d:DesignHeight="1000"
     d:DesignWidth="800"
+    Background="AliceBlue"
     mc:Ignorable="d">
 
-    <StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
         <GroupBox Header="升级">
             <DockPanel>
                 <Label
@@ -54,83 +61,12 @@
                     DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        <GroupBox Header="参数读取" />
-        <GroupBox Header="数据监控">
-            <DockPanel>
-                <GroupBox Header="曲线参数">
-                    <Grid>
-                        <!--<Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>-->
-                        <Grid Grid.Column="0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <DockPanel>
-                                <Button
-                                    Width="100"
-                                    Height="30"
-                                    Margin="5"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Content="添加参数" />
-                            </DockPanel>
-                            <DataGrid
-                                Grid.Row="1"
-                                MinHeight="200"
-                                IsReadOnly="True">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Binding="{Binding Index}" Header="序号" />
-
-                                    <DataGridTextColumn Binding="{Binding Name}" Header="名称" />
-                                    <DataGridTextColumn Binding="{Binding Type}" Header="数据类型" />
-                                    <DataGridTemplateColumn Header="操作">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <DockPanel>
-                                                    <Button Command="{Binding ViewModel.ParmEditCommand, ElementName=ParmValuePage}" Content="编辑" />
-                                                    <Button Command="{Binding ViewModel.ParmDeleteCommand, ElementName=ParmValuePage}" Content="删除" />
-                                                </DockPanel>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-
-                            </DataGrid>
-                            <DockPanel Grid.Column="1">
-                                <Button
-                                    Width="100"
-                                    Height="30"
-                                    Margin="5"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Content="导入参数" />
-                            </DockPanel>
-                            <Border
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Margin="5"
-                                BorderBrush="AntiqueWhite"
-                                BorderThickness="1">
-                                <TextBox
-                                    x:Name="DeviceParmValueStrTextBox"
-                                    AcceptsReturn="True"
-                                    Background="AliceBlue"
-                                    TextWrapping="Wrap"
-                                    VerticalScrollBarVisibility="Auto" />
-                            </Border>
-
-                        </Grid>
-
-                    </Grid>
-                </GroupBox>
-            </DockPanel>
+        <GroupBox Grid.Row="1" Header="参数读取" />
+        <GroupBox
+            Grid.Row="2"
+            MinHeight="400"
+            Header="数据监控">
+            <usercontrol:DataMonitoringSettingUserControl x:Name="DataMonitoringSetting" />
         </GroupBox>
-    </StackPanel>
+    </Grid>
 </Page>

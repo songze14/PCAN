@@ -43,9 +43,18 @@ namespace PCAN.SqlLite.Imp
             throw new NotImplementedException();
         }
 
-        public async Task<List<DataMonitoringSettingDataParm>> UpdateDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas)
+        public async Task<List<DataMonitoringSettingDataParm>> AddDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas)
         {
-            throw new NotImplementedException();
+           var olddata=await _dbcontext.DataMonitoringSettingDataParms.ToListAsync();
+            if (olddata.Count!=0)
+            {
+                _dbcontext.DataMonitoringSettingDataParms.RemoveRange(olddata);
+
+            }
+            datas.ForEach(o => o.Id = 0);
+            await _dbcontext.DataMonitoringSettingDataParms.AddRangeAsync(datas);
+            await _dbcontext.SaveChangesAsync();
+            return datas;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using PCAN.ViewModel.RunPage;
 using ReactiveUI;
 using Splat;
+using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,6 +16,10 @@ namespace PCAN.View.RealtimePage
         {
             ViewModel=Locator.Current.GetService<SysTemSettingsPageViewModel>();
             InitializeComponent();
+            this.WhenActivated(d =>
+            {
+                this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingUserControlViewModel, v => v.DataMonitoringSetting.ViewModel).DisposeWith(d);
+            });
         }
         #region ViewModel
         public SysTemSettingsPageViewModel ViewModel

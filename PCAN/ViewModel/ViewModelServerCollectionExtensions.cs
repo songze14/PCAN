@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PCAN.Modles;
 using PCAN.ViewModel.RunPage;
+using PCAN.ViewModel.Usercontrols;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
 using ReactiveUI;
@@ -36,6 +37,7 @@ namespace PCAN.ViewModel
             services.AddSingleton<DeviceParmTuningPageViewModel>();
             services.AddSingleton<DataMonitoringPageViewModel>();
             services.AddSingleton<SysTemSettingsPageViewModel>();
+            services.AddSingleton<DataMonitoringSettingUserControlViewModel>();
             return services;
         }
     }

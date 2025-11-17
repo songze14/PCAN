@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using PCAN.Modles;
+using PCAN.Shard.Tools;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace PCAN.ViewModel.Window
 {
@@ -29,42 +31,46 @@ namespace PCAN.ViewModel.Window
                         return;
                     }
                     var inputparmstrs = InputParmStr.Split("\r\n");
-                    var repagex = ParmRegex();
-                    var parmstr = string.Empty;
+                    var typerepagex = ParmRegex.TypeRegex();
+                    var namerepagex = ParmRegex.NameRegex();
+                    var remarkrepagex = ParmRegex.RemarkRegex();
                     var remark = string.Empty;
                     foreach (var inputparmstr in inputparmstrs)
                     {
-                        remark = string.Empty;
-                        if (repagex.IsMatch(inputparmstr))
+                        var typematch = typerepagex.Match(inputparmstr);
+                        if (typematch == null || !typematch.Success)
                         {
-                            var parmandremarkstrs = inputparmstr.Split("//");
-                            if (parmandremarkstrs.Length==2)
-                            {
-                                parmstr=parmandremarkstrs[0];
-                                remark = parmandremarkstrs[1];
-                            }
-                            else
-                            {
-                                MessageBox.Show($"解析参数失败:{parmstr}存在不可识别字符");
-                                return;
-                            }
+                            MessageBox.Show($"字符串{inputparmstr}找不到数据类型！");
+                            return;
+                        }
+                        var type = typematch.Value;
+                        var typeinfo = CTypeToCsharpTypeValue.TypeInfos.FirstOrDefault(o => o.Name == type);
+                        if (typeinfo == null)
+                        {
+                            MessageBox.Show($"解析参数失败:{inputparmstr}存在不可解析类型{type}");
+                            return;
+                        }
+                        var namematch = namerepagex.Match(inputparmstr);
+                        if (namematch == null || !namematch.Success)
+                        {
+                            MessageBox.Show($"字符串{inputparmstr}找不到参数名称！");
+                            return;
+                        }
+                        var name = namematch.Value;
+                        var remarkmatch = remarkrepagex.Match(inputparmstr);
+                        if (remarkmatch != null && remarkmatch.Success)
+                        {
+                            remark = remarkmatch.Value;
                         }
                         else
                         {
-                            parmstr = inputparmstr;
-                        }
-                        var parms = parmstr.Split(" ");
-                        var typeinfo = TypeInfos.FirstOrDefault(o => o.Name == parms[0]);
-                        if (typeinfo == null)
-                        {
-                            MessageBox.Show($"解析参数失败:{parmstr}存在不可解析类型{parms[0]}");
-                            return;
+                            remark = string.Empty;
                         }
                         sourceList.Add(new DevicePCanParmDataGrid()
                         {
                             ID = sourceList.Count + 1,
                             Index = sourceList.Count,
-                            Name = parms[1][0..(parms[1].Length-1)],
+                            Name = name,
                             Remark = remark,
                             Size = typeinfo.Size,
                             TargetFullName = typeinfo.Name,
@@ -85,8 +91,7 @@ namespace PCAN.ViewModel.Window
         }
         [Reactive]
         public string InputParmStr { get; set; }
-        [GeneratedRegex(@"[^a-zA-Z0-9; _]")]
-        private static partial Regex ParmRegex();
+       
         public ReactiveCommand<Unit,Unit> ParseCommand { get; set; }
        
             

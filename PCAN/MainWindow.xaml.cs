@@ -82,6 +82,11 @@ namespace PCAN
         {
             AppViewModle.NavigateTo(UrlDefines.URL_DataMonitoring);
         }
+
+        private void SysTemSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AppViewModle.NavigateTo(UrlDefines.URL_SysTemSettings);
+        }
     }
   
 }
