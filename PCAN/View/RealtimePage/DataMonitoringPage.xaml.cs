@@ -72,6 +72,7 @@ namespace PCAN.View.RealtimePage
                 this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBox.Text).DisposeWith(d);
                 #endregion
             });
         }

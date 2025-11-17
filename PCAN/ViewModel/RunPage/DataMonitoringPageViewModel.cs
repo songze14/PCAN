@@ -63,7 +63,7 @@ namespace PCAN.ViewModel.RunPage
                             }
                             index += item.Size;
                         }
-                        WpfPlotGLUserControl.SetLimit();
+                        WpfPlotGLUserControl.SetLimit(LimitCount);
                     }
                 }
                 catch (Exception ex)
@@ -294,6 +294,8 @@ namespace PCAN.ViewModel.RunPage
 
         [Reactive]
         public string ReciveDataId { get; set; } = "3ff";
+        [Reactive]
+        public int LimitCount { get; set; } = 1000;
         #endregion
         #region 本地变量
         private Dictionary<string, List<double>> PlotDics = new();

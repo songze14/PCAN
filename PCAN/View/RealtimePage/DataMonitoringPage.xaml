@@ -183,11 +183,32 @@
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
-                    <Button x:Name="StartButton" Content="开始" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="自动区间" />
+                        <TextBox
+                            x:Name="LimitCountTextBox"
+                            Grid.Column="1"
+                            Width="100"
+                            Height="50"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center" />
+                    </Grid>
+                    <Button
+                        x:Name="StartButton"
+                        Grid.Row="1"
+                        Content="开始" />
                     <Button
                         x:Name="StopButton"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         Content="停止" />
                 </Grid>
             </Grid>

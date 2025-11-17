@@ -38,13 +38,7 @@ namespace PCAN.UserControls
         {
             InitializeComponent();
             this.DataContext= this;
-            //DispatcherTimer.Tick += (s, e) =>
-            //{
-            //    double displayDuration = datalen * 0.1; // 显示的时间窗口长度
-            //    WpfPlot1.Plot.Axes.SetLimitsX(currentTime - displayDuration, currentTime);
-            //    WpfPlot1.Refresh();
-            //    currentTime+=10;
-            //};
+           
 
         }
 
@@ -206,13 +200,13 @@ namespace PCAN.UserControls
 
             }
         }
-        public void SetLimit()
+        public void SetLimit(int limitcount=1000)
         {
             UIHelper.RunInUIThread((d) =>
             {
                 WpfPlot1.Plot.Axes.AutoScaleExpandY();
-                WpfPlot1.Plot.Axes.AutoScaleExpand();
-                WpfPlot1.Plot.Axes.SetLimitsX(currentTime - WpfPlot1.Plot.Axes.Bottom.MinimumSize, currentTime);
+                var xlimit = WpfPlot1.Plot.Axes.GetDataLimits().XRange;
+                WpfPlot1.Plot.Axes.SetLimitsX(xlimit.Max - limitcount, xlimit.Max);
                 WpfPlot1.Refresh();
                 currentTime ++;
             });
