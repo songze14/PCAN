@@ -88,7 +88,7 @@
 
 
                         </WrapPanel>
-                        <DockPanel>
+                        <!--<DockPanel>
                             <Label
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -99,7 +99,7 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Text="01-00-02-00" />
-                        </DockPanel>
+                        </DockPanel>-->
                         <Button
                             x:Name="RefParmButton"
                             Margin="5"
@@ -117,7 +117,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button
+                        <!--<Button
                             x:Name="LockSendDataButton"
                             Margin="5"
                             Content="锁定">
@@ -150,7 +150,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                        </Button>
+                        </Button>-->
 
 
 

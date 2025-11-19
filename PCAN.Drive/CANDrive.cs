@@ -55,7 +55,7 @@ namespace PCAN.Drive
                     while (!token.IsCancellationRequested)
                     {
                         ReadMessages();
-                        await Task.Delay(m_SleepTime);
+                        //await Task.Delay(m_SleepTime);
                     }
                 }, token);
                 //Task.Run(async () =>
@@ -148,7 +148,7 @@ namespace PCAN.Drive
                     while (!token.IsCancellationRequested)
                     {
                         ReadMessagesFD();
-                        await Task.Delay(m_SleepTime);
+                        //await Task.Delay(m_SleepTime);
                     }
                 }, token);
                

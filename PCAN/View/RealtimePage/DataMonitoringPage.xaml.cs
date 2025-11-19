@@ -35,8 +35,8 @@ namespace PCAN.View.RealtimePage
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PCanClientUsercontrol.ViewModel).DisposeWith(d);
               
                 #region Command
-                this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
-                this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
+                //this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
+                //this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StartCommand, v => v.StartButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StopCommand, v => v.StopButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.RefParmCommand, v => v.RefParmButton).DisposeWith(d);
@@ -63,7 +63,7 @@ namespace PCAN.View.RealtimePage
                 #endregion
                 #region Flag
                 this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.SendParmGroup.IsEnabled,b=>!b).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.UnLockSendDataButton.IsEnabled).DisposeWith(d);
+                //this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.UnLockSendDataButton.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StartButton.IsEnabled,b=>!b).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StopButton.IsEnabled,b=>b).DisposeWith(d);
                 #endregion

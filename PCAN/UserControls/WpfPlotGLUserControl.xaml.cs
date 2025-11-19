@@ -55,14 +55,14 @@ namespace PCAN.UserControls
                     var _datastreamer = item.Value;
                     var MyCrosshair = _crosshairs[item.Key];
                     var XYLableC = _labelCs[item.Key];
-                    DataPoint nearest = _datastreamer.GetNearestX(mouseLocation, WpfPlot1.Plot.LastRender);
+                    DataPoint nearest = _datastreamer.GetNearest(mouseLocation, WpfPlot1.Plot.LastRender);
 
 
                     //// place the crosshair over the highlighted point
                     if (nearest.IsReal)
                     {
                         XYLableC.Visibility = Visibility.Visible;
-                        XYLableC.Content = $"X:{nearest.X},Y:{nearest.Y}";
+                        XYLableC.Content = $"{nearest.Y}";
 
                         var x = MyCrosshair.Axes.GetPixel(nearest.Coordinates);
 
@@ -134,9 +134,9 @@ namespace PCAN.UserControls
                 labelC.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
                 labelC.VerticalAlignment = System.Windows.VerticalAlignment.Top;
                 labelC.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
-                labelC.FontSize = 15;
-                labelC.Width = 100;
-                labelC.Height = 50;
+                labelC.FontSize = 10;
+                labelC.Width = 50;
+                labelC.Height = 20;
                 wpfplotdock.Children.Add(labelC);
                 _labelCs.Add(key, labelC);
                 PlotCount++;

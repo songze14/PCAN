@@ -16,6 +16,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -80,60 +81,13 @@ namespace PCAN.ViewModel.RunPage
              
               .Bind(out _dataMonitoringSettingDataParmSourceList)
               .Subscribe();
-            this.LockSendDataCommand = ReactiveCommand.Create(() =>
-            {
-                DataMonitoringSettingDataParmList.Clear();
-                var receivedatalenght = 0;
-                var senddatatext = new StringBuilder();
-                senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index, senddatatext, SendData0) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index, senddatatext, SendData1) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData2 != null ? UpdateSendData(ref receivedatalenght, SendData2.Size, SendData2.Index, senddatatext, SendData2) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData3 != null ? UpdateSendData(ref receivedatalenght, SendData3.Size, SendData3.Index, senddatatext, SendData3) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData4 != null ? UpdateSendData(ref receivedatalenght, SendData4.Size, SendData4.Index, senddatatext, SendData4) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData5 != null ? UpdateSendData(ref receivedatalenght, SendData5.Size, SendData5.Index, senddatatext, SendData5) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index, senddatatext, SendData6) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-                senddatatext.Append('-');
-                senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index, senddatatext, SendData7) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
-
-                SendDataText = senddatatext.ToString();
-                if (receivedatalenght>8)
-                {
-                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "预解析数据长度超过8" });
-                    return;
-                }
-                var startbye = new byte[8];
-                int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID, 16);
-                var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
-                dirveridBytes.CopyTo(startbye, 0);
-                startbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length+4);
-                startbye[dirveridBytes.Length + 1] = 0;
-                startbye[dirveridBytes.Length + 2] = 0xA5;
-                startbye[dirveridBytes.Length + 3] = 0xA5;
-                StartDataText= BitConverter.ToString(startbye);
-
-                var stopbye = new byte[8];
-                dirveridBytes.CopyTo(stopbye, 0);
-                stopbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length + 4);
-                stopbye[dirveridBytes.Length + 1] = 0;
-                stopbye[dirveridBytes.Length + 2] = 0xCA;
-                stopbye[dirveridBytes.Length + 3] = 0xCA;
-                StopDataText = BitConverter.ToString(stopbye);
-                HasLockSendParm = true;
-            });
-            this.UnLockSendDataCommand= ReactiveCommand.Create(() =>
-            {
-                HasLockSendParm = false;
-            });
+            
+           
             this.StartCommand = ReactiveCommand.Create(() =>
             {
                 try
                 {
+                    LockSendData();
                     if (!HasLockSendParm)
                     {
                         _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
@@ -174,7 +128,8 @@ namespace PCAN.ViewModel.RunPage
                         getdatasenddata = new byte[getdatasenddatastr.Length];
                         for (int i = 0; i < getdatasenddatastr.Length; i++)
                         {
-                            getdatasenddata[i] = Convert.ToByte(getdatasenddatastr[i], 16);
+                            var data = Convert.ToInt16(getdatasenddatastr[i]);
+                            getdatasenddata[i] = Convert.ToByte(data);
                         }
                     }
                     else
@@ -224,8 +179,9 @@ namespace PCAN.ViewModel.RunPage
                 }
                 PCanClientUsercontrolViewModel.WriteMsg(stopid, startdata);
                 HasStart = false;
+                HasLockSendParm = false;
             });
-            this.RefParmCommand.Subscribe();
+            this.RefParmCommand.Execute();
 
 
         }
@@ -266,6 +222,52 @@ namespace PCAN.ViewModel.RunPage
             return senddatatext.Append(addsenddatatextIndex.ToString("00"));
         }
        
+        private void LockSendData()
+        {
+            DataMonitoringSettingDataParmList.Clear();
+            var receivedatalenght = 0;
+            var senddatatext = new StringBuilder();
+            senddatatext = SendData0 != null ? UpdateSendData(ref receivedatalenght, SendData0.Size, SendData0.Index, senddatatext, SendData0) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData1 != null ? UpdateSendData(ref receivedatalenght, SendData1.Size, SendData1.Index, senddatatext, SendData1) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData2 != null ? UpdateSendData(ref receivedatalenght, SendData2.Size, SendData2.Index, senddatatext, SendData2) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData3 != null ? UpdateSendData(ref receivedatalenght, SendData3.Size, SendData3.Index, senddatatext, SendData3) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData4 != null ? UpdateSendData(ref receivedatalenght, SendData4.Size, SendData4.Index, senddatatext, SendData4) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData5 != null ? UpdateSendData(ref receivedatalenght, SendData5.Size, SendData5.Index, senddatatext, SendData5) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData6 != null ? UpdateSendData(ref receivedatalenght, SendData6.Size, SendData6.Index, senddatatext, SendData6) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+            senddatatext.Append('-');
+            senddatatext = SendData7 != null ? UpdateSendData(ref receivedatalenght, SendData7.Size, SendData7.Index, senddatatext, SendData7) : UpdateSendData(ref receivedatalenght, 0, 0, senddatatext);
+
+            SendDataText = senddatatext.ToString();
+            if (receivedatalenght > 8)
+            {
+                _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "预解析数据长度超过8" });
+                return;
+            }
+            var startbye = new byte[8];
+            int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID, 16);
+            var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
+            dirveridBytes.CopyTo(startbye, 0);
+            startbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length + 4);
+            startbye[dirveridBytes.Length + 1] = 0;
+            startbye[dirveridBytes.Length + 2] = 0xA5;
+            startbye[dirveridBytes.Length + 3] = 0xA5;
+            StartDataText = BitConverter.ToString(startbye);
+
+            var stopbye = new byte[8];
+            dirveridBytes.CopyTo(stopbye, 0);
+            stopbye[dirveridBytes.Length] = (byte)(dirveridBytes.Length + 4);
+            stopbye[dirveridBytes.Length + 1] = 0;
+            stopbye[dirveridBytes.Length + 2] = 0xCA;
+            stopbye[dirveridBytes.Length + 3] = 0xCA;
+            StopDataText = BitConverter.ToString(stopbye);
+            HasLockSendParm = true;
+        }
         #region SendDataComboxSelect
         [Reactive]
         public DataMonitoringSettingDataParm SendData0 { get; set; } = new DataMonitoringSettingDataParm();
@@ -293,8 +295,6 @@ namespace PCAN.ViewModel.RunPage
         
         #endregion
         #region Command
-        public ReactiveCommand<Unit,Unit> LockSendDataCommand { get; }
-        public ReactiveCommand<Unit,Unit> UnLockSendDataCommand { get; }
         public ReactiveCommand<Unit,Unit> StartCommand { get; }
         public ReactiveCommand<Unit,Unit> StopCommand { get; }
         public ReactiveCommand<Unit,Unit> RefParmCommand { get; }
