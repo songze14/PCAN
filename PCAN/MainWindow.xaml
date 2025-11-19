@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PCAN"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:usercontrols="clr-namespace:PCAN.UserControls"
@@ -16,12 +17,12 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="70" />
             <ColumnDefinition />
             <ColumnDefinition Width="400" />
         </Grid.ColumnDefinitions>
         <!--#region菜单-->
-        <Border
+        <!--<Border
             x:Name="left"
             Grid.Column="0"
             Width="200"
@@ -70,7 +71,33 @@
                     Header="数据监控" />
 
             </Menu>
-        </Border>
+        </Border>-->
+        <ToolBarTray Orientation="Vertical">
+            <ToolBar ClipToBounds="False" Style="{StaticResource MaterialDesignToolBar}">
+                <Button
+                    Click="SysTemSettings_Click"
+                    Content="{materialDesign:PackIcon Kind=CogOutline}"
+                    ToolTip="系统设置" />
+                <Button
+                    Click="MenuItem_Click"
+                    Content="{materialDesign:PackIcon Kind=StoreSearchOutline}"
+                    ToolTip="基本功能" />
+                <Button
+                    Click="Upload_Click"
+                    Content="{materialDesign:PackIcon Kind=UploadMultipleOutline}"
+                    ToolTip="升级" />
+                <Button
+                    Click="DeviceParmTuning_Click"
+                    Content="{materialDesign:PackIcon Kind=WrenchOutline}"
+                    ToolTip="设备参数调试" />
+                <Button
+                    Click="DataMonitoring_Click"
+                    Content="{materialDesign:PackIcon Kind=ChartBellCurve}"
+                    ToolTip="数据监控" />
+
+            </ToolBar>
+
+        </ToolBarTray>
         <Frame
             Name="navWin"
             Grid.Column="1"

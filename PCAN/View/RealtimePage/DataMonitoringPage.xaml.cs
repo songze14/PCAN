@@ -92,5 +92,18 @@ namespace PCAN.View.RealtimePage
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(DataMonitoringPageViewModel), typeof(DataMonitoringPage), new PropertyMetadata(null));
         #endregion
+
+        private void ConnectionCanButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.CanConnectiontoolbar.Visibility==Visibility.Hidden)
+            {
+                this.CanConnectiontoolbar.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.CanConnectiontoolbar.Visibility = Visibility.Hidden;
+            }
+           
+        }
     }
 }
