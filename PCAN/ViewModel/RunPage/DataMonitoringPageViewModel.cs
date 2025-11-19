@@ -28,18 +28,16 @@ namespace PCAN.ViewModel.RunPage
 {
     public class DataMonitoringPageViewModel: ReactiveObject
     {
-        private readonly ILogger<BasicFunctionsPageViewModel> _logger;
+        
         private readonly IMediator _mediator;
         private readonly IDataMonitoringSettingService _datamonitoringsettingservice;
 
         public DataMonitoringPageViewModel(WpfPlotGLUserControl wpfPlotGLUserControl, 
-            ILogger<BasicFunctionsPageViewModel> logger, 
             IMediator mediator, 
             PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,
             IDataMonitoringSettingService dataMonitoringSettingService)
         {
             WpfPlotGLUserControl = wpfPlotGLUserControl;
-            _logger = logger;
             _mediator = mediator;
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _datamonitoringsettingservice = dataMonitoringSettingService;
@@ -52,7 +50,7 @@ namespace PCAN.ViewModel.RunPage
                     var id =  msg.ID.ToString("X");
                     if (id == _reciveDataId && HasStart)
                     {
-                        AddLogs(new DataLog() { Direction = "Recive", Message = $"ID:{id},Data:{BitConverter.ToString(msg.DATA)}" });
+                        
 
                         var index = 0;
                         foreach (var item in DataMonitoringSettingDataParmList)
@@ -169,7 +167,6 @@ namespace PCAN.ViewModel.RunPage
                         startdata = [];
                     }
                     PCanClientUsercontrolViewModel.WriteMsg(startid, startdata);
-                    AddLogs(new DataLog() { Direction = "Send" ,Message=BitConverter.ToString(startdata) });
                     byte[] getdatasenddata;
                     var getdatasenddatastr = SendDataText.Split('-', StringSplitOptions.RemoveEmptyEntries);
                     if (getdatasenddatastr != null)
@@ -187,7 +184,6 @@ namespace PCAN.ViewModel.RunPage
                     }
                     var getdataid = uint.Parse(GetDataIDText, System.Globalization.NumberStyles.HexNumber);
                     PCanClientUsercontrolViewModel.WriteMsg(getdataid, getdatasenddata);
-                    AddLogs(new DataLog() { Direction = "Send", Message =$"ID:{getdataid},Data:{BitConverter.ToString(getdatasenddata)}"  });
 
                     PCanClientUsercontrolViewModel.Reset();
                     wpfPlotGLUserControl.ResetPlot();
@@ -206,6 +202,7 @@ namespace PCAN.ViewModel.RunPage
             this.RefParmCommand = ReactiveCommand.CreateFromTask(async () =>
             {
                 await GetDataMonitoringSettingDataParmSourceList();
+                await GetDataMonitoringSettingSourceList();
             });
             this.StopCommand = ReactiveCommand.Create(() =>
             {
@@ -228,13 +225,9 @@ namespace PCAN.ViewModel.RunPage
                 PCanClientUsercontrolViewModel.WriteMsg(stopid, startdata);
                 HasStart = false;
             });
-            this.ChangeObs = this.DataLogsList.Connect();
-            var d = this.ChangeObs
-               .ObserveOn(RxApp.MainThreadScheduler)
-               .Bind(out _dataLogsList)
-               .DisposeMany()
-               .Subscribe();
-            GetDataMonitoringSettingDataParmSourceList();
+            this.RefParmCommand.Subscribe();
+
+
         }
         private async Task GetDataMonitoringSettingDataParmSourceList()
         {
@@ -250,6 +243,19 @@ namespace PCAN.ViewModel.RunPage
             var result =await _datamonitoringsettingservice.GetDataMonitoringSettingDataParms();
             DataMonitoringSettingDataParmSourceList.AddRange(result);
         }
+        private async Task GetDataMonitoringSettingSourceList()
+        {
+
+            var result = await _datamonitoringsettingservice.GetDataMonitoringSetting();
+            if (result != null)
+            {
+                GetDataIDText = result.GetDataID ?? string.Empty;
+                StartIdText = result.StartId ?? string.Empty;
+                ReciveDataId = result.ReciveDataId ?? string.Empty;
+                StopIdText = result.StopId ?? string.Empty;
+            }
+
+        }
         private StringBuilder UpdateSendData(ref int receivedatalenght,int addreceivedatalenght,int addsenddatatextIndex, StringBuilder senddatatext, DataMonitoringSettingDataParm? dataParm=null)
         {
             receivedatalenght+=addreceivedatalenght;
@@ -259,14 +265,7 @@ namespace PCAN.ViewModel.RunPage
             }
             return senddatatext.Append(addsenddatatextIndex.ToString("00"));
         }
-        private void AddLogs(DataLog log)
-        {
-            if (DataLogsList.Count > 1000)
-            {
-                DataLogsList.RemoveAt(0);
-            }
-            DataLogsList.Add(log);
-        }
+       
         #region SendDataComboxSelect
         [Reactive]
         public DataMonitoringSettingDataParm SendData0 { get; set; } = new DataMonitoringSettingDataParm();
@@ -292,13 +291,6 @@ namespace PCAN.ViewModel.RunPage
         private readonly ReadOnlyObservableCollection<DataMonitoringSettingDataParm> _dataMonitoringSettingDataParmSourceList;
         public ReadOnlyObservableCollection<DataMonitoringSettingDataParm> DataMonitoringSettingDataParm => _dataMonitoringSettingDataParmSourceList;
         
-        #endregion
-        #region Log
-        public SourceList<DataLog> DataLogsList { get; } = new();
-        private readonly ReadOnlyObservableCollection<DataLog> _dataLogsList;
-        public ReadOnlyObservableCollection<DataLog> DataLogs => _dataLogsList;
-        public IObservable<IChangeSet<DataLog>> ChangeObs { get; }
-
         #endregion
         #region Command
         public ReactiveCommand<Unit,Unit> LockSendDataCommand { get; }

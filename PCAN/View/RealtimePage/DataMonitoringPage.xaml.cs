@@ -33,7 +33,7 @@ namespace PCAN.View.RealtimePage
             {
                 this.OneWayBind(ViewModel, vm => vm.WpfPlotGLUserControl, v => v.PlotCon.Content).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PCanClientUsercontrol.ViewModel).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.DataLogs, v => v.logs.ItemsSource).DisposeWith(d);
+              
                 #region Command
                 this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
@@ -68,21 +68,16 @@ namespace PCAN.View.RealtimePage
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StopButton.IsEnabled,b=>b).DisposeWith(d);
                 #endregion
                 #region 参数文本
-                this.Bind(ViewModel, vm => vm.GetDataIDText, v => v.GetDataIDTextBox.Text).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.SendDataText, v => v.SendDataTextBlock.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.StartIdText, v => v.StartIdTextBox.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.StartDataText, v => v.StartDataTextBlock.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.GetDataIDText, v => v.GetDataIDTextBox.Text).DisposeWith(d);
+                //this.OneWayBind(ViewModel, vm => vm.SendDataText, v => v.SendDataTextBlock.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.StartIdText, v => v.StartIdTextBox.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.StartDataText, v => v.StartDataTextBlock.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
+                //this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBox.Text).DisposeWith(d);
                 #endregion
-                this.ViewModel?.ChangeObs
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(lm => {
-                        this.scroll.ScrollToEnd();
-                    })
-                    .DisposeWith(d);
+               
             });
         }
         #region ViewModel

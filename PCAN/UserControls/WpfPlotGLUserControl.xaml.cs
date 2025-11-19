@@ -39,6 +39,9 @@ namespace PCAN.UserControls
             InitializeComponent();
             this.DataContext = this;
             AddMenu();
+           
+            double[] dataY = { 1, 4, 9, 16, 25,-1,22,89,-34,-87,0,1,2,3,4,5,6,7 };
+            this.WpfPlot1.Plot.Add.Signal(dataY);
 
         }
 

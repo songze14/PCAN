@@ -12,204 +12,155 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*" />
-            <RowDefinition Height="3*" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="1.2*" />
             <RowDefinition Height="4*" />
-            <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
         <control:PCanClientUsercontrol x:Name="PCanClientUsercontrol" Grid.Row="0" />
         <Border Grid.Row="1" Background="AliceBlue">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.5*" />
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <GroupBox Margin="5" Header="发送参数">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <WrapPanel>
-                            <WrapPanel x:Name="SendParmGroup">
-                                <Label Content="开始ID" />
-                                <TextBox
-                                    x:Name="StartIdTextBox"
-                                    Width="100"
-                                    VerticalAlignment="Top"
-                                    Text="3F3"
-                                    ToolTip="数据十六进制，不需要写0x" />
-                                <Label Content="开始参数" />
-                                <TextBox
-                                    x:Name="StartDataTextBlock"
-                                    Width="200"
-                                    VerticalAlignment="Top"
-                                    IsReadOnly="True"
-                                    Text="01-02-03" />
-                                <Label Content="获取数据ID" />
-                                <TextBox
-                                    x:Name="GetDataIDTextBox"
-                                    Width="100"
-                                    VerticalAlignment="Top"
-                                    Text="3f3"
-                                    ToolTip="数据十六进制，不需要写0x" />
-                                <GroupBox Margin="5">
-                                    <GroupBox.Header>
-                                        <StackPanel Height="15">
-                                            <TextBlock
-                                                FontSize="10"
-                                                Foreground="White"
-                                                Text="发送数据" />
-                                        </StackPanel>
-                                    </GroupBox.Header>
-                                    <ScrollViewer MinHeight="80" VerticalScrollBarVisibility="Auto">
-                                        <WrapPanel>
-                                            <Label Content="0:" />
-                                            <ComboBox
-                                                x:Name="SendData0Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="1:" />
-                                            <ComboBox
-                                                x:Name="SendData1Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="2:" />
-                                            <ComboBox
-                                                x:Name="SendData2Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="3:" />
-                                            <ComboBox
-                                                x:Name="SendData3Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="4:" />
-                                            <ComboBox
-                                                x:Name="SendData4Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="5:" />
-                                            <ComboBox
-                                                x:Name="SendData5Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="6:" />
-                                            <ComboBox
-                                                x:Name="SendData6Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                            <Label Content="7:" />
-                                            <ComboBox
-                                                x:Name="SendData7Combox"
-                                                MinWidth="120"
-                                                DisplayMemberPath="Name" />
-                                        </WrapPanel>
-                                    </ScrollViewer>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="0.5*" />
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto">
+                    <WrapPanel>
+                        <WrapPanel x:Name="SendParmGroup">
+
+                            <GroupBox Margin="5">
+                                <GroupBox.Header>
+                                    <StackPanel Height="15">
+                                        <TextBlock
+                                            FontSize="10"
+                                            Foreground="White"
+                                            Text="发送数据" />
+                                    </StackPanel>
+                                </GroupBox.Header>
+                                <ScrollViewer MinHeight="80" VerticalScrollBarVisibility="Auto">
+                                    <WrapPanel>
+                                        <Label Content="0:" />
+                                        <ComboBox
+                                            x:Name="SendData0Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="1:" />
+                                        <ComboBox
+                                            x:Name="SendData1Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="2:" />
+                                        <ComboBox
+                                            x:Name="SendData2Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="3:" />
+                                        <ComboBox
+                                            x:Name="SendData3Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="4:" />
+                                        <ComboBox
+                                            x:Name="SendData4Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="5:" />
+                                        <ComboBox
+                                            x:Name="SendData5Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="6:" />
+                                        <ComboBox
+                                            x:Name="SendData6Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                        <Label Content="7:" />
+                                        <ComboBox
+                                            x:Name="SendData7Combox"
+                                            MinWidth="120"
+                                            DisplayMemberPath="Name" />
+                                    </WrapPanel>
+                                </ScrollViewer>
 
 
-                                </GroupBox>
-
-
-                            </WrapPanel>
-                            <DockPanel>
-                                <Label
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Content="拟发送" />
-                                <TextBlock
-                                    x:Name="SendDataTextBlock"
-                                    Margin="5"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="01-00-02-00" />
-                            </DockPanel>
-                            <Button
-                                x:Name="RefParmButton"
-                                Margin="5"
-                                Content="刷新参数">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
-                                                <Setter Property="IsEnabled" Value="True" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Button
-                                x:Name="LockSendDataButton"
-                                Margin="5"
-                                Content="锁定">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
-                                                <Setter Property="IsEnabled" Value="True" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Button
-                                x:Name="UnLockSendDataButton"
-                                Margin="5"
-                                Content="解锁">
-                                <Button.Style>
-                                    <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
-                                                <Setter Property="IsEnabled" Value="True" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-
-
+                            </GroupBox>
 
 
                         </WrapPanel>
-                    </ScrollViewer>
+                        <DockPanel>
+                            <Label
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="拟发送" />
+                            <TextBlock
+                                x:Name="SendDataTextBlock"
+                                Margin="5"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Text="01-00-02-00" />
+                        </DockPanel>
+                        <Button
+                            x:Name="RefParmButton"
+                            Margin="5"
+                            Content="刷新参数">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button
+                            x:Name="LockSendDataButton"
+                            Margin="5"
+                            Content="锁定">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button
+                            x:Name="UnLockSendDataButton"
+                            Margin="5"
+                            Content="解锁">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
 
-                </GroupBox>
-                <GroupBox
-                    Grid.Column="1"
-                    Margin="5"
-                    Header="接收参数">
-                    <WrapPanel>
-                        <Label Content="接收ID" />
-                        <TextBox
-                            x:Name="ReciveDataIdTextBlock"
-                            Width="100"
-                            Text="3f3"
-                            ToolTip="数据十六进制，不需要写0x" />
-                        <Label Content="停止ID" />
-                        <TextBox
-                            x:Name="StopIdTextBox"
-                            Width="200"
-                            Text="3f3"
-                            ToolTip="数据十六进制，不需要写0x" />
-                        <Label Content="停止数据" />
-                        <TextBox
-                            x:Name="StopDataTextBlock"
-                            Width="200"
-                            IsReadOnly="True" />
+
+
+
                     </WrapPanel>
-                </GroupBox>
-                <Grid Grid.Column="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
+                </ScrollViewer>
+                <Grid Grid.Row="1" Grid.Column="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
@@ -229,39 +180,19 @@
                     </Grid>
                     <Button
                         x:Name="StartButton"
-                        Grid.Row="1"
+                        Grid.Column="1"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
                         Content="开始" />
                     <Button
                         x:Name="StopButton"
-                        Grid.Row="2"
+                        Grid.Column="2"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
                         Content="停止" />
                 </Grid>
             </Grid>
         </Border>
         <ContentControl x:Name="PlotCon" Grid.Row="2" />
-        <ScrollViewer
-            Name="scroll"
-            Grid.Row="3"
-            Margin="1"
-            Background="Azure"
-            HorizontalScrollBarVisibility="Auto"
-            VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="logs">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-
-
-                            <TextBlock Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss.ff}:}" />
-                            <TextBlock Text="{Binding Direction}" />
-                            <TextBlock Text="{Binding Message}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
-
-
     </Grid>
 </Page>

@@ -20,14 +20,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using Unit = System.Reactive.Unit;
 
-namespace PCAN.ViewModel.Usercontrols
+namespace PCAN.ViewModel.Usercontrols.DataMonitoringSettings
 {
-    public class DataMonitoringSettingUserControlViewModel :ReactiveObject
+    public class DataMonitoringPlotParmUserControlViewModel :ReactiveObject
     {
         private readonly IDataMonitoringSettingService _datamonitoringsettingservice;
         private readonly IMediator _mediator;
 
-        public DataMonitoringSettingUserControlViewModel(IDataMonitoringSettingService dataMonitoringSettingService,IMediator mediator)
+        public DataMonitoringPlotParmUserControlViewModel(IDataMonitoringSettingService dataMonitoringSettingService,IMediator mediator)
         {
             _datamonitoringsettingservice = dataMonitoringSettingService;
             _mediator = mediator;
@@ -37,7 +37,7 @@ namespace PCAN.ViewModel.Usercontrols
              .Sort(SortExpressionComparer<DataMonitoringSettingDataParm>.Ascending(x => x.Index)) // 排序
              .Bind(out _dataMonitoringSettingDataParmSourceList)
              .Subscribe();
-            this.AnalysisParmstrCommand =ReactiveCommand.Create(()=> 
+            AnalysisParmstrCommand =ReactiveCommand.Create(()=> 
             {
                 try
                 {
@@ -106,27 +106,48 @@ namespace PCAN.ViewModel.Usercontrols
                 }
 
             });
-            this.SaveParmCommand= ReactiveCommand.CreateFromTask(async() =>
+            SavePlotParmCommand= ReactiveCommand.CreateFromTask(async() =>
             {
                 try
                 {
                     var datas = DataMonitoringSettingDataParmSourceList.Items.ToList();
                     await _datamonitoringsettingservice.AddDataMonitoringSettingDataParms(datas);
-                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"保存数据监控参数成功" });
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"保存曲线参数成功" });
                 }
                 catch (Exception ex)
                 {
                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"保存数据监控参数失败:{ex.Message}" });
                 }
             });
-            this.RefreshParmCommand = ReactiveCommand.CreateFromTask(async() =>
+            SaveParmCommand=ReactiveCommand.CreateFromTask(async() =>
+            {
+                try
+                {
+                    var setting = new DataMonitoringSetting()
+                    {
+                        GetDataID = GetDataIDText,
+                        StartId = StartIdText,
+                        ReciveDataId = ReciveDataId,
+                        StopId = StopIdText,
+                    };
+                    await _datamonitoringsettingservice.UpdateDataMonitoringSetting(setting);
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"保存数据监控参数成功" });
+                }
+                catch (Exception ex)
+                {
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"保存数据监控参数失败:{ex.Message}" });
+                }
+            });
+            RefreshParmCommand = ReactiveCommand.CreateFromTask(async() =>
             {
                 await GetDataMonitoringSettingDataParmSourceList();
+                await GetDataMonitoringSettingSourceList();
             });
             RefreshParmCommand.Execute();
         }
        
         public ReactiveCommand<Unit,Unit> RefreshParmCommand { get; }
+        public ReactiveCommand<Unit,Unit> SavePlotParmCommand { get; }
         public ReactiveCommand<Unit,Unit> SaveParmCommand { get; }
         [Reactive]
         public string DeviceParmValueStr { get; set; }
@@ -141,8 +162,30 @@ namespace PCAN.ViewModel.Usercontrols
            
             DataMonitoringSettingDataParmSourceList.AddRange(result);
         }
+        private async Task GetDataMonitoringSettingSourceList()
+        {
+        
+            var result = await _datamonitoringsettingservice.GetDataMonitoringSetting();
+            if (result!=null)
+            {
+                GetDataIDText = result.GetDataID??string.Empty;
+                StartIdText = result.StartId?? string.Empty;
+                ReciveDataId = result.ReciveDataId ?? string.Empty;
+                StopIdText = result.StopId?? string.Empty;
+            }
+          
+        }
         public SourceList<DataMonitoringSettingDataParm> DataMonitoringSettingDataParmSourceList { get; } = new();
         private readonly ReadOnlyObservableCollection<DataMonitoringSettingDataParm> _dataMonitoringSettingDataParmSourceList;
         public ReadOnlyObservableCollection<DataMonitoringSettingDataParm> DataMonitoringSettingDataParm => _dataMonitoringSettingDataParmSourceList;
+
+        [Reactive]
+        public string GetDataIDText { get; internal set; }
+        [Reactive]
+        public string StartIdText { get; internal set; }
+        [Reactive]
+        public string ReciveDataId { get; internal set; }
+        [Reactive]
+        public string StopIdText { get; internal set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using PCAN.ViewModel.Usercontrols;
+﻿using PCAN.ViewModel.Usercontrols.DataMonitoringSettings;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,11 @@ namespace PCAN.ViewModel.RunPage
 {
     public class SysTemSettingsPageViewModel : ReactiveObject
     {
-        public SysTemSettingsPageViewModel(DataMonitoringSettingUserControlViewModel dataMonitoringSettingUserControlViewModel)
+        public SysTemSettingsPageViewModel(DataMonitoringPlotParmUserControlViewModel dataMonitoringSettingUserControlViewModel)
         {
             DataMonitoringSettingUserControlViewModel = dataMonitoringSettingUserControlViewModel;
         }
 
-        public DataMonitoringSettingUserControlViewModel DataMonitoringSettingUserControlViewModel { get; }
+        public DataMonitoringPlotParmUserControlViewModel DataMonitoringSettingUserControlViewModel { get; }
     }
 }

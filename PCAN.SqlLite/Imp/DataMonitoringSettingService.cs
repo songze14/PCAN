@@ -40,7 +40,22 @@ namespace PCAN.SqlLite.Imp
 
         public async Task<DataMonitoringSetting> UpdateDataMonitoringSetting(DataMonitoringSetting data)
         {
-            throw new NotImplementedException();
+           var olddata = await _dbcontext.DataMonitoringSettings.FirstOrDefaultAsync();
+            if (olddata != null)
+            {
+                olddata.GetDataID = data.GetDataID;
+                olddata.StartId = data.StartId;
+                olddata.ReciveDataId = data.ReciveDataId;
+                olddata.StopId = data.StopId;
+                await _dbcontext.SaveChangesAsync();
+                return olddata;
+            }
+            else
+            {
+                await _dbcontext.DataMonitoringSettings.AddAsync(data);
+                await _dbcontext.SaveChangesAsync();
+                return data;
+            }
         }
 
         public async Task<List<DataMonitoringSettingDataParm>> AddDataMonitoringSettingDataParms(List<DataMonitoringSettingDataParm> datas)

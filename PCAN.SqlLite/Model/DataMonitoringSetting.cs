@@ -13,6 +13,10 @@ namespace PCAN.SqlLite.Model
     {
         [Key]
         public int Id { get; set; }
+        public string? GetDataID { get;  set; }
+        public string? StartId { get;  set; }
+        public string? ReciveDataId { get;  set; }
+        public string? StopId { get;  set; }
 
     }
     [Table("DataMonitoringSettingDataParm")]
