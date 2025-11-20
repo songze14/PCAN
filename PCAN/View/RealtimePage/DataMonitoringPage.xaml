@@ -117,6 +117,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
+                        <TextBlock x:Name="MessageCountTextBlock" MinWidth="100" />
                         <!--<Button
                             x:Name="LockSendDataButton"
                             Margin="5"

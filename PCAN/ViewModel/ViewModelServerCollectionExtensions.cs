@@ -38,6 +38,7 @@ namespace PCAN.ViewModel
             services.AddSingleton<DataMonitoringPageViewModel>();
             services.AddSingleton<SysTemSettingsPageViewModel>();
             services.AddSingleton<DataMonitoringPlotParmUserControlViewModel>();
+            services.AddTransient<SignalSettingWindowViewModel>();
             return services;
         }
     }

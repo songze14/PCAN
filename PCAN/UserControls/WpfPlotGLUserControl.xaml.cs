@@ -1,6 +1,9 @@
 ﻿using PCAN.Tools;
+using PCAN.View.Windows;
+using PCAN.ViewModel.Window;
 using ReactiveUI;
 using ScottPlot;
+using ScottPlot.ArrowShapes;
 using ScottPlot.AxisPanels;
 using ScottPlot.Plottables;
 using Splat;
@@ -39,6 +42,7 @@ namespace PCAN.UserControls
             InitializeComponent();
             this.DataContext = this;
             AddMenu();
+            WpfPlot1.Plot.ShowLegend();
 
         }
 
@@ -106,20 +110,23 @@ namespace PCAN.UserControls
                 }
                 var color = WpfPlot1.Plot.Add.Palette.GetColor(_signals.Count);
                 var singnal = WpfPlot1.Plot.Add.Signal(ys, color: color);
-                if (PlotCount >= 1)
-                {
-                    var yaxis = WpfPlot1.Plot.Axes.AddLeftAxis();
-                    yaxis.Color(color);
-                    singnal.Axes.YAxis = yaxis;
-                    _leftAxis.Add(key, yaxis);
-                }
-                else
-                {
+                //if (PlotCount >= 1)
+                //{
+                //    var yaxis = WpfPlot1.Plot.Axes.AddLeftAxis();
+                //    yaxis.Color(color);
+                //    singnal.Axes.YAxis = yaxis;
+                //    _leftAxis.Add(key, yaxis);
+                //}
+                //else
+                //{
 
-                    singnal.Axes.YAxis = WpfPlot1.Plot.Axes.Left;
+                //    singnal.Axes.YAxis = WpfPlot1.Plot.Axes.Left;
 
-                }
+                //}
+                singnal.LegendText = key;
+
                 _signals.Add(key, singnal);
+
                 var crosshair = WpfPlot1.Plot.Add.Crosshair(0, 0);
                 crosshair.IsVisible = false;
                 crosshair.MarkerShape = MarkerShape.OpenCircle;
@@ -214,6 +221,18 @@ namespace PCAN.UserControls
             {
                 plot.Axes.AutoScale();
             });
+            this.WpfPlot1.Menu?.Add("调整", plot =>
+            {
+                var window = Locator.Current.GetService<IViewFor<SignalSettingWindowViewModel>>() as SignalSettingWindow;
+               var viewmodel= new SignalSettingWindowViewModel(this.WpfPlot1);
+                window!.ViewModel = viewmodel;
+                if (window!=null)
+                {
+                    window.Show();
+
+                }
+            });
+           
         }
     }
 }

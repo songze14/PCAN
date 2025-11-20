@@ -2,6 +2,7 @@
 using PCAN.UserControls;
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
+using PCAN.View.Windows;
 using PCAN.ViewModel.RunPage;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
@@ -23,6 +24,7 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<DataMonitoringPageViewModel>, DataMonitoringPage>();
             services.AddSingleton<IViewFor<SysTemSettingsPageViewModel>, SysTemSettingsPage>();
             services.AddTransient<WpfPlotGLUserControl>();
+            services.AddTransient<IViewFor<SignalSettingWindowViewModel>, SignalSettingWindow>();
             return services;
         }
     }

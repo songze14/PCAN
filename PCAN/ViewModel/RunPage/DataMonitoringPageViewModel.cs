@@ -51,8 +51,11 @@ namespace PCAN.ViewModel.RunPage
                     var id =  msg.ID.ToString("X");
                     if (id == _reciveDataId && HasStart)
                     {
-                        
+                        UIHelper.RunInUIThread(d =>
+                        {
+                            MessageCount++;
 
+                        });
                         var index = 0;
                         foreach (var item in DataMonitoringSettingDataParmList)
                         {
@@ -143,6 +146,7 @@ namespace PCAN.ViewModel.RunPage
                     PCanClientUsercontrolViewModel.Reset();
                     wpfPlotGLUserControl.ResetPlot();
                     HasStart = true;
+                    MessageCount = 0;
                 }
                 catch (Exception ex)
                 {
@@ -180,6 +184,7 @@ namespace PCAN.ViewModel.RunPage
                 PCanClientUsercontrolViewModel.WriteMsg(stopid, startdata);
                 HasStart = false;
                 HasLockSendParm = false;
+                
             });
             this.RefParmCommand.Execute();
 
@@ -334,6 +339,9 @@ namespace PCAN.ViewModel.RunPage
         #endregion
         public WpfPlotGLUserControl WpfPlotGLUserControl { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; set; }
+        [Reactive]
+        public int MessageCount { get;  set; }
+
         public class DataLog
         {
             public DateTime TimeStamp { get; set; } = DateTime.Now.ToLocalTime();
