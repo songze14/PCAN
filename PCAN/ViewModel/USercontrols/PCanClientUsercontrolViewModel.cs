@@ -79,7 +79,7 @@ namespace PCAN.ViewModel.USercontrols
                 }
                 CanDrive.FilterMessages(Convert.ToUInt32(_canfileset.FromId, 16), Convert.ToUInt32(_canfileset.ToId, 16));
 
-                this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
+                this.CanDrive.CANReadMsg.ObserveOn(RxApp.TaskpoolScheduler).Subscribe(msg =>
                 {
                     NewMessage.Value = msg;
                     var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);

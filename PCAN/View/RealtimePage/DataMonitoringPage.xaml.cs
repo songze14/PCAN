@@ -3,6 +3,7 @@ using ReactiveUI;
 using Splat;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -75,8 +76,11 @@ namespace PCAN.View.RealtimePage
                 //this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
                 //this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
                 //this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
-                this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBox.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountSlider.Value).DisposeWith(d);
+                //this.OneWayBind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBlock.Text).DisposeWith(d);
+                
                 #endregion
+                //this.OneWayBind(ViewModel,vm=>vm.HasConnect,v=>v.ConnectionCanButton.Background).DisposeWith(d);
                 this.OneWayBind(ViewModel,vm=>vm.MessageCount,v=>v.MessageCountTextBlock.Text).DisposeWith(d);
 
             });

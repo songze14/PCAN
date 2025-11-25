@@ -160,36 +160,37 @@
                 </ScrollViewer>
                 <Grid Grid.Row="1" Grid.Column="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
+                        <ColumnDefinition Width="2*" />
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
+                    <DockPanel>
+
                         <Label
                             HorizontalContentAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="自动区间" />
-                        <TextBox
-                            x:Name="LimitCountTextBox"
-                            Grid.Column="1"
-                            Width="100"
-                            Height="50"
-                            HorizontalContentAlignment="Center"
-                            VerticalContentAlignment="Center" />
-                    </Grid>
+                            Content="显示区间" />
+                        <Slider
+                            x:Name="LimitCountSlider"
+                            MinWidth="200"
+                            Maximum="100000"
+                            Minimum="10"
+                            Style="{StaticResource MaterialDesignDiscreteSlider}"
+                            TickFrequency="1000"
+                            TickPlacement="TopLeft" />
+                        <!--<TextBlock x:Name="LimitCountTextBlock" />-->
+                    </DockPanel>
                     <Button
                         x:Name="StartButton"
                         Grid.Column="1"
+                        MaxWidth="200"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         Content="开始" />
                     <Button
                         x:Name="StopButton"
                         Grid.Column="2"
+                        MaxWidth="200"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         Content="停止" />

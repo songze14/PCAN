@@ -13,9 +13,12 @@ using PCAN.UserControls;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ScottPlot.Plottables;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reactive;
@@ -23,6 +26,8 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using Windows.ApplicationModel.UserDataTasks.DataProvider;
+using static PCAN.ViewModel.RunPage.DataMonitoringPageViewModel;
 using Unit = System.Reactive.Unit;
 
 namespace PCAN.ViewModel.RunPage
@@ -42,7 +47,12 @@ namespace PCAN.ViewModel.RunPage
             _mediator = mediator;
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _datamonitoringsettingservice = dataMonitoringSettingService;
-            PCanClientUsercontrolViewModel.NewMessage.Subscribe(msg =>
+           
+            this.PCanClientUsercontrolViewModel.IsConnected.WhenAnyValue(x => x).Subscribe(isconnect =>
+            {
+                HasConnect = isconnect;
+            });
+            PCanClientUsercontrolViewModel.NewMessage.ObserveOn(RxApp.TaskpoolScheduler).Subscribe(msg =>
             {
                 try
                 {
@@ -51,11 +61,6 @@ namespace PCAN.ViewModel.RunPage
                     var id =  msg.ID.ToString("X");
                     if (id == _reciveDataId && HasStart)
                     {
-                        UIHelper.RunInUIThread(d =>
-                        {
-                            MessageCount++;
-
-                        });
                         var index = 0;
                         foreach (var item in DataMonitoringSettingDataParmList)
                         {
@@ -65,12 +70,11 @@ namespace PCAN.ViewModel.RunPage
                                 if (datastr != null)
                                 {
                                     var datavalue = Convert.ToDouble(datastr);
-                                    PlotDics[item.Name].Add(datavalue);
+                                    PlotDics[item.Name].Enqueue(datavalue);
                                 }
                             }
                             index += item.Size;
                         }
-                        WpfPlotGLUserControl.SetLimit(LimitCount);
                     }
                 }
                 catch (Exception ex)
@@ -86,25 +90,38 @@ namespace PCAN.ViewModel.RunPage
               .Subscribe();
             
            
-            this.StartCommand = ReactiveCommand.Create(() =>
+            this.StartCommand = ReactiveCommand.Create(async () =>
             {
                 try
                 {
                     LockSendData();
                     if (!HasLockSendParm)
                     {
-                        _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
+                       await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = "请先锁定发送参数" });
                         return;
                     }
                     WpfPlotGLUserControl.ClearAllSignal();
                     PlotDics.Clear();
+                    ViewPlotDic.Clear();
                     foreach (var item in DataMonitoringSettingDataParmList)
                     {
                         if (item.Index != 0)
                         {
                             var datalist = new List<double>();
-                            WpfPlotGLUserControl.AddSignal(datalist, item.Name);
-                            PlotDics.Add(item.Name, datalist);
+                            var datalogger= WpfPlotGLUserControl.AddSignal(datalist, item.Name);
+                            if (datalogger.Item1!=null)
+                            {
+                                PlotDics.Add(item.Name, new ConcurrentQueue<double>());
+                                ViewPlotDic.Add(item.Name, datalist);
+                            }
+                            else
+                            {
+                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"添加曲线失败：{datalogger.Item2}" });
+
+                                return;
+                            }
+                            
+                            
                         }
                     }
                     var startid = uint.Parse(StartIdText, System.Globalization.NumberStyles.HexNumber);
@@ -146,7 +163,58 @@ namespace PCAN.ViewModel.RunPage
                     PCanClientUsercontrolViewModel.Reset();
                     wpfPlotGLUserControl.ResetPlot();
                     HasStart = true;
-                    MessageCount = 0;
+                    MessageCount = 1;
+                    foreach (var item in PlotDics)
+                    {
+                        _=Task.Run( () =>
+                        {
+                            while (true)
+                            {
+                                try
+                                {
+                                    //await Task.Delay(TimeSpan.FromMicroseconds(100));
+                                    double data;
+                                    while (item.Value.TryDequeue(out data))
+                                    {
+                                        if (ViewPlotDic[item.Key].Count - 1 > 20_0000)
+                                        {
+                                            ViewPlotDic[item.Key].RemoveAt(0);
+
+                                        }
+                                        ViewPlotDic[item.Key].Add(data);
+
+                                        //UIHelper.RunInUIThread(d =>
+                                        //{
+                                        //    MessageCount++;
+                                        //});
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                     _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"数据更新错误:{ex.Message}" });
+                                }
+                            }
+                        });
+                    }
+                    _=Task.Run(async () =>
+                    {
+                        while (HasStart)
+                        {
+                            try
+                            {
+                                await Task.Delay(2);
+                                WpfPlotGLUserControl.SetLimit((int)LimitCount);
+                            }
+                            catch (Exception ex)
+                            {
+
+                               
+                            }
+                          
+
+                        }
+                    });
+
                 }
                 catch (Exception ex)
                 {
@@ -187,7 +255,7 @@ namespace PCAN.ViewModel.RunPage
                 
             });
             this.RefParmCommand.Execute();
-
+            
 
         }
         private async Task GetDataMonitoringSettingDataParmSourceList()
@@ -300,7 +368,7 @@ namespace PCAN.ViewModel.RunPage
         
         #endregion
         #region Command
-        public ReactiveCommand<Unit,Unit> StartCommand { get; }
+        public ReactiveCommand<Unit,Task> StartCommand { get; }
         public ReactiveCommand<Unit,Unit> StopCommand { get; }
         public ReactiveCommand<Unit,Unit> RefParmCommand { get; }
         #endregion
@@ -310,32 +378,35 @@ namespace PCAN.ViewModel.RunPage
         #endregion
         #region 参数文本
 
-        [Reactive]
         public string GetDataIDText { get; set; } = "3f3";
-        [Reactive]
         public string SendDataText { get; set; }
-        [Reactive]
         public string StartIdText { get; set; } = "3f3";
-        [Reactive]
         public string StartDataText { get; set; }
 
-        [Reactive]
         public string StopIdText { get; set; } = "3f3";
-        [Reactive]
         public string StopDataText { get; set; }
         private string _reciveDataId =>ReciveDataId.ToUpper();
-
-        [Reactive]
         public string ReciveDataId { get; set; } = "3ff";
+        private double _limitCount = 1000;
+        public double LimitCount 
+        {
+            get => _limitCount;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _limitCount, value);
+            }
+        }
+        private readonly object _lockobj = new object();
         [Reactive]
-        public int LimitCount { get; set; } = 1000;
+        public bool HasConnect { get; set; }
+       
         #endregion
         #region 本地变量
-        private Dictionary<string, List<double>> PlotDics = new();
+        private Dictionary<string, ConcurrentQueue<double>> PlotDics = new();
         private List<DataMonitoringSettingDataParm> DataMonitoringSettingDataParmList = new();
         [Reactive]
         public bool HasStart { get; set; }
-
+        private Dictionary<string, List<double>> ViewPlotDic = new ();
         #endregion
         public WpfPlotGLUserControl WpfPlotGLUserControl { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; set; }

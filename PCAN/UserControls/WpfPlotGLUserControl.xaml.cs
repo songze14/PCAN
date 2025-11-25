@@ -31,17 +31,18 @@ namespace PCAN.UserControls
     /// </summary>
     public partial class WpfPlotGLUserControl : UserControl
     {
-        private Dictionary<string, Signal> _signals = new Dictionary<string, Signal>();
+        private Dictionary<string, Signal> _datalogger = new Dictionary<string, Signal>();
         Dictionary<string, Crosshair> _crosshairs = new Dictionary<string, Crosshair>();
         Dictionary<string, Label> _labelCs = new Dictionary<string, Label>();
         Dictionary<string, LeftAxis> _leftAxis = new Dictionary<string, LeftAxis>();
-
+        private int LimitCount = 1000;
         private int PlotCount;
         public WpfPlotGLUserControl()
         {
             InitializeComponent();
             this.DataContext = this;
             AddMenu();
+            
             WpfPlot1.Plot.ShowLegend();
 
         }
@@ -54,12 +55,12 @@ namespace PCAN.UserControls
 
                 Pixel mousePixel = new(posiWithPlot.X, posiWithPlot.Y);
                 Coordinates mouseLocation = WpfPlot1.Plot.GetCoordinates(mousePixel);
-                foreach (var item in _signals)
+                foreach (var item in _datalogger)
                 {
                     var _datastreamer = item.Value;
                     var MyCrosshair = _crosshairs[item.Key];
                     var XYLableC = _labelCs[item.Key];
-                    DataPoint nearest = _datastreamer.GetNearest(mouseLocation, WpfPlot1.Plot.LastRender);
+                    DataPoint nearest = _datastreamer.GetNearest(mouseLocation,WpfPlot1.Plot.LastRender);
 
 
                     //// place the crosshair over the highlighted point
@@ -106,10 +107,12 @@ namespace PCAN.UserControls
             {
                 if (string.IsNullOrEmpty(key))
                 {
-                    key = $"sig{_signals.Count}";
+                    key = $"sig{_datalogger.Count}";
                 }
-                var color = WpfPlot1.Plot.Add.Palette.GetColor(_signals.Count);
-                var singnal = WpfPlot1.Plot.Add.Signal(ys, color: color);
+                var color = WpfPlot1.Plot.Add.Palette.GetColor(_datalogger.Count);
+                var datalogger = WpfPlot1.Plot.Add.Signal(ys);
+
+                datalogger.Color = color;
                 //if (PlotCount >= 1)
                 //{
                 //    var yaxis = WpfPlot1.Plot.Axes.AddLeftAxis();
@@ -123,9 +126,9 @@ namespace PCAN.UserControls
                 //    singnal.Axes.YAxis = WpfPlot1.Plot.Axes.Left;
 
                 //}
-                singnal.LegendText = key;
+                datalogger.LegendText = key;
 
-                _signals.Add(key, singnal);
+                _datalogger.Add(key, datalogger);
 
                 var crosshair = WpfPlot1.Plot.Add.Crosshair(0, 0);
                 crosshair.IsVisible = false;
@@ -134,7 +137,7 @@ namespace PCAN.UserControls
                 crosshair.LineWidth = 2;
                 crosshair.LineColor = color;
                 crosshair.HorizontalLine.LinePattern = LinePattern.Dotted;
-                crosshair.Axes.YAxis = singnal.Axes.YAxis;
+                crosshair.Axes.YAxis = datalogger.Axes.YAxis;
                 _crosshairs.Add(key, crosshair);
                 var labelC = new Label();
                 labelC.Visibility = Visibility.Hidden;
@@ -165,9 +168,9 @@ namespace PCAN.UserControls
         {
             try
             {
-                if (_signals.ContainsKey(key))
+                if (_datalogger.ContainsKey(key))
                 {
-                    WpfPlot1.Plot.Remove(_signals[key]);
+                    WpfPlot1.Plot.Remove(_datalogger[key]);
                     WpfPlot1.Plot.Remove(_crosshairs[key]);
 
                     wpfplotdock.Children.Remove(_labelCs[key]);
@@ -176,7 +179,7 @@ namespace PCAN.UserControls
                         WpfPlot1.Plot.Axes.Remove(_leftAxis[key]);
                         _leftAxis.Remove(key);
                     }
-                    _signals.Remove(key);
+                    _datalogger.Remove(key);
                     _crosshairs.Remove(key);
                     _labelCs.Remove(key);
                     WpfPlot1.Refresh();
@@ -191,7 +194,7 @@ namespace PCAN.UserControls
         }
         public void ClearAllSignal()
         {
-            foreach (var item in _signals)
+            foreach (var item in _datalogger)
             {
                 RemoveSignal(item.Key);
             }
@@ -201,14 +204,21 @@ namespace PCAN.UserControls
         }
         public void SetLimit(int limitcount = 1000)
         {
-            UIHelper.RunInUIThread((d) =>
+            //UIHelper.RunInUIThread((d) =>
+            //{
+            if (_datalogger.Count>0)
             {
+                var datacount = _datalogger.First().Value.Data.MinimumIndex;
                 WpfPlot1.Plot.Axes.AutoScaleExpandY();
                 var xlimit = WpfPlot1.Plot.Axes.GetDataLimits().XRange;
-                WpfPlot1.Plot.Axes.SetLimitsX(xlimit.Max - limitcount, xlimit.Max);
-                WpfPlot1.Refresh();
+                var left = xlimit.Max - limitcount < xlimit.Min ? datacount : xlimit.Max - limitcount;
+                WpfPlot1.Plot.Axes.SetLimitsX(left, xlimit.Max);
 
-            });
+                WpfPlot1.Refresh();
+            }
+           
+
+            //});
         }
         public void ResetPlot()
         {
@@ -234,5 +244,6 @@ namespace PCAN.UserControls
             });
            
         }
+     
     }
 }

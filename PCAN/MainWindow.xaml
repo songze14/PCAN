@@ -112,6 +112,14 @@
             ScrollViewer.VerticalScrollBarVisibility="Visible" />
         <!--#endregion-->
         <!--#region连接设置-->
-        <usercontrols:UILogsView x:Name="uilogView" Grid.Column="2" />
+        <Border
+            Grid.Column="2"
+            Margin="5"
+            Background="AliceBlue"
+            BorderBrush="Black">
+
+            <usercontrols:UILogsView x:Name="uilogView" />
+        </Border>
+
     </Grid>
 </Window>
