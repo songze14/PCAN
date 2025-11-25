@@ -202,7 +202,7 @@ namespace PCAN.ViewModel.RunPage
                         {
                             try
                             {
-                                await Task.Delay(2);
+                                await Task.Delay(50);
                                 WpfPlotGLUserControl.SetLimit((int)LimitCount);
                             }
                             catch (Exception ex)
