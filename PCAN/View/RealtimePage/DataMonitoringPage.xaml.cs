@@ -36,8 +36,6 @@ namespace PCAN.View.RealtimePage
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PCanClientUsercontrol.ViewModel).DisposeWith(d);
               
                 #region Command
-                //this.BindCommand(ViewModel, vm => vm.LockSendDataCommand, v => v.LockSendDataButton).DisposeWith(d);
-                //this.BindCommand(ViewModel, vm => vm.UnLockSendDataCommand, v => v.UnLockSendDataButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StartCommand, v => v.StartButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.StopCommand, v => v.StopButton).DisposeWith(d);
                 this.BindCommand(ViewModel, vm => vm.RefParmCommand, v => v.RefParmButton).DisposeWith(d);
@@ -64,24 +62,20 @@ namespace PCAN.View.RealtimePage
                 #endregion
                 #region Flag
                 this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.SendParmGroup.IsEnabled,b=>!b).DisposeWith(d);
-                //this.OneWayBind(ViewModel, vm => vm.HasLockSendParm, v => v.UnLockSendDataButton.IsEnabled).DisposeWith(d);
+              
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StartButton.IsEnabled,b=>!b).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StopButton.IsEnabled,b=>b).DisposeWith(d);
                 #endregion
                 #region 参数文本
-                //this.Bind(ViewModel, vm => vm.GetDataIDText, v => v.GetDataIDTextBox.Text).DisposeWith(d);
-                //this.OneWayBind(ViewModel, vm => vm.SendDataText, v => v.SendDataTextBlock.Text).DisposeWith(d);
-                //this.Bind(ViewModel, vm => vm.StartIdText, v => v.StartIdTextBox.Text).DisposeWith(d);
-                //this.Bind(ViewModel, vm => vm.StartDataText, v => v.StartDataTextBlock.Text).DisposeWith(d);
-                //this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
-                //this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
-                //this.Bind(ViewModel, vm => vm.StopDataText, v => v.StopDataTextBlock.Text).DisposeWith(d);
+               
+                this.OneWayBind(ViewModel, vm => vm.RefreshMillisecond, v => v.RefreshTimeTextBlock.Text).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.PlotCount, v => v.PlotCountTextBlock.Text).DisposeWith(d);
+
                 this.Bind(ViewModel, vm => vm.LimitCount, v => v.LimitCountSlider.Value).DisposeWith(d);
-                //this.OneWayBind(ViewModel, vm => vm.LimitCount, v => v.LimitCountTextBlock.Text).DisposeWith(d);
+               
                 
                 #endregion
-                //this.OneWayBind(ViewModel,vm=>vm.HasConnect,v=>v.ConnectionCanButton.Background).DisposeWith(d);
-                this.OneWayBind(ViewModel,vm=>vm.MessageCount,v=>v.MessageCountTextBlock.Text).DisposeWith(d);
+               
 
             });
         }

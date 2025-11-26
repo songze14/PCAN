@@ -129,6 +129,8 @@ namespace PCAN.ViewModel.Usercontrols.DataMonitoringSettings
                         StartId = StartIdText,
                         ReciveDataId = ReciveDataId,
                         StopId = StopIdText,
+                        RefreshMillisecond=RefreshMillisecond,
+                        PlotCount=PlotCount,
                     };
                     await _datamonitoringsettingservice.UpdateDataMonitoringSetting(setting);
                     await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"保存数据监控参数成功" });
@@ -142,6 +144,8 @@ namespace PCAN.ViewModel.Usercontrols.DataMonitoringSettings
             {
                 await GetDataMonitoringSettingDataParmSourceList();
                 await GetDataMonitoringSettingSourceList();
+                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"参数已刷新！" });
+
             });
             RefreshParmCommand.Execute();
         }
@@ -172,6 +176,8 @@ namespace PCAN.ViewModel.Usercontrols.DataMonitoringSettings
                 StartIdText = result.StartId?? string.Empty;
                 ReciveDataId = result.ReciveDataId ?? string.Empty;
                 StopIdText = result.StopId?? string.Empty;
+                PlotCount = result.PlotCount;
+                RefreshMillisecond = result.RefreshMillisecond;
             }
           
         }
@@ -187,5 +193,9 @@ namespace PCAN.ViewModel.Usercontrols.DataMonitoringSettings
         public string ReciveDataId { get; internal set; }
         [Reactive]
         public string StopIdText { get; internal set; }
+        [Reactive]
+        public int PlotCount { get; internal set; }
+        [Reactive]
+        public int RefreshMillisecond { get; internal set; } 
     }
 }

@@ -39,6 +39,8 @@ namespace PCAN.UserControls.DataMonitoringSettings
                 this.Bind(ViewModel, vm => vm.StartIdText, v => v.StartIdTextBox.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.ReciveDataId, v => v.ReciveDataIdTextBlock.Text).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.StopIdText, v => v.StopIdTextBox.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.PlotCount, v => v.PlotCountTextBox.Text).DisposeWith(d);
+                this.Bind(ViewModel, vm => vm.RefreshMillisecond, v => v.RefreshTimeTextBox.Text).DisposeWith(d);
             });
             
         }

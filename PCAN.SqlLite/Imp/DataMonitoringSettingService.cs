@@ -47,6 +47,8 @@ namespace PCAN.SqlLite.Imp
                 olddata.StartId = data.StartId;
                 olddata.ReciveDataId = data.ReciveDataId;
                 olddata.StopId = data.StopId;
+                olddata.RefreshMillisecond = data.RefreshMillisecond;
+                olddata.PlotCount = data.PlotCount;
                 await _dbcontext.SaveChangesAsync();
                 return olddata;
             }

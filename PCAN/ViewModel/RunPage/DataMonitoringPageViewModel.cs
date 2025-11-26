@@ -176,7 +176,7 @@ namespace PCAN.ViewModel.RunPage
                                     double data;
                                     while (item.Value.TryDequeue(out data))
                                     {
-                                        if (ViewPlotDic[item.Key].Count - 1 > 20_0000)
+                                        if (ViewPlotDic[item.Key].Count - 1 > PlotCount)
                                         {
                                             ViewPlotDic[item.Key].RemoveAt(0);
 
@@ -202,7 +202,7 @@ namespace PCAN.ViewModel.RunPage
                         {
                             try
                             {
-                                await Task.Delay(50);
+                                await Task.Delay(RefreshMillisecond);
                                 WpfPlotGLUserControl.SetLimit((int)LimitCount);
                             }
                             catch (Exception ex)
@@ -219,7 +219,7 @@ namespace PCAN.ViewModel.RunPage
                 catch (Exception ex)
                 {
 
-                    _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"开始时出现错误:{ex.Message}" });
+                    await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Error, LogSource = LogSource.DataMonitoring, Message = $"开始时出现错误:{ex.Message}" });
 
                 }
 
@@ -230,6 +230,8 @@ namespace PCAN.ViewModel.RunPage
             {
                 await GetDataMonitoringSettingDataParmSourceList();
                 await GetDataMonitoringSettingSourceList();
+                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DataMonitoring, Message = $"参数已刷新！" });
+
             });
             this.StopCommand = ReactiveCommand.Create(() =>
             {
@@ -282,6 +284,8 @@ namespace PCAN.ViewModel.RunPage
                 StartIdText = result.StartId ?? string.Empty;
                 ReciveDataId = result.ReciveDataId ?? string.Empty;
                 StopIdText = result.StopId ?? string.Empty;
+                RefreshMillisecond=result.RefreshMillisecond;
+                PlotCount=result.PlotCount;
             }
 
         }
@@ -387,6 +391,10 @@ namespace PCAN.ViewModel.RunPage
         public string StopDataText { get; set; }
         private string _reciveDataId =>ReciveDataId.ToUpper();
         public string ReciveDataId { get; set; } = "3ff";
+        [Reactive]
+        public int PlotCount { get; set; } = 20_0000;
+        [Reactive]
+        public int RefreshMillisecond { get; set; } = 50;
         private double _limitCount = 1000;
         public double LimitCount 
         {

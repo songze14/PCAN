@@ -17,6 +17,8 @@ namespace PCAN.SqlLite.Model
         public string? StartId { get;  set; }
         public string? ReciveDataId { get;  set; }
         public string? StopId { get;  set; }
+        public int PlotCount { get;  set; }
+        public int RefreshMillisecond { get;  set; }
 
     }
     [Table("DataMonitoringSettingDataParm")]

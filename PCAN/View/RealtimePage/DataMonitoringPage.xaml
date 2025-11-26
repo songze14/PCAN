@@ -117,41 +117,16 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <TextBlock x:Name="MessageCountTextBlock" MinWidth="100" />
-                        <!--<Button
-                            x:Name="LockSendDataButton"
-                            Margin="5"
-                            Content="锁定">
-                            <Button.Style>
-                                <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
-                                            <Setter Property="IsEnabled" Value="False" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                        <Button
-                            x:Name="UnLockSendDataButton"
-                            Margin="5"
-                            Content="解锁">
-                            <Button.Style>
-                                <Style BasedOn="{StaticResource MaterialDesignFlatMidBgButton}" TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="False">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=SendParmGroup}" Value="True">
-                                            <Setter Property="IsEnabled" Value="False" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>-->
+                        <Label VerticalAlignment="Center" Content="存储点位" />
+                        <TextBlock
+                            x:Name="PlotCountTextBlock"
+                            MinWidth="100"
+                            VerticalAlignment="Center" />
+                        <Label VerticalAlignment="Center" Content="刷新频率(ms)" />
+                        <TextBlock
+                            x:Name="RefreshTimeTextBlock"
+                            MinWidth="100"
+                            VerticalAlignment="Center" />
 
 
 
