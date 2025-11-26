@@ -65,6 +65,7 @@ namespace PCAN.View.RealtimePage
               
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StartButton.IsEnabled,b=>!b).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.HasStart, v => v.StopButton.IsEnabled,b=>b).DisposeWith(d);
+                
                 #endregion
                 #region 参数文本
                
