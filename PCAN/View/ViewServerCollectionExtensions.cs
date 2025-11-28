@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PCAN.UserControls;
+using PCAN.UserControls.UploadSetting;
 using PCAN.View.RealtimePage;
 using PCAN.View.UserPage;
 using PCAN.View.Windows;
 using PCAN.ViewModel.RunPage;
+using PCAN.ViewModel.Usercontrols.UploadSetting;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
 using ReactiveUI;
@@ -25,6 +27,7 @@ namespace PCAN.View
             services.AddSingleton<IViewFor<SysTemSettingsPageViewModel>, SysTemSettingsPage>();
             services.AddTransient<WpfPlotGLUserControl>();
             services.AddTransient<IViewFor<SignalSettingWindowViewModel>, SignalSettingWindow>();
+            services.AddTransient<IViewFor<UploadSettingUserControlViewModel>, UploadSettingUserControl>();
             return services;
         }
     }

@@ -19,6 +19,7 @@ namespace PCAN.View.RealtimePage
             this.WhenActivated(d =>
             {
                 this.OneWayBind(ViewModel, vm => vm.DataMonitoringSettingUserControlViewModel, v => v.DataMonitoringPlotParmUserControl.ViewModel).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.UploadSettingUserControlViewModel, v => v.UploadSettingUserControl.ViewModel).DisposeWith(d);
             });
         }
         #region ViewModel

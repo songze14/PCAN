@@ -6,6 +6,7 @@
     xmlns:dataMonitoringSetting="clr-namespace:PCAN.UserControls.DataMonitoringSettings"
     xmlns:local="clr-namespace:PCAN.View.RealtimePage"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uploadsetting="clr-namespace:PCAN.UserControls.UploadSetting"
     Title="SysTemSettingsPage"
     d:Background="AliceBlue"
     d:DesignHeight="1000"
@@ -19,7 +20,9 @@
             <RowDefinition Height="1*" />
             <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
-        <GroupBox Header="升级" />
+        <GroupBox Header="升级">
+            <uploadsetting:UploadSettingUserControl x:Name="UploadSettingUserControl" />
+        </GroupBox>
         <GroupBox Grid.Row="1" Header="参数读取" />
         <GroupBox
             Grid.Row="2"

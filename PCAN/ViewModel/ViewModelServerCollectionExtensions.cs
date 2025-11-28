@@ -2,6 +2,7 @@
 using PCAN.Modles;
 using PCAN.ViewModel.RunPage;
 using PCAN.ViewModel.Usercontrols.DataMonitoringSettings;
+using PCAN.ViewModel.Usercontrols.UploadSetting;
 using PCAN.ViewModel.USercontrols;
 using PCAN.ViewModel.Window;
 using ReactiveUI;
@@ -39,6 +40,7 @@ namespace PCAN.ViewModel
             services.AddSingleton<SysTemSettingsPageViewModel>();
             services.AddSingleton<DataMonitoringPlotParmUserControlViewModel>();
             services.AddTransient<SignalSettingWindowViewModel>();
+            services.AddTransient<UploadSettingUserControlViewModel>();
             return services;
         }
     }
