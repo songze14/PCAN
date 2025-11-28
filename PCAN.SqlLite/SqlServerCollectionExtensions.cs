@@ -25,6 +25,7 @@ namespace PCAN.SqlLite
             services.AddDbContext<SQLDbContext>(options =>
                 options.UseSqlite(connectionString));
             services.AddScoped<IDataMonitoringSettingService, DataMonitoringSettingService>();
+            services.AddScoped<IUploadSettingService, UploadSettingService>();
             return services;
         }
     }

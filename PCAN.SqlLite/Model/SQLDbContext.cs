@@ -15,5 +15,6 @@ namespace PCAN.SqlLite.Model
         }
         public DbSet<DataMonitoringSetting> DataMonitoringSettings { get; set; }
         public DbSet<DataMonitoringSettingDataParm> DataMonitoringSettingDataParms { get; set; }
+        public DbSet<UploadSetting> UploadSettings { get; set; }
     }
 }

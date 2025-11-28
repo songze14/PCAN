@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using PCAN.Modles;
 using PCAN.Notification.Log;
 using PCAN.Shard.Tools;
+using PCAN.SqlLite.Abs;
 using PCAN.Tools;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
@@ -33,12 +34,14 @@ namespace PCAN.ViewModel.RunPage
     public class UploadPageViewModel:ReactiveObject
     {
         private readonly IMediator _mediator;
+        private readonly IUploadSettingService _uploadsettingservice;
 
-        public UploadPageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator)
+        public UploadPageViewModel(PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel,IMediator mediator, IUploadSettingService uploadSettingService)
         {
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             _mediator = mediator;
-            _cancellationtokensource= new CancellationTokenSource();
+            _uploadsettingservice = uploadSettingService;
+            _cancellationtokensource = new CancellationTokenSource();
             _timecancellationtokensource=new CancellationTokenSource();
             BrowseFileCommand = ReactiveCommand.Create(() =>
             {
@@ -112,9 +115,9 @@ namespace PCAN.ViewModel.RunPage
                             return;
                         }
                         //先按照PackSize分组（默认512）
-                        for (int i = 0; i < filebytes.Length; i += PackSize)
+                        for (int i = 0; i < filebytes.Length; i += PackageSize)
                         {
-                            var chunk = filebytes.Skip(i).Take(PackSize).ToArray();
+                            var chunk = filebytes.Skip(i).Take(PackageSize).ToArray();
                             _sourceUploadDataGridModels.Add(new UploadDataGridModel()
                             {
                                 Data = chunk,
@@ -361,6 +364,18 @@ namespace PCAN.ViewModel.RunPage
                 .Bind(out _uploadDataGridModels)
                 .DisposeMany()
                 .Subscribe();
+            this.RefCommand = ReactiveCommand.Create(async () =>
+            {
+                var setting = await _uploadsettingservice.GetUploadSetting();
+                if (setting != null) 
+                {
+                    PackageSize = setting.PackageSize;
+                    TimeOutSeconds = setting.TimeOutSeconds;
+                    MaxResendCount=setting.MaxResendCount;
+                    UseHexUpload=setting.UploadType==SqlLite.Model.UploadType.Hex;
+                }
+            });
+            RefCommand.Subscribe();
         }
         private byte[] AESKey = System.Text.Encoding.UTF8.GetBytes("greenworksEGG123");
         private byte[] AESIV = System.Text.Encoding.UTF8.GetBytes("greenworskEGG123");
@@ -417,7 +432,7 @@ namespace PCAN.ViewModel.RunPage
         [Reactive]
         public string MCU { get; set; }
         [Reactive]
-        public int PackSize { get; set; } = 512;
+        public int PackageSize { get; set; } = 512;
 
         [Reactive]
 
@@ -430,6 +445,8 @@ namespace PCAN.ViewModel.RunPage
         public string SelectedFilePath { get; set; }
         [Reactive]
         public int UploadProgress { get; set; }
+        [Reactive]
+        public bool UseHexUpload { get; set; }
         /// <summary>
         /// 加密文件
         /// </summary>
@@ -437,6 +454,7 @@ namespace PCAN.ViewModel.RunPage
         public ReactiveCommand<Unit,Unit> BrowseFileCommand { get; set; }
         public ReactiveCommand<Unit, Unit> UploadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
+        public ReactiveCommand<Unit,Task> RefCommand { get; set; }
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
         private UploadStep UploadStep;
         private SemaphoreSlim _semaphoreslim = new(0, 1);
