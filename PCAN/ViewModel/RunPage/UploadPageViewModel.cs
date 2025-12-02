@@ -25,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using Aes = System.Security.Cryptography.Aes;
 using Unit = System.Reactive.Unit;
 
@@ -45,9 +46,10 @@ namespace PCAN.ViewModel.RunPage
             _timecancellationtokensource=new CancellationTokenSource();
             BrowseFileCommand = ReactiveCommand.Create(() =>
             {
+                var filesuffix = IsHexUpload ? "hex" : "bin";
                 var openFileDialog = new OpenFileDialog
                 {
-                    Filter = "升级文件/bin|*.bin",
+                    Filter = $"升级文件/{filesuffix}|*.{filesuffix}",
                 };
                 if (openFileDialog.ShowDialog() == true)
                 {
@@ -114,20 +116,40 @@ namespace PCAN.ViewModel.RunPage
                             IsUploading = false;
                             return;
                         }
-                        //先按照PackSize分组（默认512）
-                        for (int i = 0; i < filebytes.Length; i += PackageSize)
+                        if (IsHexUpload)
                         {
-                            var chunk = filebytes.Skip(i).Take(PackageSize).ToArray();
-                            _sourceUploadDataGridModels.Add(new UploadDataGridModel()
+                            var strs = System.Text.Encoding.UTF8.GetString(filebytes);
+                            var strsp = strs.Split("\r\n");
+                            foreach (var item in strsp)
                             {
-                                Data = chunk,
-                                Index = _sourceUploadDataGridModels.Count + 1,
-                                Size = $"{chunk.Length}Byte",
-                                CRC = CRC.CalculateCRC8(chunk)
-
-                            });
-                           
+                                var byts = System.Text.Encoding.UTF8.GetBytes(item);
+                                _sourceUploadDataGridModels.Add(new UploadDataGridModel()
+                                {
+                                    Data = byts,
+                                    Index = _sourceUploadDataGridModels.Count + 1,
+                                    Size = $"{byts.Length}Byte",
+                                    CRC = CRC.CalculateCRC8(byts)
+                                });
+                            }
                         }
+                        else 
+                        {
+                            //先按照PackSize分组（默认512）
+                            for (int i = 0; i < filebytes.Length; i += PackageSize)
+                            {
+                                var chunk = filebytes.Skip(i).Take(PackageSize).ToArray();
+                                _sourceUploadDataGridModels.Add(new UploadDataGridModel()
+                                {
+                                    Data = chunk,
+                                    Index = _sourceUploadDataGridModels.Count + 1,
+                                    Size = $"{chunk.Length}Byte",
+                                    CRC = CRC.CalculateCRC8(chunk)
+
+                                });
+
+                            }
+                        }
+                        
                         await Task.Delay(1000);
 
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已分包：包数量{_sourceUploadDataGridModels.Count}" });
@@ -154,6 +176,9 @@ namespace PCAN.ViewModel.RunPage
                                     break;
                                 case "U1":
                                     commandFrame[4] = 0x01;
+                                    break;
+                                case "U2":
+                                    commandFrame[4] = 0x02;
                                     break;
                                 default:
                                     break;
@@ -337,7 +362,7 @@ namespace PCAN.ViewModel.RunPage
                     PackageSize = setting.PackageSize;
                     TimeOutSeconds = setting.TimeOutSeconds;
                     MaxResendCount=setting.MaxResendCount;
-                    UseHexUpload=setting.UploadType==SqlLite.Model.UploadType.Hex;
+                    IsHexUpload=setting.UploadType==SqlLite.Model.UploadType.Hex;
                 }
             });
             RefCommand.Subscribe();
@@ -411,7 +436,7 @@ namespace PCAN.ViewModel.RunPage
         [Reactive]
         public int UploadProgress { get; set; }
         [Reactive]
-        public bool UseHexUpload { get; set; }
+        public bool IsHexUpload { get; set; }
    
         public ReactiveCommand<Unit,Unit> BrowseFileCommand { get; set; }
         public ReactiveCommand<Unit, Unit> UploadCommand { get; set; }

@@ -43,6 +43,8 @@ namespace PCAN.View.UserPage
                 this.OneWayBind(ViewModel, vm => vm.UploadDataGridModels, v => v.UploadDataGrid.ItemsSource).DisposeWith(d);
                 this.OneWayBind(ViewModel,vm=>vm.UploadProgress,v=>v.UploadProgressBar.Value).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.UploadProgress, v => v.UploadProgressLable.Content).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.IsHexUpload, v => v.HexUploadCheckBox.IsChecked).DisposeWith(d);
+                this.BindCommand(ViewModel, vm => vm.RefCommand, v => v.RefParmButton).DisposeWith(d);
             });
         }
         #region ViewModel
