@@ -159,7 +159,8 @@
                         CanUserAddRows="False"
                         CanUserDeleteRows="False"
                         CanUserReorderColumns="False"
-                        DockPanel.Dock="Bottom">
+                        DockPanel.Dock="Bottom"
+                        IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>

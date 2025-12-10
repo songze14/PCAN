@@ -10,7 +10,9 @@ using PCAN.Tools;
 using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ScottPlot.Colormaps;
 using System;
+using System.Buffers.Binary;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -109,26 +111,41 @@ namespace PCAN.ViewModel.RunPage
                         filebytes = decryptor.TransformFinalBlock(filebytes, 0, filebytes.Length);
                         //释放解密器
                         decryptor.Dispose();
-                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已读取文件：文件大小{filebytes.Length}Byte" });
                         if (filebytes == null)
                         {
                             MessageBox.Show("空文件！");
                             IsUploading = false;
                             return;
                         }
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"已读取文件：文件大小{filebytes.Length}Byte" });
+                      
                         if (IsHexUpload)
                         {
                             var strs = System.Text.Encoding.UTF8.GetString(filebytes);
                             var strsp = strs.Split("\r\n");
                             foreach (var item in strsp)
                             {
-                                var byts = System.Text.Encoding.UTF8.GetBytes(item);
+                                if (string.IsNullOrEmpty(item))
+                                {
+                                    continue;
+                                }
+                           
+                                var bytes = new byte[((item.Length-1)/2)+1];
+                                bytes[0] = 0x3A; //每行数据以:开头
+                                var bytei = 1;
+                                var hexstr = item[1..];
+                                for (int i = 0; i < hexstr.Length; i += 2)
+                                {
+                                    var strbyte = hexstr.Substring(i, 2);
+                                    bytes[bytei] = Convert.ToByte(strbyte, 16);
+                                    bytei++;
+                                }
                                 _sourceUploadDataGridModels.Add(new UploadDataGridModel()
                                 {
-                                    Data = byts,
+                                    Data = bytes,
                                     Index = _sourceUploadDataGridModels.Count + 1,
-                                    Size = $"{byts.Length}Byte",
-                                    CRC = CRC.CalculateCRC8(byts)
+                                    Size = $"{bytes.Length}Byte",
+                                    //CRC = CRC.ComputeCRC32(byts)
                                 });
                             }
                         }
@@ -143,7 +160,7 @@ namespace PCAN.ViewModel.RunPage
                                     Data = chunk,
                                     Index = _sourceUploadDataGridModels.Count + 1,
                                     Size = $"{chunk.Length}Byte",
-                                    CRC = CRC.CalculateCRC8(chunk)
+                                    CRC = CRC.ComputeCRC8(chunk)
 
                                 });
 
@@ -156,50 +173,52 @@ namespace PCAN.ViewModel.RunPage
 
                     
                         //h获取CRC
-                        var crcHash = CRC.CalculateCRC8(filebytes);
+                        var crcHash = CRC.ComputeCRC8(filebytes);
+                        var crcHas32 = CRC.ComputeCRC32(filebytes);
+
                         //2.发送升级命令
                         var commandFrame = new byte[8];
                    
-                            int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID,16);
-                            if (driveid==0)
-                            {
-                                MessageBox.Show("设备ID错误");
-                                IsUploading = false;
-                                return;
-                            }
-                            var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
-                            dirveridBytes.CopyTo(commandFrame, 0);
-                            switch (MCU)
-                            {
-                                case "U0":
-                                    commandFrame[4] = 0x00;
-                                    break;
-                                case "U1":
-                                    commandFrame[4] = 0x01;
-                                    break;
-                                case "U2":
-                                    commandFrame[4] = 0x02;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
-                            PCanClientUsercontrolViewModel.WriteMsg(0x730, commandFrame, () =>
-                            {
-                                Reset();
-                            });
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"等待回复！" });
-                            _semaphoreslim.Wait();
+                        int driveid = Convert.ToUInt16(PCanClientUsercontrolViewModel.DeviceID,16);
+                        if (driveid==0)
+                        {
+                            MessageBox.Show("设备ID错误");
+                            IsUploading = false;
+                            return;
+                        }
+                        var dirveridBytes = BitConverter.GetBytes((ushort)driveid);
+                        dirveridBytes.CopyTo(commandFrame, 0);
+                        switch (MCU)
+                        {
+                            case "U0":
+                                commandFrame[4] = 0x00;
+                                break;
+                            case "U1":
+                                commandFrame[4] = 0x01;
+                                break;
+                            case "U2":
+                                commandFrame[4] = 0x02;
+                                break;
+                            default:
+                                break;
+                        }
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
+                        PCanClientUsercontrolViewModel.WriteMsg(0x730, commandFrame, () =>
+                        {
+                            Reset();
+                        });
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"等待回复！" });
+                        _semaphoreslim.Wait();
                        
-                            if (UploadStep != UploadStep.Next)
-                            {
-                                await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复异常退出升级" });
-                                UploadStep = UploadStep.NON;
-                                IsUploading = false;
+                        if (UploadStep != UploadStep.Next)
+                        {
+                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复异常退出升级" });
+                            UploadStep = UploadStep.NON;
+                            IsUploading = false;
 
-                                return;
-                            }
-                            await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复正常,升级继续" });
+                            return;
+                        }
+                        await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"回复正常,升级继续" });
                    
                         int ResendCount = 0;
                         for (int i = 0; i < _sourceUploadDataGridModels.Count; i++)
@@ -228,7 +247,22 @@ namespace PCAN.ViewModel.RunPage
                             var packetindex = BitConverter.GetBytes((ushort)(i + 1));
                             Array.Reverse(packetindex);
                             packetindex.CopyTo(startFrame, 4);
-                            startFrame[6] = crcHash;
+                            //startFrame[6] = crcHash;
+                            //if (IsHexUpload)
+                            //{
+                            //    startFrame = new byte[8];
+
+                            //    totalLengthBytes.CopyTo(startFrame, 0);
+                            //    totalPacketCountBytes.CopyTo(startFrame, 2);
+                            //    var bytescrc32 = new byte[4];
+                            //    BinaryPrimitives.WriteUInt32BigEndian(bytescrc32, crcHas32);
+                            //    Array.Reverse(bytescrc32);
+
+                            //    bytescrc32.CopyTo(startFrame, 4);
+
+                            //}
+
+
                             await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"开始发送第{i + 1}个包的开始帧" });
                             PCanClientUsercontrolViewModel.WriteMsg(0x731, startFrame);
                             await Task.Delay(PCanClientUsercontrolViewModel.FrameInterval);
@@ -365,7 +399,7 @@ namespace PCAN.ViewModel.RunPage
                     IsHexUpload=setting.UploadType==SqlLite.Model.UploadType.Hex;
                 }
             });
-            RefCommand.Subscribe();
+            RefCommand.Execute().Subscribe();
         }
         private byte[] AESKey = System.Text.Encoding.UTF8.GetBytes("greenworksEGG123");
         private byte[] AESIV = System.Text.Encoding.UTF8.GetBytes("greenworskEGG123");

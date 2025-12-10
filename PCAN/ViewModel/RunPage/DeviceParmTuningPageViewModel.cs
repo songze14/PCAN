@@ -299,7 +299,7 @@ namespace PCAN.ViewModel.RunPage
                     datalenght.CopyTo(commandFrame, 4);
                     PCanClientUsercontrolViewModel.WriteMsg(0x713, commandFrame);
                     _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.DeviceParm, Message = "开始发送参数！" });
-                    var crc = CRC.CalculateCRC8(parmbyts);
+                    var crc = CRC.ComputeCRC8(parmbyts);
                     foreach (var item in senddatalist)
                     {
                         PCanClientUsercontrolViewModel.WriteMsg(0x714, item);

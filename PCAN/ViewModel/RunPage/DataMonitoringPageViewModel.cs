@@ -14,6 +14,7 @@ using PCAN.ViewModel.USercontrols;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ScottPlot.Plottables;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -172,7 +173,6 @@ namespace PCAN.ViewModel.RunPage
                             {
                                 try
                                 {
-                                    //await Task.Delay(TimeSpan.FromMicroseconds(100));
                                     double data;
                                     while (item.Value.TryDequeue(out data))
                                     {
@@ -183,10 +183,6 @@ namespace PCAN.ViewModel.RunPage
                                         }
                                         ViewPlotDic[item.Key].Add(data);
 
-                                        //UIHelper.RunInUIThread(d =>
-                                        //{
-                                        //    MessageCount++;
-                                        //});
                                     }
                                 }
                                 catch (Exception ex)
@@ -207,8 +203,8 @@ namespace PCAN.ViewModel.RunPage
                             }
                             catch (Exception ex)
                             {
-
-                               
+                                
+                                
                             }
                           
 
