@@ -178,7 +178,20 @@
                     x:Name="ConnectionCanButton"
                     Click="ConnectionCanButton_Click"
                     Content="{materialDesign:PackIcon Kind=Connection}"
-                    ToolTip="连接CAN" />
+                    ToolTip="连接CAN">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource MaterialDesignFloatingActionMiniLightButton}" TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=ViewModel.IsConnected, ElementName=PCanClientUsercontrol}" Value="True">
+                                    <Setter Property="Background" Value="LightGreen" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=ViewModel.IsConnected, ElementName=PCanClientUsercontrol}" Value="False">
+                                    <Setter Property="Background" Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
             </ToolBar>
         </ToolBarTray>

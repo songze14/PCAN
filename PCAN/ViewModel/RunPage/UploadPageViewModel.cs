@@ -201,7 +201,7 @@ namespace PCAN.ViewModel.RunPage
                                 break;
                             default:
                                 break;
-                        }
+                        } 
                         await _mediator.Publish(new LogNotification() { LogLevel = LogLevel.Information, LogSource = LogSource.Upload, Message = $"发送升级指令" });
                         PCanClientUsercontrolViewModel.WriteMsg(0x730, commandFrame, () =>
                         {
