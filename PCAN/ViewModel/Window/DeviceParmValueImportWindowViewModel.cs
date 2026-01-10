@@ -31,12 +31,17 @@ namespace PCAN.ViewModel.Window
                         return;
                     }
                     var inputparmstrs = InputParmStr.Split("\r\n");
-                    var typerepagex = ParmRegex.TypeRegex();
-                    var namerepagex = ParmRegex.NameRegex();
-                    var remarkrepagex = ParmRegex.RemarkRegex();
+                    var typerepagex = ParmRegex.DeviceTypeRegex();
+                    var namerepagex = ParmRegex.DeviceNameRegex();
+                    var remarkrepagex = ParmRegex.DeviceRemarkRegex();
+                    var isarryrepagex = ParmRegex.DeviceIsArry();
                     var remark = string.Empty;
                     foreach (var inputparmstr in inputparmstrs)
                     {
+                        if (string.IsNullOrWhiteSpace(inputparmstr))
+                        {
+                            continue;
+                        }
                         var typematch = typerepagex.Match(inputparmstr);
                         if (typematch == null || !typematch.Success)
                         {
@@ -66,16 +71,42 @@ namespace PCAN.ViewModel.Window
                         {
                             remark = string.Empty;
                         }
-                        sourceList.Add(new DevicePCanParmDataGrid()
+                        var isarrymatch = isarryrepagex.Match(inputparmstr);
+                        if (isarrymatch == null || !isarrymatch.Success)
                         {
-                            ID = sourceList.Count + 1,
-                            Index = sourceList.Count,
-                            Name = name,
-                            Remark = remark,
-                            Size = typeinfo.Size,
-                            TargetFullName = typeinfo.Name,
-                            TargetType = typeinfo.FullName,
-                        });
+                            sourceList.Add(new DevicePCanParmDataGrid()
+                            {
+                                ID = sourceList.Count + 1,
+                                Index = sourceList.Count,
+                                Name = name,
+                                Remark = remark,
+                                Size = typeinfo.Size,
+                                TargetFullName = typeinfo.Name,
+                                TargetType = typeinfo.FullName,
+                            });
+                        }
+                        else
+                        {
+                            var arrynum = isarrymatch.Value;
+                            if (!int.TryParse(arrynum, out int arrycount))
+                            {
+                                MessageBox.Show($"字符串{inputparmstr}数组解析失败！");
+                                return;
+                            }
+                            for (int i = 0; i < arrycount; i++)
+                            {
+                                sourceList.Add(new DevicePCanParmDataGrid()
+                                {
+                                    ID = sourceList.Count + 1,
+                                    Index = sourceList.Count,
+                                    Name = $"{name}.[{i}]",
+                                    Remark = remark,
+                                    Size = typeinfo.Size,
+                                    TargetFullName = typeinfo.Name,
+                                    TargetType = typeinfo.FullName,
+                                });
+                            }
+                        }
                     }
                     MessageBox.Show("解析完成");
 

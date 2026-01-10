@@ -83,11 +83,12 @@ namespace PCAN.Drive
             {
                 try
                 {
-                    
+                    var senddata = new byte[8];
+                    Array.Copy(writemsg.Data, senddata, writemsg.Data.Length);
                     PcanMessage msg = new PcanMessage();
                     msg.ID = (uint)writemsg.Id;
-                    msg.DLC = (byte)writemsg.Data.Length;
-                    msg.Data = writemsg.Data;
+                    msg.DLC = (byte)8;
+                    msg.Data.SetData( senddata,true);
                     msg.MsgType = writemsg.MessageType;
                     //if (msg.DATA.Length<8)
                     //{

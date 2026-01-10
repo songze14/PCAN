@@ -6,6 +6,7 @@ using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
 using PCAN.Shard.Models;
 using PCAN.Shard.Modles;
+using PCAN.Tools;
 using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -82,19 +83,22 @@ namespace PCAN.ViewModel.USercontrols
                 this.CanDrive.CANReadMsg.ObserveOn(RxApp.TaskpoolScheduler).Subscribe(msg =>
                 {
                     NewMessage.Value = msg;
-                    var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
-                    if (oldmsg != null)
+                    UIHelper.RunInUIThread(d =>
                     {
-                        oldmsg.MSGTYPE = msg.MSGTYPE;
-                        oldmsg.LEN = msg.LEN;
-                        oldmsg.DATA = msg.DATA;
-                        oldmsg.Count++;
-                    }
-                    else
-                    {
-                        TPCANMsgs.Add(msg);
-
-                    }
+                        var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
+                        if (oldmsg != null)
+                        {
+                            oldmsg.MSGTYPE = msg.MSGTYPE;
+                            oldmsg.LEN = msg.LEN;
+                            oldmsg.DATA = msg.DATA;
+                            oldmsg.Count++;
+                        }
+                        else
+                        {
+                            TPCANMsgs.Add(msg);
+                        }
+                    });
+                    
 
                 });
                 _logger.LogInformation("连接设备");
