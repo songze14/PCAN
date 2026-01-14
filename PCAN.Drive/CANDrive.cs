@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using DynamicData.Aggregation;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using PCAN.Drive.Modle;
 using PCAN.Notification.Log;
+using PCAN.Shard.Tools;
 using Peak.Can.Basic;
 using System.Diagnostics;
 using System.Reactive.Linq;
@@ -168,8 +170,8 @@ namespace PCAN.Drive
             {
                 try
                 {
-
-                    PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, (byte)writemsg.Data.Length, writemsg.Data,extendedDataLength:true);
+                    var datalength = MathTool.GetDLCFromLength(writemsg.Data.Length);
+                    PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, datalength, writemsg.Data,extendedDataLength:true);
                     //if (msg.Data < 64)
                     //{
                     //    Array.Resize(ref msg.DATA, 64);
@@ -177,6 +179,8 @@ namespace PCAN.Drive
                     var result = WriteFD(msg);
                     if (result != PcanStatus.OK)
                     {
+                        string errtext="";
+                        var errtextstatus = Api.GetErrorText(result,out errtext);
                         _mediator.Publish(new LogNotification
                         {
                             LogLevel = LogLevel.Error,

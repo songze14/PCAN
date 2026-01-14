@@ -104,7 +104,11 @@ namespace PCAN_AutoCar_Test_Client.ViewModel.USercontrols
                         CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
 
                     }
-                    CanDrive.FilterMessages(Convert.ToUInt32( _canfileset.FromId,16),Convert.ToUInt32( _canfileset.ToId,16));
+                    if (!string.IsNullOrWhiteSpace( _canfileset.FromId))
+                    {
+                        CanDrive.FilterMessages(Convert.ToUInt32(_canfileset.FromId, 16), Convert.ToUInt32(_canfileset.ToId, 16));
+
+                    }
                     this.CanDrive.CANReadMsg.ObserveOn(RxApp.MainThreadScheduler).Subscribe(msg =>
                     {
                         NewMessage.Value = msg;
