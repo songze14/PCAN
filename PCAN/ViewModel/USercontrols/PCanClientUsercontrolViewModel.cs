@@ -82,24 +82,11 @@ namespace PCAN.ViewModel.USercontrols
 
                 this.CanDrive.CANReadMsg.ObserveOn(RxApp.TaskpoolScheduler).Subscribe(msg =>
                 {
-                    NewMessage.Value = msg;
-                    UIHelper.RunInUIThread(d =>
+                    if (msg!=null)
                     {
-                        var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
-                        if (oldmsg != null)
-                        {
-                            oldmsg.MSGTYPE = msg.MSGTYPE;
-                            oldmsg.LEN = msg.LEN;
-                            oldmsg.DATA = msg.DATA;
-                            oldmsg.Count++;
-                        }
-                        else
-                        {
-                            TPCANMsgs.Add(msg);
-                        }
-                    });
-                    
+                        NewMessage.Value = msg;
 
+                    }
                 });
                 _logger.LogInformation("连接设备");
                 IsConnected = true;
@@ -172,7 +159,6 @@ namespace PCAN.ViewModel.USercontrols
         public string DeviceID { get; set; }
         public ReactiveProperty<ReadMessage> NewMessage { get; set; } = new ReactiveProperty<ReadMessage>();
         public ObservableCollection<LocalPorts> Ports { get; set; } = [];
-        public ObservableCollection<ReadMessage> TPCANMsgs { get; set; } = [];
         public ObservableCollection<LocalBaudRate> LocalBaudRates { get; set; } =
      [
          new LocalBaudRate()

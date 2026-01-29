@@ -57,18 +57,8 @@ namespace PCAN.Drive
                     while (!token.IsCancellationRequested)
                     {
                         ReadMessages();
-                        //await Task.Delay(m_SleepTime);
                     }
                 }, token);
-                //Task.Run(async () =>
-                //{
-                //    while (!token.IsCancellationRequested)
-                //    {
-                //        WriteMessages();
-                //        await Task.Delay(m_SleepTime);
-
-                //    }
-                //}, token);
             }
             else
             {
@@ -85,6 +75,7 @@ namespace PCAN.Drive
             {
                 try
                 {
+                    ///CAN协议规定数据长度为8位
                     var senddata = new byte[8];
                     Array.Copy(writemsg.Data, senddata, writemsg.Data.Length);
                     PcanMessage msg = new PcanMessage();
@@ -164,12 +155,12 @@ namespace PCAN.Drive
                     LogSource = LogSource.CanDevice,
                     Message = $"CANFD初始化失败，请检查参数:{status}"
                 });
-            }
-            ;
+            };
             this.CanWriteMessages.AsObservable().Subscribe(writemsg =>
             {
                 try
                 {
+                    ///CANFD协议规定数据长度为1-8，12，16，24，32位
                     var datalength = MathTool.GetDLCFromLength(writemsg.Data.Length);
                     PcanMessage msg = new((uint)writemsg.Id, writemsg.MessageType, datalength, writemsg.Data,extendedDataLength:true);
                     //if (msg.Data < 64)
@@ -312,7 +303,7 @@ namespace PCAN.Drive
             }
             catch (Exception ex)
             {
-
+                 
                 _mediator.Publish(new LogNotification
                 {
                     LogLevel = LogLevel.Error,

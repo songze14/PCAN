@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,9 +32,19 @@ namespace PCAN.View.UserPage
             {
                 this.OneWayBind(ViewModel, vm => vm.Title, v => v.Title).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
-                this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel.TPCANMsgs, v => v.CanMessageDataGrid.ItemsSource).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.TPCANMsgs, v => v.CanMessageDataGrid.ItemsSource).DisposeWith(d);
 
+                this.Bind(this.ViewModel, vm => vm.EventGroup, v => v.idEventGroup.Text).DisposeWith(d);
 
+                this.BindCommand(this.ViewModel, vm => vm.CmdClearFilter, v => v.clearFilter).DisposeWith(d);
+
+                this.BindCommand(this.ViewModel, vm => vm.CmdClear, v => v.clear, nameof(this.clear.Click)).DisposeWith(d);
+                this.ViewModel?.ChangeObs
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(lm => {
+                       
+                    })
+                    .DisposeWith(d);
             });
             InitializeComponent();
 

@@ -31,7 +31,7 @@ namespace PCAN.ViewModel
                 ;
                 return appvm;
             });
-            services.AddTransient<PCanClientUsercontrolViewModel>();
+            services.AddSingleton<PCanClientUsercontrolViewModel>();
             services.AddSingleton<UploadPageViewModel>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<UILogsViewModel>();
