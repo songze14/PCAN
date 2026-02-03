@@ -302,7 +302,7 @@ NUGET
     OpenTK.Windowing.GraphicsLibraryFramework (4.9.4) - restriction: || (>= net462) (>= net8.0-windows7.0)
       OpenTK.Core (>= 4.9.4 < 4.10) - restriction: >= netcoreapp3.1
       OpenTK.redist.glfw (>= 3.4.0.44) - restriction: >= netcoreapp3.1
-    Peak.PCANBasic.NET (4.10.1.968)
+    Peak.PCANBasic.NET (4.6.2.753)
       NETStandard.Library (>= 1.6.1) - restriction: >= netstandard2.0
     ReactiveUI (21.0.1)
       DynamicData (>= 9.4.1) - restriction: || (>= net462) (>= netstandard2.0)
@@ -413,11 +413,11 @@ NUGET
       SourceGear.sqlite3 (>= 3.50.4.2) - restriction: >= netstandard2.0
       SQLitePCLRaw.config.e_sqlite3 (>= 3.0.2) - restriction: >= netstandard2.0
     SQLitePCLRaw.config.e_sqlite3 (3.0.2) - restriction: >= net8.0
-      SQLitePCLRaw.provider.e_sqlite3 (>= 3.0.2) - restriction: || (>= net471) (&& (>= net8.0) (< net8.0-ios) (< net8.0-tvos)) (&& (< net8.0) (>= netstandard2.0)) (< netstandard2.0)
+      SQLitePCLRaw.provider.e_sqlite3 (>= 3.0.2) - restriction: || (>= net471) (&& (>= net8.0) (< net8.0-ios) (< net8.0-tvos)) (&& (< net8.0) (>= netstandard2.0))
       SQLitePCLRaw.provider.internal (>= 3.0.2) - restriction: || (>= net8.0-ios) (>= net8.0-tvos)
     SQLitePCLRaw.core (3.0.2) - restriction: >= net8.0
       System.Memory (>= 4.6.3) - restriction: >= netstandard2.0
-    SQLitePCLRaw.provider.e_sqlite3 (3.0.2) - restriction: || (&& (>= net471) (>= net8.0)) (&& (>= net8.0) (< net8.0-ios) (< net8.0-tvos)) (&& (>= net8.0) (< netstandard2.0))
+    SQLitePCLRaw.provider.e_sqlite3 (3.0.2) - restriction: || (&& (>= net471) (>= net8.0)) (&& (>= net8.0) (< net8.0-ios) (< net8.0-tvos))
       SQLitePCLRaw.core (>= 3.0.2) - restriction: >= netstandard2.0
     SQLitePCLRaw.provider.internal (3.0.2) - restriction: || (>= net8.0-ios) (>= net8.0-tvos)
       SQLitePCLRaw.core (>= 3.0.2) - restriction: >= net8.0

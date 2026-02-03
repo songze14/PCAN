@@ -1,4 +1,4 @@
-﻿//  PCANBasic.cs
+﻿//  PCANBasicCompatible.cs
 //
 //  ~~~~~~~~~~~~
 //
@@ -656,7 +656,7 @@ namespace Peak.Can.Basic1
         /// <summary>
         /// Device name
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = PCANBasic.MAX_LENGTH_HARDWARE_NAME)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = PCANBasicCompatible.MAX_LENGTH_HARDWARE_NAME)]
         public string device_name;
         /// <summary>
         /// Device number
@@ -669,11 +669,11 @@ namespace Peak.Can.Basic1
     }
     #endregion
 
-    #region PCANBasic 类
+    #region PCANBasicCompatible 类
     /// <summary>
     /// PCAN-Basic API 类实现
     /// </summary>
-    public static class PCANBasic
+    public static class PCANBasicCompatible
     {
         #region PCAN-BUS 句柄定义
         /// <summary>
@@ -1117,7 +1117,7 @@ namespace Peak.Can.Basic1
         public const int MAX_LENGTH_VERSION_STRING = 256;
         #endregion
 
-        #region PCANBasic API 实现n
+        #region PCANBasicCompatible API 实现n
        /// <summary>初始化一个 PCAN 通道
        /// </summary>
        /// <param name="Channel">PCAN 通道的句柄</param>
@@ -1126,8 +1126,8 @@ namespace Peak.Can.Basic1
        /// <param name="IOPort">非即插即用: 并行端口的 I/O 地址</param>
        /// <param name="Interrupt">非即插即用: 并行端口的中断号</param>
        ///  <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Initialize")]
-        public static extern TPCANStatus Initialize(
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Initialize")]
+        public static extern TPCANStatus  Initialize(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
             [MarshalAs(UnmanagedType.U2)]
@@ -1147,7 +1147,7 @@ namespace Peak.Can.Basic1
             TPCANHandle Channel,
             TPCANBaudrate Btr0Btr1)
         {
-            return Initialize(Channel, Btr0Btr1, (TPCANType)0, 0, 0);
+            return Initialize(Channel, Btr0Btr1, (TPCANType)1, 0, 0);
         }
 
         /// <summary>
@@ -1173,7 +1173,7 @@ namespace Peak.Can.Basic1
         ///data_sjw = 1
         /// </exampe>
         ///<返回> tpcanstatus错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_InitializeFD")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_InitializeFD")]
         public static extern TPCANStatus InitializeFD(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1186,7 +1186,7 @@ namespace Peak.Can.Basic1
         /// 将取消所有已初始化的通道</remarks>
         /// <param name="Channel">PCAN 通道的句柄</param>
         /// <returns>TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Uninitialize")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Uninitialize")]
         public static extern TPCANStatus Uninitialize(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel);
@@ -1197,7 +1197,7 @@ namespace Peak.Can.Basic1
       ///  <remarks>不会执行 CAN 控制器的重置</remarks>
       ///  <param name="Channel">PCAN 通道的句柄</param>
       /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Reset")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Reset")]
         public static extern TPCANStatus Reset(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel);
@@ -1207,7 +1207,7 @@ namespace Peak.Can.Basic1
         /// </summary>
         /// <param name="Channel">PCAN 通道的句柄</param>
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetStatus")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetStatus")]
         public static extern TPCANStatus GetStatus(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel);
@@ -1219,14 +1219,14 @@ namespace Peak.Can.Basic1
         ///  <param name="MessageBuffer">用于存储 CAN 消息的 TPCANMsg 结构缓冲区</param>
         ///  <param name="TimestampBuffer">用于获取消息接收时间的 TPCANTimestamp 结构缓冲区</param>
         ///  <returns>TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Read")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Read")]
         public static extern TPCANStatus Read(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
             out TPCANMsg MessageBuffer,
             out TPCANTimestamp TimestampBuffer);
 
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Read")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Read")]
         private static extern TPCANStatus Read(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1253,14 +1253,14 @@ namespace Peak.Can.Basic1
         /// <param name="MessageBuffer">用于存储 CAN 消息的 TPCANMsgFD 结构缓冲区</param>
         /// <param name="TimestampBuffer">用于获取消息接收时间的 TPCANTimestampFD 缓冲区</param>
         ///  <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_ReadFD")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_ReadFD")]
         public static extern TPCANStatus ReadFD(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
             out TPCANMsgFD MessageBuffer,
             out TPCANTimestampFD TimestampBuffer);
 
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_ReadFD")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_ReadFD")]
         private static extern TPCANStatus ReadFD(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1286,7 +1286,7 @@ namespace Peak.Can.Basic1
         /// <param name="Channel">PCAN 通道的句柄</param>
         /// <param name="MessageBuffer">包含要发送消息的 TPCANMsg 缓冲区</param>
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_Write")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_Write")]
         public static extern TPCANStatus Write(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1297,7 +1297,7 @@ namespace Peak.Can.Basic1
         /// <param name="Channel">具有 FD 功能的 PCAN 通道的句柄</param>
         ///  <param name="MessageBuffer">包含要发送消息的 TPCANMsgFD 缓冲区</param>
         /// <returns>一个 TPCANStatus 错误码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_WriteFD")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_WriteFD")]
         public static extern TPCANStatus WriteFD(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1312,7 +1312,7 @@ namespace Peak.Can.Basic1
         /// <param name="ToID">要接收的最高CAN ID</param>
         /// <param name="Mode">消息类型，标准（11位标识符）或扩展（29位标识符）</param>
         ///  <returns>TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_FilterMessages")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_FilterMessages")]
         public static extern TPCANStatus FilterMessages(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1330,7 +1330,7 @@ namespace Peak.Can.Basic1
         ///  <param name="StringBuffer">用于存放参数值的缓冲区</param>
         /// <param name="BufferLength">缓冲区的字节大小</param>
         /// <returns>一个 TPCANStatus 错误码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetValue")]
         public static extern TPCANStatus GetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1350,7 +1350,7 @@ namespace Peak.Can.Basic1
         /// <param name="NumericBuffer">用于存放参数值的缓冲区</param>
         /// <param name="BufferLength">缓冲区的字节大小</param>
         /// <returns>一个 TPCANStatus 错误码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetValue")]
         public static extern TPCANStatus GetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1368,7 +1368,7 @@ namespace Peak.Can.Basic1
         ///  <param name="NumericBuffer">用于存放参数值的缓冲区</param>
         /// <param name="BufferLength">缓冲区的字节大小</param>
         /// <returns>一个 TPCANStatus 错误码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetValue")]
         public static extern TPCANStatus GetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1377,7 +1377,7 @@ namespace Peak.Can.Basic1
             out UInt64 NumericBuffer,
             UInt32 BufferLength);
 
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetValue")]
         private static extern TPCANStatus GetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1416,7 +1416,7 @@ namespace Peak.Can.Basic1
         /// <param name="NumericBuffer">包含要设置的值的缓冲区</param>
         /// <param name="BufferLength">缓冲区的字节大小</param>
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_SetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_SetValue")]
         public static extern TPCANStatus SetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1434,7 +1434,7 @@ namespace Peak.Can.Basic1
         /// <param name="NumericBuffer">包含要设置值的缓冲区</param> 
         /// <param name="BufferLength">缓冲区的字节大小</param> 
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_SetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_SetValue")]
         public static extern TPCANStatus SetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1452,7 +1452,7 @@ namespace Peak.Can.Basic1
         /// <param name="StringBuffer">要设置的值的缓冲区</param>       
         ///  <param name="BufferLength">缓冲区的字节大小</param>        
         ///  <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_SetValue")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_SetValue")]
         public static extern TPCANStatus SetValue(
             [MarshalAs(UnmanagedType.U2)]
             TPCANHandle Channel,
@@ -1469,7 +1469,7 @@ namespace Peak.Can.Basic1
         ///  <param name="Error">一个 TPCANStatus 错误代码</param>/// <param name="Language">指示“主要语言 ID”</param>
         /// <param name="StringBuffer">文本缓冲区（长度至少为 256）</param>
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_GetErrorText")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_GetErrorText")]
         public static extern TPCANStatus GetErrorText(
             [MarshalAs(UnmanagedType.U4)]
             TPCANStatus Error,
@@ -1482,7 +1482,7 @@ namespace Peak.Can.Basic1
         /// <param name="Parameters">一个以逗号分隔的字符串，包含要在 PCAN-Basic 通道中匹配的参数名称/值对</param>
         ///  <param name="FoundChannel">用于返回找到的 PCAN-Basic 通道的缓冲区</param>
         /// <returns>一个 TPCANStatus 错误代码</returns>
-        [DllImport("PCANBasic.dll", EntryPoint = "CAN_LookUpChannel")]
+        [DllImport("PCANBasicCompatible.dll", EntryPoint = "CAN_LookUpChannel")]
         public static extern TPCANStatus LookUpChannel(
             String Parameters,
             out TPCANHandle FoundChannel);

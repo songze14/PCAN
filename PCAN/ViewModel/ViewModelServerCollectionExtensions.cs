@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using PCAN.Modles;
 using PCAN.ViewModel.RunPage;
 using PCAN.ViewModel.Usercontrols.DataMonitoringSettings;
@@ -12,7 +13,7 @@ namespace PCAN.ViewModel
 {
     public static class ViewModelServerCollectionExtensions
     {
-        public static IServiceCollection AddViewModels(this IServiceCollection services)
+        public static IServiceCollection AddViewModels(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<BasicFunctionsPageViewModel>();
             services.AddSingleton<ParmValueSettingPageViewModel>();
@@ -31,7 +32,17 @@ namespace PCAN.ViewModel
                 ;
                 return appvm;
             });
-            services.AddSingleton<PCanClientUsercontrolViewModel>();
+            var SingletonPattern = configuration.GetSection("SingletonPattern").Value;
+            if (string.IsNullOrEmpty(SingletonPattern) || !bool.Parse(SingletonPattern))
+            {
+                services.AddTransient<PCanClientUsercontrolViewModel>();
+            }
+            else
+            {
+                services.AddSingleton<PCanClientUsercontrolViewModel>();
+                
+            }
+
             services.AddSingleton<UploadPageViewModel>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<UILogsViewModel>();

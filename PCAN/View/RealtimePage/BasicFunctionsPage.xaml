@@ -18,8 +18,9 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="4*" />
         </Grid.RowDefinitions>
-        <usercontrols:PCanClientUsercontrol x:Name="PcanClientUsercontrol" Grid.Row="0" />
 
+        <usercontrols:PCanClientUsercontrol x:Name="PcanClientUsercontrol" Grid.Row="0" />
+        <!--<usercontrols:PCanClientCompatibleUsercontrol x:Name="PCanClientCompatibleUsercontrol" Grid.Row="0" />-->
         <DockPanel Grid.Row="1" Background="AliceBlue">
             <StackPanel
                 Margin="0,2,0,8"

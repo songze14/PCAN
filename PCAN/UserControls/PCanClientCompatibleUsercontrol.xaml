@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="PCAN.UserControls.PCanClientUsercontrol"
+    x:Class="PCAN.UserControls.PCanClientCompatibleUsercontrol"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -199,7 +199,11 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Content="CANFD" />
-
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Background="Red"
+                    FontSize="20"
+                    Text="兼容模式" />
             </DockPanel>
             <Label
                 x:Name="ConnectLab"

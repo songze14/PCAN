@@ -32,8 +32,10 @@ namespace PCAN.View.UserPage
             {
                 this.OneWayBind(ViewModel, vm => vm.Title, v => v.Title).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.PCanClientUsercontrolViewModel, v => v.PcanClientUsercontrol.ViewModel).DisposeWith(d);
+                //this.OneWayBind(ViewModel, vm => vm.PCanClientCompatibleUsercontrolViewModel, v => v.PCanClientCompatibleUsercontrol.ViewModel).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.TPCANMsgs, v => v.CanMessageDataGrid.ItemsSource).DisposeWith(d);
-
+                //this.OneWayBind(ViewModel,vm=>vm.Compatible,v=>v.PCanClientCompatibleUsercontrol.Visibility,comp => comp ? Visibility.Visible : Visibility.Collapsed).DisposeWith(d);
+                this.OneWayBind(ViewModel, vm => vm.Compatible, v => v.PcanClientUsercontrol.Visibility, comp => comp ? Visibility.Collapsed : Visibility.Visible).DisposeWith(d);
                 this.Bind(this.ViewModel, vm => vm.EventGroup, v => v.idEventGroup.Text).DisposeWith(d);
 
                 this.BindCommand(this.ViewModel, vm => vm.CmdClearFilter, v => v.clearFilter).DisposeWith(d);

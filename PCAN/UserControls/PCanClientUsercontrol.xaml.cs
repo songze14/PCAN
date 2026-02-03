@@ -49,7 +49,6 @@ namespace PCAN.UserControls
                 this.OneWayBind(ViewModel, vm => vm.NoConnected, v => v.RefreshPort.IsEnabled).DisposeWith(d);
                 this.OneWayBind(ViewModel, vm => vm.ConnectLab, v => v.ConnectLab.Content).DisposeWith(d);
                 this.Bind(ViewModel, vm => vm.UseCANFD, v => v.EnableCanFdCheckBox.IsChecked).DisposeWith(d);
-                
                 this.Bind(ViewModel, vm => vm.FrameInterval, v => v.FrameInterval.Text).DisposeWith(d);
             });
         }

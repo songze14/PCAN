@@ -22,7 +22,7 @@ namespace PCAN
             resolver.InitializeSplat();
             resolver.InitializeReactiveUI();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LogNotificationHandle).Assembly) );
-            services.AddViewModels();
+            services.AddViewModels(context.Configuration);
             services.AddViews();
             services.AddSqlLite(context.Configuration);
 

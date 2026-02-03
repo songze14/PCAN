@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PCAN.Drive;
 using PCAN.Drive.Modle;
@@ -11,6 +12,7 @@ using PCAN.ViewModel.USercontrols;
 using Peak.Can.Basic;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Windows;
@@ -24,21 +26,21 @@ namespace PCAN.ViewModel.RunPage
         private readonly ILogger<BasicFunctionsPageViewModel> _logger;
         private readonly IMediator _mediator;
 
-        public BasicFunctionsPageViewModel(ILogger<BasicFunctionsPageViewModel> logger,IMediator mediator, PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel)
+        public BasicFunctionsPageViewModel(ILogger<BasicFunctionsPageViewModel> logger, PCanClientUsercontrolViewModel pCanClientUsercontrolViewModel, IMediator mediator, IConfiguration configuration)
         {
             _logger = logger;
             _mediator = mediator;
             PCanClientUsercontrolViewModel = pCanClientUsercontrolViewModel;
             this.PCanClientUsercontrolViewModel.NewMessage.Subscribe(msg =>
             {
-                if (msg==null)
+                if (msg == null)
                 {
                     return;
                 }
                 UIHelper.RunInUIThread(d =>
                 {
                     var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
-                 
+
                     if (oldmsg != null)
                     {
                         oldmsg.MSGTYPE = msg.MSGTYPE;
@@ -54,12 +56,50 @@ namespace PCAN.ViewModel.RunPage
 
 
             });
+            //var compatible = configuration.GetSection("Compatible").Value;
+            //if (string.IsNullOrEmpty(compatible) || bool.Parse(compatible))
+            //{
+            //    Compatible=true;
+            //    PCanClientCompatibleUsercontrolViewModel = Locator.Current.GetService<PCanClientCompatibleUsercontrolViewModel>();
+            //    this.PCanClientCompatibleUsercontrolViewModel.NewMessage.Subscribe(msg =>
+            //    {
+            //        if (msg == null)
+            //        {
+            //            return;
+            //        }
+            //        UIHelper.RunInUIThread(d =>
+            //        {
+            //            var oldmsg = TPCANMsgs.FirstOrDefault(x => x.ID == msg.ID);
+
+            //            if (oldmsg != null)
+            //            {
+            //                oldmsg.MSGTYPE = msg.MSGTYPE;
+            //                oldmsg.LEN = msg.LEN;
+            //                oldmsg.DATA = msg.DATA;
+            //                oldmsg.Count++;
+            //            }
+            //            else
+            //            {
+            //                _source.Add(msg);
+            //            }
+            //        });
+
+
+            //    });
+            //}
+            //else
+            //{
+               
+            //}
+
 
             var eventgroupFilter = this.WhenAnyValue(x => x.EventGroup)
                .Throttle(TimeSpan.FromMilliseconds(400))
                .DistinctUntilChanged()
-               .Select(x => {
-                   Func<ReadMessage, bool> res = lm => {
+               .Select(x =>
+               {
+                   Func<ReadMessage, bool> res = lm =>
+                   {
                        if (string.IsNullOrEmpty(x))
                        {
                            return true;
@@ -84,8 +124,9 @@ namespace PCAN.ViewModel.RunPage
                 this.EventGroup = "";
             });
 
-            var disposeCmdClearFilterException = this.CmdClearFilter.ThrownExceptions.Subscribe(x => {
-                
+            var disposeCmdClearFilterException = this.CmdClearFilter.ThrownExceptions.Subscribe(x =>
+            {
+
             });
             this.CmdClear = ReactiveCommand.Create(() =>
             {
@@ -94,7 +135,9 @@ namespace PCAN.ViewModel.RunPage
         }
         private bool Filting;
         [Reactive]
-        public string EventGroup { get; set; } 
+        public string EventGroup { get; set; }
+        [Reactive]
+        public bool Compatible { get; set; }
         private SourceList<ReadMessage> _source = new SourceList<ReadMessage>();
         private readonly ReadOnlyObservableCollection<ReadMessage> _TPCANMsgs;
         public ReadOnlyObservableCollection<ReadMessage> TPCANMsgs => _TPCANMsgs;
@@ -107,5 +150,6 @@ namespace PCAN.ViewModel.RunPage
 
 
         public PCanClientUsercontrolViewModel PCanClientUsercontrolViewModel { get; }
+        //public PCanClientCompatibleUsercontrolViewModel PCanClientCompatibleUsercontrolViewModel { get; }
     }
 }

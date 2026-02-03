@@ -7,7 +7,8 @@ using PCAN.Notification.Log;
 using PCAN.Shard.Models;
 using PCAN.Shard.Modles;
 using PCAN.Tools;
-using Peak.Can.Basic;
+
+using Peak.Can.Basic1;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Collections.ObjectModel;
@@ -17,7 +18,7 @@ using System.Windows.Input;
 
 namespace PCAN.ViewModel.USercontrols
 {
-    public class PCanClientUsercontrolViewModel:ReactiveObject
+    public class PCanClientUsercontrolViewModel : ReactiveObject
     {
         private readonly CanFileSet _canfileset;
 
@@ -31,26 +32,30 @@ namespace PCAN.ViewModel.USercontrols
                 Ports.Clear();
                 UInt16 deviceID = 1;
                 uint iChannelsCount;
-                var stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsCount, out iChannelsCount);
-                if (stsResult == PcanStatus.OK)
+                var stsResult = PCANBasicCompatible.GetValue(PCANBasicCompatible.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS_COUNT, out iChannelsCount, sizeof(uint));
+                if (stsResult == TPCANStatus.PCAN_ERROR_OK)
                 {
-                    PcanChannelInformation[] info = new PcanChannelInformation[iChannelsCount];
 
-                    stsResult = Api.GetValue(PcanChannel.None, PcanParameter.AttachedChannelsInformation, info);
-                    if (stsResult == PcanStatus.OK)
-                    {
-                        foreach (var channel in info)
-                            if ((channel.ChannelCondition & ChannelCondition.ChannelAvailable) == ChannelCondition.ChannelAvailable)
+                    TPCANChannelInformation[] info = new TPCANChannelInformation[iChannelsCount];
+
+                    stsResult = PCANBasicCompatible.GetValue(PCANBasicCompatible.PCAN_NONEBUS, TPCANParameter.PCAN_ATTACHED_CHANNELS, info);
+                    if (stsResult == TPCANStatus.PCAN_ERROR_OK)
+                        // Include only connectable channels
+                        //
+                        foreach (TPCANChannelInformation channel in info)
+                            if ((channel.channel_condition & PCANBasicCompatible.PCAN_CHANNEL_AVAILABLE) == PCANBasicCompatible.PCAN_CHANNEL_AVAILABLE)
                             {
-                                Ports.Add(new LocalPorts() { PortName = channel.DeviceName, PortsNum =(ushort)channel.ChannelHandle });
+                                var bIsFD = (channel.device_features & PCANBasicCompatible.FEATURE_FD_CAPABLE) == PCANBasicCompatible.FEATURE_FD_CAPABLE;
+                                Ports.Add(new LocalPorts() { PortName = channel.device_name, PortsNum = (ushort)channel.channel_handle });
+
+                               
                             }
-                        mediator.Publish(new LogNotification()
-                        {
-                            LogSource =LogSource.CanDevice,
-                            Message = $"刷新端口成功,共{Ports.Count}个端口"
-                        });
-                    }
-                       
+                    mediator.Publish(new LogNotification()
+                    {
+                        LogSource = LogSource.CanDevice,
+                        Message = $"刷新端口成功,共{Ports.Count}个端口"
+                    });
+                   
 
                 }
             });
@@ -68,16 +73,20 @@ namespace PCAN.ViewModel.USercontrols
                     return;
                 }
                 //logger.LogDebug($"{SelectedPort}:{SelectedBaudrate}");
+              
                 if (UseCANFD)
                 {
-                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval,useFD:true);
+                    CanDrive = new CanDriveCompatible(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrateFD, _mediator, FrameInterval, useFD: true);
 
                 }
                 else
                 {
-                    CanDrive = new CANDrive(SelectedPort, Convert.ToUInt32(DeviceID, 16), SelectedBaudrate, _mediator, FrameInterval);
+                    CanDrive = new CanDriveCompatible(SelectedPort, Convert.ToUInt32(DeviceID, 16),(Peak.Can.Basic1.TPCANBaudrate)SelectedBaudrate, _mediator, FrameInterval);
 
                 }
+                
+              
+               
                 CanDrive.FilterMessages(Convert.ToUInt32(_canfileset.FromId, 16), Convert.ToUInt32(_canfileset.ToId, 16));
 
                 this.CanDrive.CANReadMsg.ObserveOn(RxApp.TaskpoolScheduler).Subscribe(msg =>
@@ -136,7 +145,7 @@ namespace PCAN.ViewModel.USercontrols
 
             }
         }
-        private CANDrive CanDrive;
+        private CanDriveCompatible CanDrive;
         private readonly ILogger<PCanClientUsercontrolViewModel> _logger;
         private readonly IMediator _mediator;
 
@@ -154,7 +163,9 @@ namespace PCAN.ViewModel.USercontrols
 
         [Reactive]
         public bool UseCANFD { get; set; } = false;
-        public Bitrate SelectedBaudrate { get; set; }
+     
+
+        public Peak.Can.Basic.Bitrate SelectedBaudrate { get; set; }
         public string SelectedBaudrateFD { get; set; }= BitrateFD.BitrateSaeJ2284_4;
         public string DeviceID { get; set; }
         public ReactiveProperty<ReadMessage> NewMessage { get; set; } = new ReactiveProperty<ReadMessage>();
@@ -163,37 +174,37 @@ namespace PCAN.ViewModel.USercontrols
      [
          new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan1000,
+                Baudrate= (Peak.Can.Basic.Bitrate)TPCANBaudrate.PCAN_BAUD_100K,
                 BaudRateName="1M  kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan800,
+                Baudrate= (Peak.Can.Basic.Bitrate)TPCANBaudrate.PCAN_BAUD_800K,
                 BaudRateName="800 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan500,
+                Baudrate= (Peak.Can.Basic.Bitrate)TPCANBaudrate.PCAN_BAUD_500K,
                 BaudRateName="500 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan250,
+                Baudrate= (Peak.Can.Basic.Bitrate)TPCANBaudrate.PCAN_BAUD_250K,
                 BaudRateName="250 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan125,
+                Baudrate=(Peak.Can.Basic.Bitrate) TPCANBaudrate.PCAN_BAUD_125K,
                 BaudRateName="125 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan100,
+                Baudrate=(Peak.Can.Basic.Bitrate) TPCANBaudrate.PCAN_BAUD_100K,
                 BaudRateName="100 kBit/sec"
             },
             new LocalBaudRate()
             {
-                Baudrate= Bitrate.Pcan50,
+                Baudrate=(Peak.Can.Basic.Bitrate) TPCANBaudrate.PCAN_BAUD_50K,
                 BaudRateName="50  kBit/sec"
             },
 
